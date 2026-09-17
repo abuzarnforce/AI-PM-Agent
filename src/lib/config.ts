@@ -1,19 +1,20 @@
-export const config = {
-  jira: {
-    baseUrl: process.env.JIRA_BASE_URL ?? "",
-    email: process.env.JIRA_EMAIL ?? "",
-    apiToken: process.env.JIRA_API_TOKEN ?? "",
-  },
-  gemini: {
-    apiKey: process.env.GEMINI_API_KEY ?? "",
-    model: process.env.GEMINI_MODEL ?? "gemini-1.5-pro",
-  },
-};
+import { loadConnectorConfig } from "./connectorStore";
+
+/** Always reads fresh from the connector store (file-backed), so a key saved
+ * through the Connector UI takes effect immediately without a server restart. */
+export function getJiraConfig() {
+  return loadConnectorConfig().jira;
+}
+
+export function getGeminiConfig() {
+  return loadConnectorConfig().gemini;
+}
 
 export function isJiraConfigured(): boolean {
-  return Boolean(config.jira.baseUrl && config.jira.email && config.jira.apiToken);
+  const { baseUrl, email, apiToken } = getJiraConfig();
+  return Boolean(baseUrl && email && apiToken);
 }
 
 export function isGeminiConfigured(): boolean {
-  return Boolean(config.gemini.apiKey);
+  return Boolean(getGeminiConfig().apiKey);
 }

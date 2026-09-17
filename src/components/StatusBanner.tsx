@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function StatusBanner() {
+export default function StatusBanner({ onConfigure }: { onConfigure: () => void }) {
   const [status, setStatus] = useState<{ jiraConfigured: boolean; geminiConfigured: boolean } | null>(
     null
   );
@@ -22,7 +22,9 @@ export default function StatusBanner() {
       {!status.jiraConfigured && (
         <span>⚠ JIRA_BASE_URL / JIRA_EMAIL / JIRA_API_TOKEN not set</span>
       )}
-      <span className="ml-2 text-amber-400/70">Add them to .env.local and restart the server.</span>
+      <button onClick={onConfigure} className="ml-2 underline text-amber-400/90 hover:text-amber-300">
+        Connect them in the Connector tab
+      </button>
     </div>
   );
 }

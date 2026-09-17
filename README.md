@@ -10,21 +10,30 @@ See [CLAUDE.md](./CLAUDE.md) for the full behavior spec (hard rules, templates, 
 
 ```bash
 npm install
-cp .env.example .env.local
-# fill in JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, GEMINI_API_KEY in .env.local
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000, go to the **Connector** tab, and paste in your own Jira
+site URL + email + API token and your Gemini API key. That's the whole setup — no
+`.env` file editing required. Anyone who downloads this app configures it the same way,
+from their own account, without touching code or environment variables.
+
+Credentials are stored locally by this app instance (`.data/connectors.json`, gitignored)
+and are only ever sent to Jira and Google's Gemini API directly — never anywhere else.
+
+`.env.example` still exists as an optional way for a self-hoster to pre-seed default
+values on first run; anything saved through the Connector UI overrides it.
 
 ## Getting the credentials
 
 - **Jira API token**: Atlassian account → Security → API tokens → Create token.
-  `JIRA_EMAIL` is the Atlassian account email that token belongs to.
+  The account email is the Atlassian account that token belongs to.
 - **Gemini API key**: Google AI Studio → Get API key.
 
 ## What's in the UI
 
+- **Connector** — connect your own Jira site and Gemini API key, with a live
+  "Test connection" check for each.
 - **Chat** — free-form questions answered from live Jira data, with ticket keys cited inline.
 - **Health Check** — point at an epic key or sprint name, get missing-AC / unestimated /
   stale / scope-drift / QA-gap findings and an on-track / at-risk / blocked verdict.
@@ -35,6 +44,10 @@ Open http://localhost:3000.
 
 ## Architecture
 
+- `src/lib/connectorStore.ts` — file-backed store (`.data/connectors.json`) for user-supplied
+  Jira/Gemini credentials, written by the Connector UI. Env vars only seed defaults on first run.
+- `src/lib/config.ts` — reads live from the connector store on every call, so a saved
+  credential takes effect immediately, no restart needed.
 - `src/lib/jira.ts` — Jira REST API v3 client (search, get issue/comments, create/update issue).
   `createIssue`/`updateIssue` are only ever called from `src/lib/drafts.ts#approveDraft`.
 - `src/lib/gemini.ts` — Gemini client wrapper (`generateText`, `generateJson`).

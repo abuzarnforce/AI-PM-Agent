@@ -11,13 +11,13 @@ Offer to go deeper (e.g. list affected tickets) rather than dumping everything b
 export async function POST(req: NextRequest) {
   if (!isGeminiConfigured()) {
     return NextResponse.json(
-      { error: "Gemini is not configured. Add GEMINI_API_KEY to .env.local." },
+      { error: "Gemini is not configured. Connect it from the Connector tab." },
       { status: 400 }
     );
   }
   if (!isJiraConfigured()) {
     return NextResponse.json(
-      { error: "Jira is not configured. Add JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN to .env.local." },
+      { error: "Jira is not configured. Connect it from the Connector tab." },
       { status: 400 }
     );
   }

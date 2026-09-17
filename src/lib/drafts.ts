@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { createIssue, updateIssue, type NewIssueFields } from "./jira";
+import { getJiraConfig } from "./config";
 
 export type DraftKind = "new_story" | "update_story" | "prd";
 export type DraftStatus = "needs triage" | "ready for grooming" | "approved" | "rejected";
@@ -88,7 +89,7 @@ export async function approveDraft(id: string): Promise<Draft> {
     await updateIssue(draft.jiraAction.targetKey, draft.jiraAction.fields);
     draft.result = {
       key: draft.jiraAction.targetKey,
-      url: `${process.env.JIRA_BASE_URL ?? ""}/browse/${draft.jiraAction.targetKey}`,
+      url: `${getJiraConfig().baseUrl}/browse/${draft.jiraAction.targetKey}`,
     };
   }
 

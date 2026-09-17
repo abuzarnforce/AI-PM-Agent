@@ -1,4 +1,4 @@
-import { config, isJiraConfigured } from "./config";
+import { getJiraConfig, isJiraConfigured } from "./config";
 
 export interface JiraIssue {
   key: string;
@@ -24,21 +24,20 @@ export interface JiraComment {
 
 class JiraNotConfiguredError extends Error {
   constructor() {
-    super(
-      "Jira is not configured. Set JIRA_BASE_URL, JIRA_EMAIL, and JIRA_API_TOKEN in .env.local."
-    );
+    super("Jira is not configured. Connect it from the Connector tab.");
     this.name = "JiraNotConfiguredError";
   }
 }
 
 function authHeader(): string {
-  const raw = `${config.jira.email}:${config.jira.apiToken}`;
+  const { email, apiToken } = getJiraConfig();
+  const raw = `${email}:${apiToken}`;
   return `Basic ${Buffer.from(raw).toString("base64")}`;
 }
 
 async function jiraFetch(path: string, init?: RequestInit): Promise<any> {
   if (!isJiraConfigured()) throw new JiraNotConfiguredError();
-  const res = await fetch(`${config.jira.baseUrl}${path}`, {
+  const res = await fetch(`${getJiraConfig().baseUrl}${path}`, {
     ...init,
     headers: {
       Authorization: authHeader(),
@@ -85,7 +84,7 @@ function mapIssue(raw: any): JiraIssue {
     epicKey: f.parent?.key ?? f.epic?.key ?? null,
     acceptanceCriteria: f.customfield_10100 ? adfToText(f.customfield_10100) : null,
     labels: f.labels ?? [],
-    url: `${config.jira.baseUrl}/browse/${raw.key}`,
+    url: `${getJiraConfig().baseUrl}/browse/${raw.key}`,
   };
 }
 
@@ -148,7 +147,7 @@ export async function createIssue(fields: NewIssueFields): Promise<{ key: string
     method: "POST",
     body: JSON.stringify(body),
   });
-  return { key: data.key, url: `${config.jira.baseUrl}/browse/${data.key}` };
+  return { key: data.key, url: `${getJiraConfig().baseUrl}/browse/${data.key}` };
 }
 
 /** Actually updates the issue in Jira. Only ever called after explicit PM approval. */

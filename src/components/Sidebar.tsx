@@ -1,12 +1,13 @@
 "use client";
 
-export type Tab = "chat" | "health" | "drafts" | "feedback";
+export type Tab = "chat" | "health" | "drafts" | "feedback" | "connector";
 
 const ITEMS: { id: Tab; label: string; hint: string }[] = [
   { id: "chat", label: "Chat", hint: "Ask questions across Jira" },
   { id: "health", label: "Health Check", hint: "Epic / sprint report" },
   { id: "drafts", label: "Drafts", hint: "Pending PM approval" },
   { id: "feedback", label: "Feedback Capture", hint: "Turn a note into a draft" },
+  { id: "connector", label: "Connector", hint: "Connect Jira + Gemini" },
 ];
 
 export default function Sidebar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {

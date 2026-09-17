@@ -7,13 +7,14 @@ import ChatPanel from "@/components/ChatPanel";
 import HealthCheckPanel from "@/components/HealthCheckPanel";
 import DraftsPanel from "@/components/DraftsPanel";
 import FeedbackCapturePanel from "@/components/FeedbackCapturePanel";
+import ConnectorPanel from "@/components/ConnectorPanel";
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("chat");
 
   return (
     <div className="flex h-screen flex-col">
-      <StatusBanner />
+      <StatusBanner onConfigure={() => setTab("connector")} />
       <div className="flex min-h-0 flex-1">
         <Sidebar active={tab} onChange={setTab} />
         <main className="min-h-0 flex-1 bg-bg">
@@ -21,6 +22,7 @@ export default function Home() {
           {tab === "health" && <HealthCheckPanel />}
           {tab === "drafts" && <DraftsPanel />}
           {tab === "feedback" && <FeedbackCapturePanel />}
+          {tab === "connector" && <ConnectorPanel />}
         </main>
       </div>
     </div>

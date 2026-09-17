@@ -1,22 +1,20 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { config, isGeminiConfigured } from "./config";
+import { getGeminiConfig, isGeminiConfigured } from "./config";
 
-let client: GoogleGenerativeAI | null = null;
-
-function getClient(): GoogleGenerativeAI {
+/** No cached singleton: the API key can change at any time via the Connector UI,
+ * so a fresh client is built from the current stored config on every call. */
+function getClient(): { client: GoogleGenerativeAI; model: string } {
   if (!isGeminiConfigured()) {
-    throw new Error("Gemini is not configured. Set GEMINI_API_KEY in .env.local.");
+    throw new Error("Gemini is not configured. Connect it from the Connector tab.");
   }
-  if (!client) client = new GoogleGenerativeAI(config.gemini.apiKey);
-  return client;
+  const { apiKey, model } = getGeminiConfig();
+  return { client: new GoogleGenerativeAI(apiKey), model };
 }
 
 export async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
-  const model = getClient().getGenerativeModel({
-    model: config.gemini.model,
-    systemInstruction,
-  });
-  const result = await model.generateContent(prompt);
+  const { client, model } = getClient();
+  const generativeModel = client.getGenerativeModel({ model, systemInstruction });
+  const result = await generativeModel.generateContent(prompt);
   return result.response.text();
 }
 
