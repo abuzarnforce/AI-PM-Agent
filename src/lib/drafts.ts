@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { createIssue, updateIssue, type NewIssueFields } from "./jira";
 import { getJiraConfig } from "./config";
 
-export type DraftKind = "new_story" | "update_story" | "prd";
+export type DraftKind = "new_story" | "update_story" | "prd" | "brd";
 export type DraftStatus = "needs triage" | "ready for grooming" | "approved" | "rejected";
 
 export interface Draft {

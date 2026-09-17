@@ -2,25 +2,56 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquarePlus } from "lucide-react";
+import { FileText, ScrollText, Briefcase, Sparkles } from "lucide-react";
 
-export default function FeedbackCapturePanel() {
-  const [rawText, setRawText] = useState("");
+type StudioKind = "user_story" | "prd" | "brd";
+
+const KINDS: { id: StudioKind; label: string; icon: typeof FileText; placeholder: string }[] = [
+  {
+    id: "user_story",
+    label: "User Story",
+    icon: FileText,
+    placeholder: "e.g. Managers need to bulk-approve leave requests instead of one at a time...",
+  },
+  {
+    id: "prd",
+    label: "PRD",
+    icon: ScrollText,
+    placeholder: "e.g. We want to add SSO login for enterprise customers because...",
+  },
+  {
+    id: "brd",
+    label: "BRD",
+    icon: Briefcase,
+    placeholder: "e.g. Finance needs automated expense-category validation to cut manual review time...",
+  },
+];
+
+export default function StudioPanel() {
+  const [kind, setKind] = useState<StudioKind>("user_story");
+  const [brief, setBrief] = useState("");
   const [source, setSource] = useState("");
   const [projectKey, setProjectKey] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<any>(null);
 
-  async function submit() {
+  const activeKind = KINDS.find((k) => k.id === kind)!;
+
+  async function generate() {
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      const res = await fetch("/api/feedback-capture", {
+      const res = await fetch("/api/studio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rawText, source, projectKey: projectKey || undefined }),
+        body: JSON.stringify({
+          kind,
+          brief,
+          source,
+          projectKey: kind === "user_story" ? projectKey || undefined : undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -35,19 +66,49 @@ export default function FeedbackCapturePanel() {
   return (
     <div className="flex h-full flex-col overflow-y-auto">
       <div className="border-b border-white/[0.06] p-4">
-        <h1 className="text-lg font-semibold tracking-tight">Feedback Capture</h1>
+        <h1 className="text-lg font-semibold tracking-tight">Studio</h1>
         <p className="text-sm text-white/50">
-          Paste a raw comment, note, or transcript excerpt. It's checked for duplicates before a draft
-          story is created — nothing is written to Jira here.
+          Draft a User Story, PRD, or BRD from a brief. Everything lands in Drafts as "needs
+          triage" — nothing is written to Jira until you approve it.
         </p>
+
+        <div className="relative mt-4 inline-flex rounded-lg border border-white/10 bg-panel p-1">
+          {KINDS.map((k) => {
+            const isActive = kind === k.id;
+            const Icon = k.icon;
+            return (
+              <button
+                key={k.id}
+                onClick={() => {
+                  setKind(k.id);
+                  setResult(null);
+                  setError(null);
+                }}
+                className="btn relative rounded-md px-3.5 py-1.5 text-sm font-medium"
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="studio-kind-pill"
+                    className="absolute inset-0 rounded-md bg-accent shadow-sm"
+                    transition={{ type: "spring", bounce: 0, duration: 0.35 }}
+                  />
+                )}
+                <span className={`relative z-10 flex items-center gap-1.5 whitespace-nowrap ${isActive ? "text-white" : "text-white/60"}`}>
+                  <Icon size={14} strokeWidth={2.25} />
+                  {k.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-3 p-4">
         <textarea
-          value={rawText}
-          onChange={(e) => setRawText(e.target.value)}
-          placeholder="e.g. 'Customer on the call said they can't filter the export by date range...'"
-          rows={6}
+          value={brief}
+          onChange={(e) => setBrief(e.target.value)}
+          placeholder={activeKind.placeholder}
+          rows={5}
           className="w-full rounded-lg border border-white/10 bg-panel px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent"
         />
         <div className="flex flex-wrap gap-3">
@@ -57,19 +118,21 @@ export default function FeedbackCapturePanel() {
             placeholder="Source (meeting note, demo date + stakeholder, etc.)"
             className="w-80 rounded-md border border-white/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
           />
-          <input
-            value={projectKey}
-            onChange={(e) => setProjectKey(e.target.value)}
-            placeholder="Optional: project key for duplicate check + draft"
-            className="w-72 rounded-md border border-white/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
-          />
+          {kind === "user_story" && (
+            <input
+              value={projectKey}
+              onChange={(e) => setProjectKey(e.target.value)}
+              placeholder="Optional: project key for duplicate check"
+              className="w-72 rounded-md border border-white/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
+            />
+          )}
           <button
-            onClick={submit}
-            disabled={loading || !rawText.trim() || !source.trim()}
+            onClick={generate}
+            disabled={loading || !brief.trim() || !source.trim()}
             className="btn flex items-center gap-1.5 rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
           >
-            <MessageSquarePlus size={14} />
-            {loading ? "Processing…" : "Extract & check"}
+            <Sparkles size={14} />
+            {loading ? "Generating…" : `Generate ${activeKind.label}`}
           </button>
         </div>
 
@@ -115,7 +178,9 @@ export default function FeedbackCapturePanel() {
               transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
               className="card-surface rounded-lg p-4 text-sm"
             >
-              <div className="mb-2 font-medium text-emerald-300">Draft created — tagged "needs triage"</div>
+              <div className="mb-2 font-medium text-emerald-300">
+                Draft created — tagged "needs triage"
+              </div>
               <pre className="whitespace-pre-wrap rounded bg-bg p-3 text-xs text-white/80">
                 {result.draft.body}
               </pre>

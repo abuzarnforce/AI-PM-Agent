@@ -58,6 +58,41 @@ ${list(input.risksAndOpenQuestions)}
 ${input.rolloutPlan}`;
 }
 
+export interface BrdInput {
+  businessObjective: string;
+  background: string;
+  stakeholders: string[];
+  businessRequirements: string[];
+  assumptionsAndConstraints: string[];
+  successCriteria: string[];
+  outOfScope: string[];
+}
+
+export function renderBrd(input: BrdInput): string {
+  const list = (items: string[]) => items.map((i) => `- ${i}`).join("\n");
+  const numbered = (items: string[]) => items.map((i, idx) => `${idx + 1}. ${i}`).join("\n");
+  return `1. Business objective
+${input.businessObjective}
+
+2. Background / context
+${input.background}
+
+3. Stakeholders
+${list(input.stakeholders)}
+
+4. Business requirements
+${numbered(input.businessRequirements)}
+
+5. Assumptions & constraints
+${list(input.assumptionsAndConstraints)}
+
+6. Success criteria
+${list(input.successCriteria)}
+
+7. Out of scope
+${list(input.outOfScope)}`;
+}
+
 export interface HealthCheckReport {
   epicOrSprint: string;
   missingAcceptanceCriteria: { key: string; summary: string }[];

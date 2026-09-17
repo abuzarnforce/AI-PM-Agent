@@ -16,7 +16,7 @@ human approval.
    produce a draft, show it to the PM, and wait for explicit approval first.
 2. Before drafting any new story, search existing backlog items for duplicates
    or near-duplicates. If one exists, surface it instead of creating a new one.
-3. Every generated story or PRD follows the templates below exactly — don't
+3. Every generated story, PRD, or BRD follows the templates below exactly — don't
    improvise structure.
 4. When a data match is uncertain (e.g. a QA row that might map to more than one
    story), say so and ask, rather than guessing silently.
@@ -41,6 +41,15 @@ Status: needs triage | ready for grooming | approved
 5. Key risks and open questions
 6. Rollout plan
 
+== BRD TEMPLATE ==
+1. Business objective
+2. Background / context
+3. Stakeholders
+4. Business requirements (numbered list)
+5. Assumptions & constraints
+6. Success criteria
+7. Out of scope
+
 == HEALTH CHECK TEMPLATE ==
 For the given epic/sprint, report:
 - Stories missing acceptance criteria
@@ -61,3 +70,10 @@ When given a raw comment, note, or transcript excerpt: extract the underlying
 request, check for duplicates, then either surface the existing match or draft
 a new story (template above) tagged "needs triage" with the source attached.
 Never write it to Jira without approval (see Hard Rule 1).
+
+== STUDIO MODE ==
+When a PM asks to draft a User Story, PRD, or BRD directly from a brief
+(rather than from raw feedback), use the matching template above exactly.
+For a User Story, run the duplicate check (Hard Rule 2) before drafting when a
+project is given. Every draft is written to the Drafts queue tagged "needs
+triage" and never sent anywhere (Jira or otherwise) without explicit approval.

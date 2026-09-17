@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plug, Sparkles, ShieldCheck, Unplug } from "lucide-react";
 
 interface Status {
   jira: { baseUrl: string; email: string; apiTokenMasked: string; configured: boolean };
@@ -113,31 +115,47 @@ export default function ConnectorPanel() {
 
   const Badge = ({ configured }: { configured: boolean }) => (
     <span
-      className={`rounded px-2 py-0.5 text-xs font-medium ${
+      className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
         configured ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-white/40"
       }`}
     >
+      <motion.span
+        className={`h-1.5 w-1.5 rounded-full ${configured ? "bg-emerald-400" : "bg-white/30"}`}
+        animate={configured ? { opacity: [1, 0.4, 1] } : {}}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
       {configured ? "Connected" : "Not connected"}
     </span>
   );
 
-  const ResultBanner = ({ result }: { result: TestResult }) =>
-    result && (
-      <div
-        className={`mt-2 rounded-md border px-3 py-2 text-xs ${
-          result.ok
-            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-            : "border-red-500/30 bg-red-500/10 text-red-300"
-        }`}
-      >
-        {result.detail}
-      </div>
-    );
+  const ResultBanner = ({ result }: { result: TestResult }) => (
+    <AnimatePresence>
+      {result && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+          className="overflow-hidden"
+        >
+          <div
+            className={`mt-2 rounded-md border px-3 py-2 text-xs ${
+              result.ok
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                : "border-red-500/30 bg-red-500/10 text-red-300"
+            }`}
+          >
+            {result.detail}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-b border-border p-4">
-        <h1 className="text-lg font-semibold">Connector</h1>
+      <div className="border-b border-white/[0.06] p-4">
+        <h1 className="text-lg font-semibold tracking-tight">Connector</h1>
         <p className="text-sm text-white/50">
           Connect your own Jira site and Gemini API key. Credentials are stored locally by this
           app instance — nothing is sent anywhere except Jira and Google's Gemini API directly.
@@ -146,9 +164,17 @@ export default function ConnectorPanel() {
 
       <div className="space-y-6 p-4">
         {/* Jira */}
-        <div className="rounded-lg border border-border bg-panel p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+          className="card-surface rounded-xl p-4"
+        >
           <div className="mb-3 flex items-center justify-between">
-            <div className="font-medium">Jira</div>
+            <div className="flex items-center gap-2 font-medium">
+              <Plug size={16} className="text-white/50" />
+              Jira
+            </div>
             {status && <Badge configured={status.jira.configured} />}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -158,7 +184,7 @@ export default function ConnectorPanel() {
                 value={jiraBaseUrl}
                 onChange={(e) => setJiraBaseUrl(e.target.value)}
                 placeholder="https://your-domain.atlassian.net"
-                className="w-full rounded-md border border-border bg-bg px-3 py-1.5 outline-none focus:border-accent"
+                className="w-full rounded-md border border-white/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
               />
             </label>
             <label className="text-sm">
@@ -167,7 +193,7 @@ export default function ConnectorPanel() {
                 value={jiraEmail}
                 onChange={(e) => setJiraEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-md border border-border bg-bg px-3 py-1.5 outline-none focus:border-accent"
+                className="w-full rounded-md border border-white/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
               />
             </label>
             <label className="text-sm sm:col-span-2">
@@ -182,7 +208,7 @@ export default function ConnectorPanel() {
                 value={jiraToken}
                 onChange={(e) => setJiraToken(e.target.value)}
                 placeholder={status?.jira.apiTokenMasked ? "Leave blank to keep current token" : "Paste your Jira API token"}
-                className="w-full rounded-md border border-border bg-bg px-3 py-1.5 outline-none focus:border-accent"
+                className="w-full rounded-md border border-white/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
               />
             </label>
           </div>
@@ -190,22 +216,24 @@ export default function ConnectorPanel() {
             <button
               onClick={saveJira}
               disabled={savingJira || !jiraBaseUrl || !jiraEmail}
-              className="rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              className="btn rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
             >
               {savingJira ? "Saving…" : "Save"}
             </button>
             <button
               onClick={() => test("jira")}
               disabled={testingJira || !status?.jira.configured}
-              className="rounded-md border border-border px-4 py-1.5 text-sm text-white/70 hover:bg-white/5 disabled:opacity-50"
+              className="btn flex items-center gap-1.5 rounded-md border border-white/10 px-4 py-1.5 text-sm text-white/70 hover:bg-white/5 disabled:opacity-50"
             >
+              <ShieldCheck size={13} />
               {testingJira ? "Testing…" : "Test connection"}
             </button>
             {status?.jira.configured && (
               <button
                 onClick={() => disconnect("jira")}
-                className="rounded-md px-4 py-1.5 text-sm text-white/40 hover:text-red-300"
+                className="btn flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm text-white/40 hover:text-red-300"
               >
+                <Unplug size={13} />
                 Disconnect
               </button>
             )}
@@ -214,12 +242,20 @@ export default function ConnectorPanel() {
           <div className="mt-2 text-xs text-white/30">
             Create a token at Atlassian account → Security → API tokens.
           </div>
-        </div>
+        </motion.div>
 
         {/* Gemini */}
-        <div className="rounded-lg border border-border bg-panel p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", bounce: 0, duration: 0.3, delay: 0.05 }}
+          className="card-surface rounded-xl p-4"
+        >
           <div className="mb-3 flex items-center justify-between">
-            <div className="font-medium">Gemini</div>
+            <div className="flex items-center gap-2 font-medium">
+              <Sparkles size={16} className="text-white/50" />
+              Gemini
+            </div>
             {status && <Badge configured={status.gemini.configured} />}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -235,7 +271,7 @@ export default function ConnectorPanel() {
                 value={geminiKey}
                 onChange={(e) => setGeminiKey(e.target.value)}
                 placeholder={status?.gemini.apiKeyMasked ? "Leave blank to keep current key" : "Paste your Gemini API key"}
-                className="w-full rounded-md border border-border bg-bg px-3 py-1.5 outline-none focus:border-accent"
+                className="w-full rounded-md border border-white/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
               />
             </label>
             <label className="text-sm">
@@ -244,7 +280,7 @@ export default function ConnectorPanel() {
                 value={geminiModel}
                 onChange={(e) => setGeminiModel(e.target.value)}
                 placeholder="gemini-3.5-flash-lite"
-                className="w-full rounded-md border border-border bg-bg px-3 py-1.5 outline-none focus:border-accent"
+                className="w-full rounded-md border border-white/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
               />
             </label>
           </div>
@@ -252,29 +288,31 @@ export default function ConnectorPanel() {
             <button
               onClick={saveGemini}
               disabled={savingGemini}
-              className="rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              className="btn rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
             >
               {savingGemini ? "Saving…" : "Save"}
             </button>
             <button
               onClick={() => test("gemini")}
               disabled={testingGemini || !status?.gemini.configured}
-              className="rounded-md border border-border px-4 py-1.5 text-sm text-white/70 hover:bg-white/5 disabled:opacity-50"
+              className="btn flex items-center gap-1.5 rounded-md border border-white/10 px-4 py-1.5 text-sm text-white/70 hover:bg-white/5 disabled:opacity-50"
             >
+              <ShieldCheck size={13} />
               {testingGemini ? "Testing…" : "Test connection"}
             </button>
             {status?.gemini.configured && (
               <button
                 onClick={() => disconnect("gemini")}
-                className="rounded-md px-4 py-1.5 text-sm text-white/40 hover:text-red-300"
+                className="btn flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm text-white/40 hover:text-red-300"
               >
+                <Unplug size={13} />
                 Disconnect
               </button>
             )}
           </div>
           <ResultBanner result={geminiTest} />
           <div className="mt-2 text-xs text-white/30">Get a key from Google AI Studio.</div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

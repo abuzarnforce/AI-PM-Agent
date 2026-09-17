@@ -2,9 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+}
+
 html, body {
-  background-color: #0b0d10;
-  color: #e6e8eb;
+  background-color: #0a0b0d;
+  color: #f0f1f3;
+  font-optical-sizing: auto;
+}
+
+body {
+  background-image:
+    radial-gradient(1200px circle at 15% -10%, rgba(91, 141, 239, 0.10), transparent 55%),
+    radial-gradient(900px circle at 100% 0%, rgba(168, 130, 255, 0.07), transparent 50%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.02em;
 }
 
 ::-webkit-scrollbar {
@@ -14,4 +30,50 @@ html, body {
 ::-webkit-scrollbar-thumb {
   background: #2a2f38;
   border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #383f4b;
+}
+
+::selection {
+  background: rgba(91, 141, 239, 0.35);
+}
+
+/* Universal press feedback: respond on the input itself, not on completion. */
+.btn {
+  transition: transform 100ms ease-out, filter 150ms ease-out, opacity 150ms ease-out;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.btn:disabled {
+  transform: none;
+}
+
+.glass {
+  background: rgba(20, 23, 28, 0.72);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+.card-surface {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: border-color 150ms ease-out, background-color 150ms ease-out, transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+.card-surface:hover {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+  .card-surface {
+    transition: border-color 150ms ease-out, background-color 150ms ease-out;
+  }
 }
