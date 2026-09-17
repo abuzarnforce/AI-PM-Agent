@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
   try {
     const jqlPrompt = `Convert this product manager question into a single Jira JQL query.
 ${projectKey ? `Scope it to project = "${projectKey}".` : "No project scoping given; search across accessible projects."}
+Jira's search API rejects unbounded queries, so the JQL MUST include at least one restricting
+clause (project, assignee, reporter, a status/issuetype filter, or a date bound like
+"updated >= -365d"). If nothing else fits, add "updated >= -365d" as a safety bound.
 Question: "${message}"
 Return JSON: { "jql": string }`;
     const { jql } = await generateJson<{ jql: string }>(jqlPrompt);

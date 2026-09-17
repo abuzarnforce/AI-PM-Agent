@@ -90,11 +90,19 @@ function mapIssue(raw: any): JiraIssue {
 
 /** Search issues by JQL. Accepts a plain-language hint too, which is passed through
  * as-is if it already looks like JQL, otherwise the caller (chat route) should
- * convert it to JQL via Gemini before calling this. */
+ * convert it to JQL via Gemini before calling this.
+ *
+ * Uses POST /rest/api/3/search/jql — the old GET /rest/api/3/search was removed
+ * by Atlassian (see https://developer.atlassian.com/changelog/#CHANGE-2046). */
 export async function searchIssues(jql: string, maxResults = 50): Promise<JiraIssue[]> {
-  const data = await jiraFetch(
-    `/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=summary,status,issuetype,assignee,updated,created,description,labels,parent`
-  );
+  const data = await jiraFetch(`/rest/api/3/search/jql`, {
+    method: "POST",
+    body: JSON.stringify({
+      jql,
+      maxResults,
+      fields: ["summary", "status", "issuetype", "assignee", "updated", "created", "description", "labels", "parent"],
+    }),
+  });
   return (data.issues ?? []).map(mapIssue);
 }
 
