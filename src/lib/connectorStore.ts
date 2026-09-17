@@ -18,7 +18,7 @@ const STORE_FILE = path.join(DATA_DIR, "connectors.json");
 
 const EMPTY: ConnectorConfig = {
   jira: { baseUrl: "", email: "", apiToken: "" },
-  gemini: { apiKey: "", model: "gemini-3.6-flash" },
+  gemini: { apiKey: "", model: "gemini-3.5-flash-lite" },
 };
 
 /** Env vars act only as an initial seed for first run (handy for the maintainer's own
@@ -34,7 +34,7 @@ function envSeed(): ConnectorConfig {
     },
     gemini: {
       apiKey: process.env.GEMINI_API_KEY ?? "",
-      model: process.env.GEMINI_MODEL ?? "gemini-3.6-flash",
+      model: process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite",
     },
   };
 }

@@ -14,12 +14,12 @@ export default function ChatPanel() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [lastQuestion, setLastQuestion] = useState<string | null>(null);
 
-  async function send() {
-    const text = input.trim();
+  async function ask(text: string, opts: { echo: boolean } = { echo: true }) {
     if (!text || loading) return;
-    setMessages((m) => [...m, { role: "user", text }]);
-    setInput("");
+    if (opts.echo) setMessages((m) => [...m, { role: "user", text }]);
+    setLastQuestion(text);
     setLoading(true);
     try {
       const res = await fetch("/api/chat", {
@@ -35,6 +35,17 @@ export default function ChatPanel() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function send() {
+    const text = input.trim();
+    if (!text) return;
+    setInput("");
+    ask(text);
+  }
+
+  function retry() {
+    if (lastQuestion) ask(lastQuestion, { echo: false });
   }
 
   return (
@@ -68,6 +79,15 @@ export default function ChatPanel() {
             }`}
           >
             <div className="whitespace-pre-wrap">{m.text}</div>
+            {m.role === "error" && (
+              <button
+                onClick={retry}
+                disabled={loading}
+                className="mt-2 rounded border border-red-500/30 px-2 py-1 text-xs text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+              >
+                Retry
+              </button>
+            )}
             {m.sources && m.sources.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5 text-xs text-white/50">
                 Sources:

@@ -16,7 +16,7 @@ export default function ConnectorPanel() {
   const [jiraEmail, setJiraEmail] = useState("");
   const [jiraToken, setJiraToken] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
-  const [geminiModel, setGeminiModel] = useState("gemini-3.6-flash");
+  const [geminiModel, setGeminiModel] = useState("gemini-3.5-flash-lite");
 
   const [savingJira, setSavingJira] = useState(false);
   const [savingGemini, setSavingGemini] = useState(false);
@@ -31,7 +31,7 @@ export default function ConnectorPanel() {
     setStatus(data);
     setJiraBaseUrl(data.jira.baseUrl);
     setJiraEmail(data.jira.email);
-    setGeminiModel(data.gemini.model || "gemini-3.6-flash");
+    setGeminiModel(data.gemini.model || "gemini-3.5-flash-lite");
   }
 
   useEffect(() => {
@@ -243,7 +243,7 @@ export default function ConnectorPanel() {
               <input
                 value={geminiModel}
                 onChange={(e) => setGeminiModel(e.target.value)}
-                placeholder="gemini-3.6-flash"
+                placeholder="gemini-3.5-flash-lite"
                 className="w-full rounded-md border border-border bg-bg px-3 py-1.5 outline-none focus:border-accent"
               />
             </label>
