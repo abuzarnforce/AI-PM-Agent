@@ -11,6 +11,7 @@ import DraftsPanel from "@/components/DraftsPanel";
 import FeedbackCapturePanel from "@/components/FeedbackCapturePanel";
 import ConnectorPanel from "@/components/ConnectorPanel";
 import StudioPanel from "@/components/StudioPanel";
+import DashboardsPanel from "@/components/DashboardsPanel";
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("overview");
@@ -27,6 +28,8 @@ export default function Home() {
         return <DraftsPanel />;
       case "studio":
         return <StudioPanel />;
+      case "dashboards":
+        return <DashboardsPanel />;
       case "feedback":
         return <FeedbackCapturePanel />;
       case "connector":

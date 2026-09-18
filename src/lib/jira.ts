@@ -35,9 +35,27 @@ function authHeader(): string {
   return `Basic ${Buffer.from(raw).toString("base64")}`;
 }
 
+/** Transient connection hiccups (cold TCP/TLS handshake, brief network blips) happen
+ * occasionally and aren't Jira's or the user's fault — retry a couple of times before
+ * surfacing an error, same approach as the Gemini transient-error handling. */
+async function fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
+  const delays = [300, 800, 1500];
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (err: any) {
+      if (attempt >= delays.length) {
+        const cause = err?.cause ? ` (${err.cause.code ?? err.cause.message ?? err.cause})` : "";
+        throw new Error(`Could not reach Jira: ${err.message}${cause}`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+    }
+  }
+}
+
 async function jiraFetch(path: string, init?: RequestInit): Promise<any> {
   if (!isJiraConfigured()) throw new JiraNotConfiguredError();
-  const res = await fetch(`${getJiraConfig().baseUrl}${path}`, {
+  const res = await fetchWithRetry(`${getJiraConfig().baseUrl}${path}`, {
     ...init,
     headers: {
       Authorization: authHeader(),
@@ -86,6 +104,18 @@ function mapIssue(raw: any): JiraIssue {
     labels: f.labels ?? [],
     url: `${getJiraConfig().baseUrl}/browse/${raw.key}`,
   };
+}
+
+/** Fast aggregate count for a bounded JQL query, via Jira's approximate-count
+ * endpoint — used to build our own live stat widgets without paging through
+ * every issue. "Approximate" per Atlassian's naming, but accurate in practice
+ * for dashboard-style counts. */
+export async function approximateCount(jql: string): Promise<number> {
+  const data = await jiraFetch(`/rest/api/3/search/approximate-count`, {
+    method: "POST",
+    body: JSON.stringify({ jql }),
+  });
+  return data.count as number;
 }
 
 /** Search issues by JQL. Accepts a plain-language hint too, which is passed through
