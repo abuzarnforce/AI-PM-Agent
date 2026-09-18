@@ -53,7 +53,7 @@ export default function ChatPanel() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-white/[0.06] p-4">
-        <h1 className="text-lg font-semibold tracking-tight">Chat</h1>
+        <h1 className="text-panel-title">Chat</h1>
         <p className="text-sm text-white/50">Ask a free-form question. Answers cite Jira ticket keys.</p>
         <input
           value={projectKey}

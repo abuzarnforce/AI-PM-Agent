@@ -155,7 +155,7 @@ export default function ConnectorPanel() {
   return (
     <div className="flex h-full flex-col overflow-y-auto">
       <div className="border-b border-white/[0.06] p-4">
-        <h1 className="text-lg font-semibold tracking-tight">Connector</h1>
+        <h1 className="text-panel-title">Connector</h1>
         <p className="text-sm text-white/50">
           Connect your own Jira site and Gemini API key. Credentials are stored locally by this
           app instance — nothing is sent anywhere except Jira and Google's Gemini API directly.

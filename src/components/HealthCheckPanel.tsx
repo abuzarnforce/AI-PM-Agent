@@ -4,11 +4,43 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 
-const VERDICT_STYLES: Record<string, { classes: string; icon: typeof CheckCircle2 }> = {
-  "on track": { classes: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30", icon: CheckCircle2 },
-  "at risk": { classes: "bg-amber-500/15 text-amber-300 border-amber-500/30", icon: AlertTriangle },
-  blocked: { classes: "bg-red-500/15 text-red-300 border-red-500/30", icon: XCircle },
+const VERDICT_STYLES: Record<string, { text: string; ring: string; icon: typeof CheckCircle2 }> = {
+  "on track": { text: "text-emerald-300", ring: "#34d399", icon: CheckCircle2 },
+  "at risk": { text: "text-amber-300", ring: "#fbbf24", icon: AlertTriangle },
+  blocked: { text: "text-red-300", ring: "#f87171", icon: XCircle },
 };
+
+function RadialGauge({ score, total, color }: { score: number; total: number; color: string }) {
+  const size = 76;
+  const stroke = 7;
+  const r = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  const fraction = total === 0 ? 1 : score / total;
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} fill="none" />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke={color}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          fill="none"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: circumference * (1 - fraction) }}
+          transition={{ type: "spring", bounce: 0, duration: 0.8 }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-sm font-semibold">{score}/{total}</span>
+        <span className="text-[9px] text-white/40">clean</span>
+      </div>
+    </div>
+  );
+}
 
 export default function HealthCheckPanel() {
   const [epicKey, setEpicKey] = useState("");
@@ -66,7 +98,7 @@ export default function HealthCheckPanel() {
   return (
     <div className="flex h-full flex-col overflow-y-auto">
       <div className="border-b border-white/[0.06] p-4">
-        <h1 className="text-lg font-semibold tracking-tight">Health Check</h1>
+        <h1 className="text-panel-title">Health Check</h1>
         <p className="mb-3 text-sm text-white/50">
           Report on an epic or sprint: missing AC, unestimated stories, stale tickets, scope drift, QA gaps.
         </p>
@@ -128,15 +160,29 @@ export default function HealthCheckPanel() {
             {(() => {
               const v = VERDICT_STYLES[report.verdict];
               const VIcon = v.icon;
+              const checks = [
+                report.missingAcceptanceCriteria.length,
+                report.unestimated.length,
+                report.stale.length,
+                report.scopeDrift.length,
+                report.qaCoverageGaps.length,
+              ];
+              const cleanCount = checks.filter((c) => c === 0).length;
               return (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
-                  className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium ${v.classes}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: "spring", bounce: 0.1, duration: 0.35 }}
+                  className="card-surface flex items-center gap-4 rounded-2xl p-4"
                 >
-                  <VIcon size={15} />
-                  {report.verdict.toUpperCase()} — {report.verdictReason}
+                  <RadialGauge score={cleanCount} total={checks.length} color={v.ring} />
+                  <div>
+                    <div className={`flex items-center gap-1.5 text-sm font-semibold ${v.text}`}>
+                      <VIcon size={15} />
+                      {report.verdict.toUpperCase()}
+                    </div>
+                    <div className="mt-0.5 text-sm text-white/60">{report.verdictReason}</div>
+                  </div>
                 </motion.div>
               );
             })()}

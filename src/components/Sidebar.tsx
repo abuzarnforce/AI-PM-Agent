@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MessageSquare, Activity, Inbox, Wand2, MessageSquarePlus, Plug, Sparkles } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Activity, Inbox, Wand2, MessageSquarePlus, Plug, Sparkles } from "lucide-react";
 
-export type Tab = "chat" | "health" | "drafts" | "studio" | "feedback" | "connector";
+export type Tab = "overview" | "chat" | "health" | "drafts" | "studio" | "feedback" | "connector";
 
 const ITEMS: { id: Tab; label: string; hint: string; icon: typeof MessageSquare }[] = [
+  { id: "overview", label: "Overview", hint: "Your backlog at a glance", icon: LayoutDashboard },
   { id: "chat", label: "Chat", hint: "Ask questions across Jira", icon: MessageSquare },
   { id: "studio", label: "Studio", hint: "Draft stories, PRDs, BRDs", icon: Wand2 },
   { id: "health", label: "Health Check", hint: "Epic / sprint report", icon: Activity },
@@ -15,6 +17,15 @@ const ITEMS: { id: Tab; label: string; hint: string; icon: typeof MessageSquare 
 ];
 
 export default function Sidebar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+  const [status, setStatus] = useState<{ jiraConfigured: boolean; geminiConfigured: boolean } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/status")
+      .then((r) => r.json())
+      .then(setStatus)
+      .catch(() => {});
+  }, [active]);
+
   return (
     <nav className="glass flex w-64 shrink-0 flex-col border-r border-white/[0.06] p-3">
       <div className="mb-5 flex items-center gap-2 px-2 pt-1">
@@ -55,6 +66,21 @@ export default function Sidebar({ active, onChange }: { active: Tab; onChange: (
           );
         })}
       </ul>
+
+      <div className="mt-auto flex items-center gap-3 rounded-lg px-3 py-2.5 text-[11px] text-white/40">
+        <span className="flex items-center gap-1.5">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${status?.jiraConfigured ? "bg-emerald-400" : "bg-white/20"}`}
+          />
+          Jira
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${status?.geminiConfigured ? "bg-emerald-400" : "bg-white/20"}`}
+          />
+          Gemini
+        </span>
+      </div>
     </nav>
   );
 }

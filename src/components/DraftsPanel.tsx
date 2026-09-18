@@ -36,6 +36,13 @@ const KIND_LABEL: Record<string, string> = {
   brd: "BRD",
 };
 
+const KIND_ACCENT: Record<string, string> = {
+  new_story: "#5b8def",
+  update_story: "#5b8def",
+  prd: "#a78bfa",
+  brd: "#f59e0b",
+};
+
 export default function DraftsPanel() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -91,7 +98,7 @@ export default function DraftsPanel() {
       <div className="border-b border-white/[0.06] p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">Drafts</h1>
+            <h1 className="text-panel-title">Drafts</h1>
             <p className="text-sm text-white/50">
               Nothing is written to Jira until you approve it here (Hard Rule 1).
             </p>
@@ -129,7 +136,8 @@ export default function DraftsPanel() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.3, delay: i * 0.03 }}
-                className="card-surface rounded-xl p-4"
+                style={{ "--accent-color": KIND_ACCENT[d.kind] ?? "#5b8def" } as React.CSSProperties}
+                className="card-surface card-accent rounded-xl p-4"
               >
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">

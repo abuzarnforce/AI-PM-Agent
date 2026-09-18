@@ -66,7 +66,7 @@ export default function StudioPanel() {
   return (
     <div className="flex h-full flex-col overflow-y-auto">
       <div className="border-b border-white/[0.06] p-4">
-        <h1 className="text-lg font-semibold tracking-tight">Studio</h1>
+        <h1 className="text-panel-title">Studio</h1>
         <p className="text-sm text-white/50">
           Draft a User Story, PRD, or BRD from a brief. Everything lands in Drafts as "needs
           triage" — nothing is written to Jira until you approve it.

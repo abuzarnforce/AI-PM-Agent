@@ -35,7 +35,7 @@ export default function FeedbackCapturePanel() {
   return (
     <div className="flex h-full flex-col overflow-y-auto">
       <div className="border-b border-white/[0.06] p-4">
-        <h1 className="text-lg font-semibold tracking-tight">Feedback Capture</h1>
+        <h1 className="text-panel-title">Feedback Capture</h1>
         <p className="text-sm text-white/50">
           Paste a raw comment, note, or transcript excerpt. It's checked for duplicates before a draft
           story is created — nothing is written to Jira here.
