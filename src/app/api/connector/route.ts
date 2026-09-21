@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   const body = (await req.json()) as {
     jira?: { baseUrl?: string; email?: string; apiToken?: string };
     gemini?: { apiKey?: string; model?: string };
+    github?: { repo?: string; token?: string };
   };
 
   const jira = body.jira
@@ -26,14 +27,21 @@ export async function POST(req: NextRequest) {
       }
     : undefined;
 
-  await saveConnectorConfig({ jira, gemini });
+  const github = body.github
+    ? {
+        ...(body.github.repo ? { repo: body.github.repo.replace(/^https?:\/\/github\.com\//, "").replace(/\/+$/, "") } : {}),
+        ...(body.github.token ? { token: body.github.token } : {}),
+      }
+    : undefined;
+
+  await saveConnectorConfig({ jira, gemini, github });
   return NextResponse.json(await connectorStatus());
 }
 
 export async function DELETE(req: NextRequest) {
-  const { kind } = (await req.json()) as { kind: "jira" | "gemini" };
-  if (kind !== "jira" && kind !== "gemini") {
-    return NextResponse.json({ error: "kind must be 'jira' or 'gemini'" }, { status: 400 });
+  const { kind } = (await req.json()) as { kind: "jira" | "gemini" | "github" };
+  if (kind !== "jira" && kind !== "gemini" && kind !== "github") {
+    return NextResponse.json({ error: "kind must be 'jira', 'gemini', or 'github'" }, { status: 400 });
   }
   await clearConnector(kind);
   return NextResponse.json(await connectorStatus());

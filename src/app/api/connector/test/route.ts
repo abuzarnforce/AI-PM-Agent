@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getJiraConfig, isJiraConfigured, isGeminiConfigured } from "@/lib/config";
+import { getJiraConfig, isJiraConfigured, isGeminiConfigured, isGithubConfigured, getGithubConfig } from "@/lib/config";
 import { generateText } from "@/lib/gemini";
+import { testAccess } from "@/lib/github";
 
 async function testJira(): Promise<{ ok: boolean; detail: string }> {
   if (!(await isJiraConfigured())) return { ok: false, detail: "Jira is not configured yet." };
@@ -34,11 +35,24 @@ async function testGemini(): Promise<{ ok: boolean; detail: string }> {
   }
 }
 
-export async function POST(req: NextRequest) {
-  const { target } = (await req.json()) as { target: "jira" | "gemini" };
-  if (target !== "jira" && target !== "gemini") {
-    return NextResponse.json({ error: "target must be 'jira' or 'gemini'" }, { status: 400 });
+async function testGithub(): Promise<{ ok: boolean; detail: string }> {
+  if (!(await isGithubConfigured())) return { ok: false, detail: "GitHub is not configured yet." };
+  const { repo } = await getGithubConfig();
+  const [owner, name] = repo.split("/");
+  if (!owner || !name) return { ok: false, detail: `"${repo}" doesn't look like "owner/name".` };
+  try {
+    const { fullName, defaultBranch } = await testAccess(owner, name);
+    return { ok: true, detail: `Connected to ${fullName} (default branch: ${defaultBranch})` };
+  } catch (err: any) {
+    return { ok: false, detail: err.message ?? "Could not reach GitHub." };
   }
-  const result = target === "jira" ? await testJira() : await testGemini();
+}
+
+export async function POST(req: NextRequest) {
+  const { target } = (await req.json()) as { target: "jira" | "gemini" | "github" };
+  if (target !== "jira" && target !== "gemini" && target !== "github") {
+    return NextResponse.json({ error: "target must be 'jira', 'gemini', or 'github'" }, { status: 400 });
+  }
+  const result = target === "jira" ? await testJira() : target === "gemini" ? await testGemini() : await testGithub();
   return NextResponse.json(result);
 }

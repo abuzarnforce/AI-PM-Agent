@@ -2,25 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LayoutDashboard, LayoutGrid, MessageSquare, Activity, Inbox, Wand2, MessageSquarePlus, Plug, Sparkles, UserCircle2 } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, MessageSquare, Activity, Inbox, Wand2, MessageSquarePlus, Plug, Sparkles, UserCircle2, GitBranch } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import AccountModal from "./AccountModal";
 
-export type Tab = "overview" | "chat" | "health" | "drafts" | "studio" | "feedback" | "connector" | "dashboards";
+export type Tab = "overview" | "chat" | "health" | "drafts" | "studio" | "feedback" | "connector" | "dashboards" | "repoActivity";
 
 const ITEMS: { id: Tab; label: string; hint: string; icon: typeof MessageSquare }[] = [
   { id: "overview", label: "Overview", hint: "Your backlog at a glance", icon: LayoutDashboard },
   { id: "chat", label: "Chat", hint: "Ask questions across Jira", icon: MessageSquare },
   { id: "studio", label: "Studio", hint: "Draft stories, PRDs, BRDs", icon: Wand2 },
   { id: "dashboards", label: "Dashboards", hint: "Live status & trend widgets", icon: LayoutGrid },
+  { id: "repoActivity", label: "Repo Activity", hint: "Daily commits & PRs by dev", icon: GitBranch },
   { id: "health", label: "Health Check", hint: "Epic / sprint report", icon: Activity },
   { id: "drafts", label: "Drafts", hint: "Pending PM approval", icon: Inbox },
   { id: "feedback", label: "Feedback Capture", hint: "Turn a note into a draft", icon: MessageSquarePlus },
-  { id: "connector", label: "Connector", hint: "Connect Jira + Gemini", icon: Plug },
+  { id: "connector", label: "Connector", hint: "Connect Jira + Gemini + GitHub", icon: Plug },
 ];
 
 export default function Sidebar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
-  const [status, setStatus] = useState<{ jiraConfigured: boolean; geminiConfigured: boolean } | null>(null);
+  const [status, setStatus] = useState<{ jiraConfigured: boolean; geminiConfigured: boolean; githubConfigured: boolean } | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
 
@@ -93,6 +94,12 @@ export default function Sidebar({ active, onChange }: { active: Tab; onChange: (
               className={`h-1.5 w-1.5 rounded-full ${status?.geminiConfigured ? "bg-emerald-400" : "bg-fg/20"}`}
             />
             Gemini
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${status?.githubConfigured ? "bg-emerald-400" : "bg-fg/20"}`}
+            />
+            GitHub
           </span>
         </div>
         {username && (

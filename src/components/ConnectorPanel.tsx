@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plug, Sparkles, ShieldCheck, Unplug, Lock } from "lucide-react";
+import { Plug, Sparkles, ShieldCheck, Unplug, Lock, GitBranch } from "lucide-react";
 
 interface Status {
   jira: { baseUrl: string; email: string; apiTokenMasked: string; configured: boolean };
   gemini: { model: string; apiKeyMasked: string; configured: boolean };
+  github: { repo: string; tokenMasked: string; configured: boolean };
 }
 
 type TestResult = { ok: boolean; detail: string } | null;
 
-/** Jira/Gemini credentials live here, so re-confirm the signed-in user's password every
- * time this tab is opened — not just once per session. The component fully unmounts
+/** Jira/Gemini/GitHub credentials live here, so re-confirm the signed-in user's password
+ * every time this tab is opened — not just once per session. The component fully unmounts
  * when the PM navigates to another tab (see page.tsx's tab switch), so this gate state
  * naturally resets on every visit. */
 export default function ConnectorPanel() {
@@ -57,7 +58,7 @@ export default function ConnectorPanel() {
           </div>
           <div className="mb-1 text-sm font-semibold">Re-enter your password</div>
           <p className="mb-4 text-xs text-fg/50">
-            The Connector holds your Jira and Gemini credentials, so it asks again every time.
+            The Connector holds your Jira, Gemini, and GitHub credentials, so it asks again every time.
           </p>
           <input
             autoFocus
@@ -91,13 +92,18 @@ function ConnectorPanelContent() {
   const [jiraToken, setJiraToken] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
   const [geminiModel, setGeminiModel] = useState("gemini-3.5-flash-lite");
+  const [githubRepo, setGithubRepo] = useState("");
+  const [githubToken, setGithubToken] = useState("");
 
   const [savingJira, setSavingJira] = useState(false);
   const [savingGemini, setSavingGemini] = useState(false);
+  const [savingGithub, setSavingGithub] = useState(false);
   const [testingJira, setTestingJira] = useState(false);
   const [testingGemini, setTestingGemini] = useState(false);
+  const [testingGithub, setTestingGithub] = useState(false);
   const [jiraTest, setJiraTest] = useState<TestResult>(null);
   const [geminiTest, setGeminiTest] = useState<TestResult>(null);
+  const [githubTest, setGithubTest] = useState<TestResult>(null);
 
   async function load() {
     const res = await fetch("/api/connector");
@@ -106,6 +112,7 @@ function ConnectorPanelContent() {
     setJiraBaseUrl(data.jira.baseUrl);
     setJiraEmail(data.jira.email);
     setGeminiModel(data.gemini.model || "gemini-3.5-flash-lite");
+    setGithubRepo(data.github.repo);
   }
 
   useEffect(() => {
@@ -148,7 +155,25 @@ function ConnectorPanelContent() {
     }
   }
 
-  async function disconnect(kind: "jira" | "gemini") {
+  async function saveGithub() {
+    setSavingGithub(true);
+    setGithubTest(null);
+    try {
+      await fetch("/api/connector", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          github: { repo: githubRepo, token: githubToken || undefined },
+        }),
+      });
+      setGithubToken("");
+      await load();
+    } finally {
+      setSavingGithub(false);
+    }
+  }
+
+  async function disconnect(kind: "jira" | "gemini" | "github") {
     await fetch("/api/connector", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -159,16 +184,20 @@ function ConnectorPanelContent() {
       setJiraEmail("");
       setJiraToken("");
       setJiraTest(null);
-    } else {
+    } else if (kind === "gemini") {
       setGeminiKey("");
       setGeminiTest(null);
+    } else {
+      setGithubRepo("");
+      setGithubToken("");
+      setGithubTest(null);
     }
     await load();
   }
 
-  async function test(target: "jira" | "gemini") {
-    const setTesting = target === "jira" ? setTestingJira : setTestingGemini;
-    const setResult = target === "jira" ? setJiraTest : setGeminiTest;
+  async function test(target: "jira" | "gemini" | "github") {
+    const setTesting = target === "jira" ? setTestingJira : target === "gemini" ? setTestingGemini : setTestingGithub;
+    const setResult = target === "jira" ? setJiraTest : target === "gemini" ? setGeminiTest : setGithubTest;
     setTesting(true);
     setResult(null);
     try {
@@ -229,8 +258,9 @@ function ConnectorPanelContent() {
       <div className="border-b border-fg/[0.06] p-4">
         <h1 className="text-panel-title">Connector</h1>
         <p className="text-sm text-fg/50">
-          Connect your own Jira site and Gemini API key. Credentials are stored locally by this
-          app instance — nothing is sent anywhere except Jira and Google's Gemini API directly.
+          Connect your own Jira site, Gemini API key, and a read-only GitHub repo. Credentials are
+          stored locally by this app instance — nothing is sent anywhere except Jira, Google's
+          Gemini API, and GitHub directly.
         </p>
       </div>
 
@@ -384,6 +414,78 @@ function ConnectorPanelContent() {
           </div>
           <ResultBanner result={geminiTest} />
           <div className="mt-2 text-xs text-fg/30">Get a key from Google AI Studio.</div>
+        </motion.div>
+
+        {/* GitHub */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", bounce: 0, duration: 0.3, delay: 0.1 }}
+          className="card-surface rounded-xl p-4"
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 font-medium">
+              <GitBranch size={16} className="text-fg/50" />
+              GitHub
+            </div>
+            {status && <Badge configured={status.github.configured} />}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="text-sm sm:col-span-2">
+              <div className="mb-1 text-fg/50">Repository</div>
+              <input
+                value={githubRepo}
+                onChange={(e) => setGithubRepo(e.target.value)}
+                placeholder="owner/repo or a github.com link"
+                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
+              />
+            </label>
+            <label className="text-sm sm:col-span-2">
+              <div className="mb-1 text-fg/50">
+                Personal access token{" "}
+                {status?.github.tokenMasked && (
+                  <span className="text-fg/30">(current: {status.github.tokenMasked})</span>
+                )}
+              </div>
+              <input
+                type="password"
+                value={githubToken}
+                onChange={(e) => setGithubToken(e.target.value)}
+                placeholder={status?.github.tokenMasked ? "Leave blank to keep current token" : "Paste a read-only fine-grained PAT"}
+                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
+              />
+            </label>
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              onClick={saveGithub}
+              disabled={savingGithub || !githubRepo}
+              className="btn rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            >
+              {savingGithub ? "Saving…" : "Save"}
+            </button>
+            <button
+              onClick={() => test("github")}
+              disabled={testingGithub || !status?.github.configured}
+              className="btn flex items-center gap-1.5 rounded-md border border-fg/10 px-4 py-1.5 text-sm text-fg/70 hover:bg-fg/5 disabled:opacity-50"
+            >
+              <ShieldCheck size={13} />
+              {testingGithub ? "Testing…" : "Test connection"}
+            </button>
+            {status?.github.configured && (
+              <button
+                onClick={() => disconnect("github")}
+                className="btn flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm text-fg/40 hover:text-red-300"
+              >
+                <Unplug size={13} />
+                Disconnect
+              </button>
+            )}
+          </div>
+          <ResultBanner result={githubTest} />
+          <div className="mt-2 text-xs text-fg/30">
+            Create a fine-grained, read-only token at GitHub → Settings → Developer settings.
+          </div>
         </motion.div>
       </div>
     </div>

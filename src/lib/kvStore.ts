@@ -18,11 +18,19 @@ function getRedis(): Redis | null {
   return redisClient;
 }
 
+/** Redis keys are flat strings and happily contain "/" or ":" (e.g. "owner/repo"),
+ * but the local file-fallback path is built from the same key — sanitize it so a
+ * key like "repoActivitySnapshot:NForce-One/NForce-OneHR" can't be misread as a
+ * subdirectory that doesn't exist. */
+function safeFileName(key: string): string {
+  return key.replace(/[^a-zA-Z0-9_.-]/g, "_");
+}
+
 export async function readJson<T>(key: string): Promise<T | null> {
   const redis = getRedis();
   if (redis) return (await redis.get<T>(key)) ?? null;
 
-  const file = path.join(DATA_DIR, `${key}.json`);
+  const file = path.join(DATA_DIR, `${safeFileName(key)}.json`);
   if (!fs.existsSync(file)) return null;
   try {
     return JSON.parse(fs.readFileSync(file, "utf-8")) as T;
@@ -39,5 +47,5 @@ export async function writeJson<T>(key: string, value: T): Promise<void> {
   }
 
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(path.join(DATA_DIR, `${key}.json`), JSON.stringify(value, null, 2), "utf-8");
+  fs.writeFileSync(path.join(DATA_DIR, `${safeFileName(key)}.json`), JSON.stringify(value, null, 2), "utf-8");
 }

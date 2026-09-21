@@ -19,3 +19,12 @@ export async function isJiraConfigured(): Promise<boolean> {
 export async function isGeminiConfigured(): Promise<boolean> {
   return Boolean((await getGeminiConfig()).apiKey);
 }
+
+export async function getGithubConfig() {
+  return (await loadConnectorConfig()).github;
+}
+
+export async function isGithubConfigured(): Promise<boolean> {
+  const { repo, token } = await getGithubConfig();
+  return Boolean(repo && token);
+}
