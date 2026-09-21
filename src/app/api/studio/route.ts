@@ -8,7 +8,7 @@ import { isJiraConfigured, isGeminiConfigured } from "@/lib/config";
 type StudioKind = "user_story" | "prd" | "brd";
 
 export async function POST(req: NextRequest) {
-  if (!isGeminiConfigured()) {
+  if (!(await isGeminiConfigured())) {
     return NextResponse.json({ error: "Gemini is not configured. Connect it from the Connector tab." }, { status: 400 });
   }
 
@@ -44,7 +44,7 @@ Return JSON:
         acceptanceCriteria: { given: string; when: string; then: string }[];
       }>(extractPrompt);
 
-      if (isJiraConfigured() && projectKey) {
+      if ((await isJiraConfigured()) && projectKey) {
         const duplicateCheck = await checkForDuplicates(projectKey, extracted.title, extracted.need);
         if (duplicateCheck.hasMatch) {
           return NextResponse.json({ duplicateFound: true, duplicateCheck, extracted });
@@ -60,7 +60,7 @@ Return JSON:
         source,
         status: "needs triage",
       });
-      const draft = createDraft({
+      const draft = await createDraft({
         kind: "new_story",
         title: extracted.title,
         body,
@@ -100,7 +100,7 @@ Return JSON:
       }>(prompt);
 
       const body = renderPrd(extracted);
-      const draft = createDraft({ kind: "prd", title: extracted.title, body, source });
+      const draft = await createDraft({ kind: "prd", title: extracted.title, body, source });
       return NextResponse.json({ duplicateFound: false, draft });
     }
 
@@ -132,7 +132,7 @@ Return JSON:
       }>(prompt);
 
       const body = renderBrd(extracted);
-      const draft = createDraft({ kind: "brd", title: extracted.title, body, source });
+      const draft = await createDraft({ kind: "brd", title: extracted.title, body, source });
       return NextResponse.json({ duplicateFound: false, draft });
     }
 

@@ -20,7 +20,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T)
 }
 
 export async function GET(req: NextRequest) {
-  if (!isJiraConfigured()) {
+  if (!(await isJiraConfigured())) {
     return NextResponse.json({ error: "Jira is not configured. Connect it from the Connector tab." }, { status: 400 });
   }
 

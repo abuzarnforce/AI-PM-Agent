@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const { password } = (await req.json().catch(() => ({}))) as { password?: string };
   if (!password) return NextResponse.json({ error: "Password is required." }, { status: 400 });
 
-  const ok = verifyPassword(username, password);
+  const ok = await verifyPassword(username, password);
   if (!ok) return NextResponse.json({ error: "Incorrect password." }, { status: 401 });
   return NextResponse.json({ ok: true });
 }

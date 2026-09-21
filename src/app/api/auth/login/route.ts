@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Username and password are required." }, { status: 400 });
   }
 
-  if (!verifyPassword(username.trim(), password)) {
+  if (!(await verifyPassword(username.trim(), password))) {
     return NextResponse.json({ error: "Incorrect username or password." }, { status: 401 });
   }
 

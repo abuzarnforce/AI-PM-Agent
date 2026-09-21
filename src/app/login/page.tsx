@@ -86,11 +86,6 @@ export default function LoginPage() {
           <LogIn size={14} />
           {loading ? "Signing in…" : "Sign in"}
         </button>
-
-        <p className="mt-4 text-center text-[11px] text-fg/30">
-          First time here? Default login is <span className="text-fg/50">admin</span> /{" "}
-          <span className="text-fg/50">ChangeMe123!</span> — change it right after signing in.
-        </p>
       </motion.form>
     </div>
   );

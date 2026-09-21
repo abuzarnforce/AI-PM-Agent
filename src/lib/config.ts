@@ -1,20 +1,21 @@
 import { loadConnectorConfig } from "./connectorStore";
 
-/** Always reads fresh from the connector store (file-backed), so a key saved
- * through the Connector UI takes effect immediately without a server restart. */
-export function getJiraConfig() {
-  return loadConnectorConfig().jira;
+/** Always reads fresh from the connector store (KV in production, file-backed
+ * locally), so a key saved through the Connector UI takes effect immediately
+ * without a server restart. */
+export async function getJiraConfig() {
+  return (await loadConnectorConfig()).jira;
 }
 
-export function getGeminiConfig() {
-  return loadConnectorConfig().gemini;
+export async function getGeminiConfig() {
+  return (await loadConnectorConfig()).gemini;
 }
 
-export function isJiraConfigured(): boolean {
-  const { baseUrl, email, apiToken } = getJiraConfig();
+export async function isJiraConfigured(): Promise<boolean> {
+  const { baseUrl, email, apiToken } = await getJiraConfig();
   return Boolean(baseUrl && email && apiToken);
 }
 
-export function isGeminiConfigured(): boolean {
-  return Boolean(getGeminiConfig().apiKey);
+export async function isGeminiConfigured(): Promise<boolean> {
+  return Boolean((await getGeminiConfig()).apiKey);
 }

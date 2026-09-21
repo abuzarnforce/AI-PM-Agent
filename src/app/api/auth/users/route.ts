@@ -5,7 +5,7 @@ import { listUsernames, createUser } from "@/lib/authStore";
 export async function GET() {
   const me = getCurrentUsername();
   if (!me) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
-  return NextResponse.json({ usernames: listUsernames() });
+  return NextResponse.json({ usernames: await listUsernames() });
 }
 
 export async function POST(req: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    createUser(username.trim(), password);
+    await createUser(username.trim(), password);
     return NextResponse.json({ username: username.trim() });
   } catch (err: any) {
     return NextResponse.json({ error: err.message ?? "Could not create user." }, { status: 400 });

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectorStatus, saveConnectorConfig, clearConnector } from "@/lib/connectorStore";
 
 export async function GET() {
-  return NextResponse.json(connectorStatus());
+  return NextResponse.json(await connectorStatus());
 }
 
 export async function POST(req: NextRequest) {
@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
       }
     : undefined;
 
-  saveConnectorConfig({ jira, gemini });
-  return NextResponse.json(connectorStatus());
+  await saveConnectorConfig({ jira, gemini });
+  return NextResponse.json(await connectorStatus());
 }
 
 export async function DELETE(req: NextRequest) {
@@ -35,6 +35,6 @@ export async function DELETE(req: NextRequest) {
   if (kind !== "jira" && kind !== "gemini") {
     return NextResponse.json({ error: "kind must be 'jira' or 'gemini'" }, { status: 400 });
   }
-  clearConnector(kind);
-  return NextResponse.json(connectorStatus());
+  await clearConnector(kind);
+  return NextResponse.json(await connectorStatus());
 }

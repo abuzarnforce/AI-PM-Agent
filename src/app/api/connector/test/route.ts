@@ -3,8 +3,8 @@ import { getJiraConfig, isJiraConfigured, isGeminiConfigured } from "@/lib/confi
 import { generateText } from "@/lib/gemini";
 
 async function testJira(): Promise<{ ok: boolean; detail: string }> {
-  if (!isJiraConfigured()) return { ok: false, detail: "Jira is not configured yet." };
-  const { baseUrl, email, apiToken } = getJiraConfig();
+  if (!(await isJiraConfigured())) return { ok: false, detail: "Jira is not configured yet." };
+  const { baseUrl, email, apiToken } = await getJiraConfig();
   try {
     const res = await fetch(`${baseUrl}/rest/api/3/myself`, {
       headers: {
@@ -25,7 +25,7 @@ async function testJira(): Promise<{ ok: boolean; detail: string }> {
 }
 
 async function testGemini(): Promise<{ ok: boolean; detail: string }> {
-  if (!isGeminiConfigured()) return { ok: false, detail: "Gemini is not configured yet." };
+  if (!(await isGeminiConfigured())) return { ok: false, detail: "Gemini is not configured yet." };
   try {
     const text = await generateText('Reply with exactly one word: "pong".');
     return { ok: true, detail: `Model responded: ${text.trim().slice(0, 60)}` };

@@ -8,10 +8,13 @@ const SECRET_PATH = path.join(DATA_DIR, "session-secret.txt");
 export const SESSION_COOKIE = "aipm_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-/** Generated once on first run and persisted locally (gitignored, never
- * committed) so sessions survive a dev-server restart but a fresh checkout
- * of this repo never shares a secret with anyone else's. */
+/** In production (e.g. Vercel), the filesystem is read-only, so SESSION_SECRET must
+ * be set as an environment variable there. Locally, it's generated once on first run
+ * and persisted to a gitignored file so sessions survive a dev-server restart without
+ * any setup, and a fresh checkout never shares a secret with anyone else's. */
 function getSecret(): string {
+  if (process.env.SESSION_SECRET) return process.env.SESSION_SECRET;
+
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(SECRET_PATH)) {
     const secret = crypto.randomBytes(32).toString("hex");

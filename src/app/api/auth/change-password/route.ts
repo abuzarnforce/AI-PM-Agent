@@ -16,10 +16,10 @@ export async function POST(req: NextRequest) {
   if (newPassword.length < 8) {
     return NextResponse.json({ error: "New password must be at least 8 characters." }, { status: 400 });
   }
-  if (!verifyPassword(me, currentPassword)) {
+  if (!(await verifyPassword(me, currentPassword))) {
     return NextResponse.json({ error: "Current password is incorrect." }, { status: 401 });
   }
 
-  changePassword(me, newPassword);
+  await changePassword(me, newPassword);
   return NextResponse.json({ ok: true });
 }

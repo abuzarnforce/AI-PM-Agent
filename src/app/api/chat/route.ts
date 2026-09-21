@@ -23,13 +23,13 @@ const JQL_SYSTEM_INSTRUCTION = `You write Jira JQL. Follow Jira's JQL grammar ex
 - Return ONLY the JQL string, no explanation.`;
 
 export async function POST(req: NextRequest) {
-  if (!isGeminiConfigured()) {
+  if (!(await isGeminiConfigured())) {
     return NextResponse.json(
       { error: "Gemini is not configured. Connect it from the Connector tab." },
       { status: 400 }
     );
   }
-  if (!isJiraConfigured()) {
+  if (!(await isJiraConfigured())) {
     return NextResponse.json(
       { error: "Jira is not configured. Connect it from the Connector tab." },
       { status: 400 }

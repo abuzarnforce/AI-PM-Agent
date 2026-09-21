@@ -1,9 +1,5 @@
-import fs from "fs";
-import path from "path";
 import crypto from "crypto";
-
-const DATA_DIR = path.join(process.cwd(), ".data");
-const USERS_PATH = path.join(DATA_DIR, "users.json");
+import { readJson, writeJson } from "./kvStore";
 
 export interface StoredUser {
   username: string;
@@ -12,12 +8,10 @@ export interface StoredUser {
   createdAt: string;
 }
 
+const USERS_KEY = "users";
+
 const DEFAULT_ADMIN_USERNAME = "admin";
 const DEFAULT_ADMIN_PASSWORD = "ChangeMe123!";
-
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-}
 
 function hashPassword(password: string, salt: string): string {
   return crypto.scryptSync(password, salt, 64).toString("hex");
@@ -26,7 +20,7 @@ function hashPassword(password: string, salt: string): string {
 /** Seeds a default admin account on first run so the app is usable out of the box.
  * The default password is intentionally documented (not secret) — the PM is expected
  * to change it immediately from the Account panel. */
-function seedIfEmpty(): StoredUser[] {
+async function seedIfEmpty(): Promise<StoredUser[]> {
   const salt = crypto.randomBytes(16).toString("hex");
   const seeded: StoredUser[] = [
     {
@@ -36,39 +30,30 @@ function seedIfEmpty(): StoredUser[] {
       createdAt: new Date().toISOString(),
     },
   ];
-  ensureDataDir();
-  fs.writeFileSync(USERS_PATH, JSON.stringify({ users: seeded }, null, 2));
+  await writeJson(USERS_KEY, seeded);
   return seeded;
 }
 
-function loadUsers(): StoredUser[] {
-  ensureDataDir();
-  if (!fs.existsSync(USERS_PATH)) return seedIfEmpty();
-  try {
-    const data = JSON.parse(fs.readFileSync(USERS_PATH, "utf8"));
-    const users = data.users as StoredUser[];
-    if (!Array.isArray(users) || users.length === 0) return seedIfEmpty();
-    return users;
-  } catch {
-    return seedIfEmpty();
-  }
+async function loadUsers(): Promise<StoredUser[]> {
+  const users = await readJson<StoredUser[]>(USERS_KEY);
+  if (!Array.isArray(users) || users.length === 0) return seedIfEmpty();
+  return users;
 }
 
-function saveUsers(users: StoredUser[]) {
-  ensureDataDir();
-  fs.writeFileSync(USERS_PATH, JSON.stringify({ users }, null, 2));
+async function saveUsers(users: StoredUser[]): Promise<void> {
+  await writeJson(USERS_KEY, users);
 }
 
-export function listUsernames(): string[] {
-  return loadUsers().map((u) => u.username);
+export async function listUsernames(): Promise<string[]> {
+  return (await loadUsers()).map((u) => u.username);
 }
 
-export function findUser(username: string): StoredUser | undefined {
-  return loadUsers().find((u) => u.username.toLowerCase() === username.toLowerCase());
+export async function findUser(username: string): Promise<StoredUser | undefined> {
+  return (await loadUsers()).find((u) => u.username.toLowerCase() === username.toLowerCase());
 }
 
-export function verifyPassword(username: string, password: string): boolean {
-  const user = findUser(username);
+export async function verifyPassword(username: string, password: string): Promise<boolean> {
+  const user = await findUser(username);
   if (!user) return false;
   const candidate = hashPassword(password, user.salt);
   const a = Buffer.from(candidate, "hex");
@@ -76,8 +61,8 @@ export function verifyPassword(username: string, password: string): boolean {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-export function createUser(username: string, password: string): void {
-  const users = loadUsers();
+export async function createUser(username: string, password: string): Promise<void> {
+  const users = await loadUsers();
   if (users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
     throw new Error(`A user named "${username}" already exists.`);
   }
@@ -88,19 +73,15 @@ export function createUser(username: string, password: string): void {
     passwordHash: hashPassword(password, salt),
     createdAt: new Date().toISOString(),
   });
-  saveUsers(users);
+  await saveUsers(users);
 }
 
-export function changePassword(username: string, newPassword: string): void {
-  const users = loadUsers();
+export async function changePassword(username: string, newPassword: string): Promise<void> {
+  const users = await loadUsers();
   const user = users.find((u) => u.username.toLowerCase() === username.toLowerCase());
   if (!user) throw new Error("User not found.");
   const salt = crypto.randomBytes(16).toString("hex");
   user.salt = salt;
   user.passwordHash = hashPassword(newPassword, salt);
-  saveUsers(users);
-}
-
-export function isDefaultAdminPasswordStillSet(): boolean {
-  return verifyPassword(DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD);
+  await saveUsers(users);
 }

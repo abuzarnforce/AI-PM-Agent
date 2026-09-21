@@ -6,7 +6,7 @@ import { createDraft } from "@/lib/drafts";
 import { isJiraConfigured, isGeminiConfigured } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
-  if (!isGeminiConfigured()) {
+  if (!(await isGeminiConfigured())) {
     return NextResponse.json({ error: "Gemini is not configured." }, { status: 400 });
   }
   const { rawText, source, projectKey } = (await req.json()) as {
@@ -40,7 +40,7 @@ Return JSON:
     }>(extractPrompt);
 
     let duplicateCheck = null;
-    if (isJiraConfigured() && projectKey) {
+    if ((await isJiraConfigured()) && projectKey) {
       duplicateCheck = await checkForDuplicates(projectKey, extracted.title, extracted.need);
       if (duplicateCheck.hasMatch) {
         return NextResponse.json({
@@ -61,7 +61,7 @@ Return JSON:
       status: "needs triage",
     });
 
-    const draft = createDraft({
+    const draft = await createDraft({
       kind: "new_story",
       title: extracted.title,
       body,

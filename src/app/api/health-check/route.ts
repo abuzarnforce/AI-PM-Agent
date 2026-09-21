@@ -5,7 +5,7 @@ import { renderHealthCheck, type HealthCheckReport } from "@/lib/templates";
 import { isJiraConfigured, isGeminiConfigured } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
-  if (!isJiraConfigured() || !isGeminiConfigured()) {
+  if (!(await isJiraConfigured()) || !(await isGeminiConfigured())) {
     return NextResponse.json({ error: "Jira and Gemini must both be configured." }, { status: 400 });
   }
 

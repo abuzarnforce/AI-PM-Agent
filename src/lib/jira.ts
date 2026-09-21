@@ -29,8 +29,8 @@ class JiraNotConfiguredError extends Error {
   }
 }
 
-function authHeader(): string {
-  const { email, apiToken } = getJiraConfig();
+async function authHeader(): Promise<string> {
+  const { email, apiToken } = await getJiraConfig();
   const raw = `${email}:${apiToken}`;
   return `Basic ${Buffer.from(raw).toString("base64")}`;
 }
@@ -54,11 +54,12 @@ async function fetchWithRetry(url: string, init: RequestInit): Promise<Response>
 }
 
 async function jiraFetch(path: string, init?: RequestInit): Promise<any> {
-  if (!isJiraConfigured()) throw new JiraNotConfiguredError();
-  const res = await fetchWithRetry(`${getJiraConfig().baseUrl}${path}`, {
+  if (!(await isJiraConfigured())) throw new JiraNotConfiguredError();
+  const [{ baseUrl }, auth] = await Promise.all([getJiraConfig(), authHeader()]);
+  const res = await fetchWithRetry(`${baseUrl}${path}`, {
     ...init,
     headers: {
-      Authorization: authHeader(),
+      Authorization: auth,
       "Content-Type": "application/json",
       Accept: "application/json",
       ...(init?.headers ?? {}),
@@ -87,7 +88,7 @@ function adfToText(adf: any): string {
   return out.trim();
 }
 
-function mapIssue(raw: any): JiraIssue {
+function mapIssue(raw: any, baseUrl: string): JiraIssue {
   const f = raw.fields ?? {};
   return {
     key: raw.key,
@@ -102,7 +103,7 @@ function mapIssue(raw: any): JiraIssue {
     epicKey: f.parent?.key ?? f.epic?.key ?? null,
     acceptanceCriteria: f.customfield_10100 ? adfToText(f.customfield_10100) : null,
     labels: f.labels ?? [],
-    url: `${getJiraConfig().baseUrl}/browse/${raw.key}`,
+    url: `${baseUrl}/browse/${raw.key}`,
   };
 }
 
@@ -125,20 +126,23 @@ export async function approximateCount(jql: string): Promise<number> {
  * Uses POST /rest/api/3/search/jql — the old GET /rest/api/3/search was removed
  * by Atlassian (see https://developer.atlassian.com/changelog/#CHANGE-2046). */
 export async function searchIssues(jql: string, maxResults = 50): Promise<JiraIssue[]> {
-  const data = await jiraFetch(`/rest/api/3/search/jql`, {
-    method: "POST",
-    body: JSON.stringify({
-      jql,
-      maxResults,
-      fields: ["summary", "status", "issuetype", "assignee", "updated", "created", "description", "labels", "parent"],
+  const [data, { baseUrl }] = await Promise.all([
+    jiraFetch(`/rest/api/3/search/jql`, {
+      method: "POST",
+      body: JSON.stringify({
+        jql,
+        maxResults,
+        fields: ["summary", "status", "issuetype", "assignee", "updated", "created", "description", "labels", "parent"],
+      }),
     }),
-  });
-  return (data.issues ?? []).map(mapIssue);
+    getJiraConfig(),
+  ]);
+  return (data.issues ?? []).map((raw: any) => mapIssue(raw, baseUrl));
 }
 
 export async function getIssue(key: string): Promise<JiraIssue> {
-  const raw = await jiraFetch(`/rest/api/3/issue/${key}`);
-  return mapIssue(raw);
+  const [raw, { baseUrl }] = await Promise.all([jiraFetch(`/rest/api/3/issue/${key}`), getJiraConfig()]);
+  return mapIssue(raw, baseUrl);
 }
 
 export async function getIssueComments(key: string): Promise<JiraComment[]> {
@@ -181,11 +185,14 @@ export async function createIssue(fields: NewIssueFields): Promise<{ key: string
       ...(fields.epicKey ? { parent: { key: fields.epicKey } } : {}),
     },
   };
-  const data = await jiraFetch(`/rest/api/3/issue`, {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
-  return { key: data.key, url: `${getJiraConfig().baseUrl}/browse/${data.key}` };
+  const [data, { baseUrl }] = await Promise.all([
+    jiraFetch(`/rest/api/3/issue`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+    getJiraConfig(),
+  ]);
+  return { key: data.key, url: `${baseUrl}/browse/${data.key}` };
 }
 
 /** Actually updates the issue in Jira. Only ever called after explicit PM approval. */

@@ -1,5 +1,4 @@
-import fs from "node:fs";
-import path from "node:path";
+import { readJson, writeJson } from "./kvStore";
 
 export interface ConnectorConfig {
   jira: {
@@ -13,8 +12,7 @@ export interface ConnectorConfig {
   };
 }
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const STORE_FILE = path.join(DATA_DIR, "connectors.json");
+const STORE_KEY = "connectors";
 
 const EMPTY: ConnectorConfig = {
   jira: { baseUrl: "", email: "", apiToken: "" },
@@ -22,7 +20,7 @@ const EMPTY: ConnectorConfig = {
 };
 
 /** Env vars act only as an initial seed for first run (handy for the maintainer's own
- * deployment). Once a value is saved through the Connector UI, the stored file wins —
+ * deployment). Once a value is saved through the Connector UI, the stored value wins —
  * that's what makes this a piece of software anyone can download and configure
  * themselves without touching environment variables or redeploying. */
 function envSeed(): ConnectorConfig {
@@ -39,49 +37,43 @@ function envSeed(): ConnectorConfig {
   };
 }
 
-export function loadConnectorConfig(): ConnectorConfig {
-  if (!fs.existsSync(STORE_FILE)) return envSeed();
-  try {
-    const stored = JSON.parse(fs.readFileSync(STORE_FILE, "utf-8")) as ConnectorConfig;
-    const seed = envSeed();
-    return {
-      jira: {
-        baseUrl: stored.jira?.baseUrl || seed.jira.baseUrl,
-        email: stored.jira?.email || seed.jira.email,
-        apiToken: stored.jira?.apiToken || seed.jira.apiToken,
-      },
-      gemini: {
-        apiKey: stored.gemini?.apiKey || seed.gemini.apiKey,
-        model: stored.gemini?.model || seed.gemini.model,
-      },
-    };
-  } catch {
-    return envSeed();
-  }
+export async function loadConnectorConfig(): Promise<ConnectorConfig> {
+  const stored = await readJson<ConnectorConfig>(STORE_KEY);
+  const seed = envSeed();
+  if (!stored) return seed;
+  return {
+    jira: {
+      baseUrl: stored.jira?.baseUrl || seed.jira.baseUrl,
+      email: stored.jira?.email || seed.jira.email,
+      apiToken: stored.jira?.apiToken || seed.jira.apiToken,
+    },
+    gemini: {
+      apiKey: stored.gemini?.apiKey || seed.gemini.apiKey,
+      model: stored.gemini?.model || seed.gemini.model,
+    },
+  };
 }
 
-export function saveConnectorConfig(partial: {
+export async function saveConnectorConfig(partial: {
   jira?: Partial<ConnectorConfig["jira"]>;
   gemini?: Partial<ConnectorConfig["gemini"]>;
-}): ConnectorConfig {
-  const current = loadConnectorConfig();
+}): Promise<ConnectorConfig> {
+  const current = await loadConnectorConfig();
   const next: ConnectorConfig = {
     jira: { ...current.jira, ...partial.jira },
     gemini: { ...current.gemini, ...partial.gemini },
   };
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(STORE_FILE, JSON.stringify(next, null, 2), "utf-8");
+  await writeJson(STORE_KEY, next);
   return next;
 }
 
-export function clearConnector(kind: "jira" | "gemini"): ConnectorConfig {
-  const current = loadConnectorConfig();
+export async function clearConnector(kind: "jira" | "gemini"): Promise<ConnectorConfig> {
+  const current = await loadConnectorConfig();
   const next: ConnectorConfig = {
     ...current,
     [kind]: EMPTY[kind],
   };
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(STORE_FILE, JSON.stringify(next, null, 2), "utf-8");
+  await writeJson(STORE_KEY, next);
   return next;
 }
 
@@ -92,8 +84,8 @@ function mask(secret: string): string {
 }
 
 /** Safe-to-send-to-the-browser view: never echoes full secrets back. */
-export function connectorStatus() {
-  const cfg = loadConnectorConfig();
+export async function connectorStatus() {
+  const cfg = await loadConnectorConfig();
   return {
     jira: {
       baseUrl: cfg.jira.baseUrl,

@@ -1,6 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { readJson, writeJson } from "./kvStore";
 import { createIssue, updateIssue, type NewIssueFields } from "./jira";
 import { getJiraConfig } from "./config";
 
@@ -25,33 +24,28 @@ export interface Draft {
   result?: { key: string; url: string };
 }
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const DATA_FILE = path.join(DATA_DIR, "drafts.json");
+const DRAFTS_KEY = "drafts";
 
-function load(): Draft[] {
-  if (!fs.existsSync(DATA_FILE)) return [];
-  try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
-  } catch {
-    return [];
-  }
+async function load(): Promise<Draft[]> {
+  return (await readJson<Draft[]>(DRAFTS_KEY)) ?? [];
 }
 
-function save(drafts: Draft[]): void {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(DATA_FILE, JSON.stringify(drafts, null, 2), "utf-8");
+async function save(drafts: Draft[]): Promise<void> {
+  await writeJson(DRAFTS_KEY, drafts);
 }
 
-export function listDrafts(): Draft[] {
-  return load().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+export async function listDrafts(): Promise<Draft[]> {
+  return (await load()).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
-export function getDraft(id: string): Draft | undefined {
-  return load().find((d) => d.id === id);
+export async function getDraft(id: string): Promise<Draft | undefined> {
+  return (await load()).find((d) => d.id === id);
 }
 
-export function createDraft(input: Omit<Draft, "id" | "createdAt" | "status"> & { status?: DraftStatus }): Draft {
-  const drafts = load();
+export async function createDraft(
+  input: Omit<Draft, "id" | "createdAt" | "status"> & { status?: DraftStatus }
+): Promise<Draft> {
+  const drafts = await load();
   const draft: Draft = {
     id: randomUUID(),
     createdAt: new Date().toISOString(),
@@ -59,14 +53,14 @@ export function createDraft(input: Omit<Draft, "id" | "createdAt" | "status"> & 
     ...input,
   };
   drafts.push(draft);
-  save(drafts);
+  await save(drafts);
   return draft;
 }
 
 /** The ONLY path by which this app is allowed to write to Jira: a PM must call
  * this explicitly (via POST /api/drafts/approve) against an existing draft. */
 export async function approveDraft(id: string): Promise<Draft> {
-  const drafts = load();
+  const drafts = await load();
   const draft = drafts.find((d) => d.id === id);
   if (!draft) throw new Error(`Draft ${id} not found`);
   if (draft.status === "approved") return draft;
@@ -89,20 +83,20 @@ export async function approveDraft(id: string): Promise<Draft> {
     await updateIssue(draft.jiraAction.targetKey, draft.jiraAction.fields);
     draft.result = {
       key: draft.jiraAction.targetKey,
-      url: `${getJiraConfig().baseUrl}/browse/${draft.jiraAction.targetKey}`,
+      url: `${(await getJiraConfig()).baseUrl}/browse/${draft.jiraAction.targetKey}`,
     };
   }
 
   draft.status = "approved";
-  save(drafts);
+  await save(drafts);
   return draft;
 }
 
-export function rejectDraft(id: string): Draft {
-  const drafts = load();
+export async function rejectDraft(id: string): Promise<Draft> {
+  const drafts = await load();
   const draft = drafts.find((d) => d.id === id);
   if (!draft) throw new Error(`Draft ${id} not found`);
   draft.status = "rejected";
-  save(drafts);
+  await save(drafts);
   return draft;
 }

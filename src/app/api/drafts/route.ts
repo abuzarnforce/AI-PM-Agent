@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { listDrafts, createDraft } from "@/lib/drafts";
 
 export async function GET() {
-  return NextResponse.json({ drafts: listDrafts() });
+  return NextResponse.json({ drafts: await listDrafts() });
 }
 
 export async function POST(req: NextRequest) {
@@ -10,6 +10,6 @@ export async function POST(req: NextRequest) {
   if (!body.title || !body.body || !body.source || !body.kind) {
     return NextResponse.json({ error: "kind, title, body, and source are required" }, { status: 400 });
   }
-  const draft = createDraft(body);
+  const draft = await createDraft(body);
   return NextResponse.json({ draft });
 }

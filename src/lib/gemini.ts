@@ -3,11 +3,11 @@ import { getGeminiConfig, isGeminiConfigured } from "./config";
 
 /** No cached singleton: the API key can change at any time via the Connector UI,
  * so a fresh client is built from the current stored config on every call. */
-function getClient(): { client: GoogleGenerativeAI; model: string } {
-  if (!isGeminiConfigured()) {
+async function getClient(): Promise<{ client: GoogleGenerativeAI; model: string }> {
+  if (!(await isGeminiConfigured())) {
     throw new Error("Gemini is not configured. Connect it from the Connector tab.");
   }
-  const { apiKey, model } = getGeminiConfig();
+  const { apiKey, model } = await getGeminiConfig();
   return { client: new GoogleGenerativeAI(apiKey), model };
 }
 
@@ -32,7 +32,7 @@ const RETRY_DELAYS_MS = [500, 1500, 4000];
  * Google's side doesn't surface as a broken feature — but never retry a per-day quota
  * exhaustion, since that won't clear until Google resets it. */
 export async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
-  const { client, model } = getClient();
+  const { client, model } = await getClient();
   const generativeModel = client.getGenerativeModel({ model, systemInstruction });
 
   let lastError: unknown;
