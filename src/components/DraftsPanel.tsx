@@ -19,7 +19,7 @@ const STATUS_STYLES: Record<string, string> = {
   "needs triage": "bg-amber-500/15 text-amber-300",
   "ready for grooming": "bg-sky-500/15 text-sky-300",
   approved: "bg-emerald-500/15 text-emerald-300",
-  rejected: "bg-white/10 text-white/40",
+  rejected: "bg-fg/10 text-fg/40",
 };
 
 const KIND_ICON: Record<string, typeof FileText> = {
@@ -95,15 +95,15 @@ export default function DraftsPanel() {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-b border-white/[0.06] p-4">
+      <div className="border-b border-fg/[0.06] p-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-panel-title">Drafts</h1>
-            <p className="text-sm text-white/50">
+            <p className="text-sm text-fg/50">
               Nothing is written to Jira until you approve it here (Hard Rule 1).
             </p>
           </div>
-          <button onClick={load} className="btn rounded-md p-2 text-white/40 hover:bg-white/5 hover:text-white/70">
+          <button onClick={load} className="btn rounded-md p-2 text-fg/40 hover:bg-fg/5 hover:text-fg/70">
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
@@ -122,7 +122,7 @@ export default function DraftsPanel() {
           )}
         </AnimatePresence>
         {!loading && drafts.length === 0 && (
-          <div className="py-10 text-center text-sm text-white/30">No drafts yet.</div>
+          <div className="py-10 text-center text-sm text-fg/30">No drafts yet.</div>
         )}
         <AnimatePresence>
           {drafts.map((d, i) => {
@@ -141,9 +141,9 @@ export default function DraftsPanel() {
               >
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Icon size={15} className="text-white/40" />
+                    <Icon size={15} className="text-fg/40" />
                     <span className="font-medium">{d.title}</span>
-                    <span className="rounded bg-white/5 px-1.5 py-0.5 text-[11px] text-white/40">
+                    <span className="rounded bg-fg/5 px-1.5 py-0.5 text-[11px] text-fg/40">
                       {KIND_LABEL[d.kind] ?? d.kind}
                     </span>
                   </div>
@@ -151,8 +151,8 @@ export default function DraftsPanel() {
                     {d.status}
                   </span>
                 </div>
-                <pre className="mb-2 whitespace-pre-wrap rounded-lg bg-bg p-3 text-xs text-white/80">{d.body}</pre>
-                <div className="flex items-center justify-between text-xs text-white/40">
+                <pre className="mb-2 whitespace-pre-wrap rounded-lg bg-bg p-3 text-xs text-fg/80">{d.body}</pre>
+                <div className="flex items-center justify-between text-xs text-fg/40">
                   <span>Source: {d.source}</span>
                   {d.result ? (
                     <a
@@ -170,7 +170,7 @@ export default function DraftsPanel() {
                         <button
                           onClick={() => reject(d.id)}
                           disabled={busyId === d.id}
-                          className="btn flex items-center gap-1 rounded border border-white/10 px-3 py-1 text-white/70 hover:bg-white/5 disabled:opacity-50"
+                          className="btn flex items-center gap-1 rounded border border-fg/10 px-3 py-1 text-fg/70 hover:bg-fg/5 disabled:opacity-50"
                         >
                           <X size={12} />
                           Reject

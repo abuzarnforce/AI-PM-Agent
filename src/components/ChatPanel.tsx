@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, RotateCcw, Sparkles } from "lucide-react";
+import { useJiraBaseUrl, jiraTicketUrl, linkifyTicketKeys } from "@/lib/useJiraBaseUrl";
 
 interface Message {
   role: "user" | "assistant" | "error";
@@ -17,6 +18,7 @@ export default function ChatPanel() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [lastQuestion, setLastQuestion] = useState<string | null>(null);
+  const jiraBaseUrl = useJiraBaseUrl();
 
   async function ask(text: string, opts: { echo: boolean } = { echo: true }) {
     if (!text || loading) return;
@@ -52,21 +54,21 @@ export default function ChatPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-white/[0.06] p-4">
+      <div className="border-b border-fg/[0.06] p-4">
         <h1 className="text-panel-title">Chat</h1>
-        <p className="text-sm text-white/50">Ask a free-form question. Answers cite Jira ticket keys.</p>
+        <p className="text-sm text-fg/50">Ask a free-form question. Answers cite Jira ticket keys.</p>
         <input
           value={projectKey}
           onChange={(e) => setProjectKey(e.target.value)}
           placeholder="Optional: scope to project key (e.g. ONEHR)"
-          className="mt-2 w-72 rounded-md border border-white/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
+          className="mt-2 w-72 rounded-md border border-fg/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
         />
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 && (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-white/30">
-            <Sparkles size={22} className="text-white/15" />
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-fg/30">
+            <Sparkles size={22} className="text-fg/15" />
             <div>Try: "What's blocking the login epic?" or "List open bugs assigned to me."</div>
           </div>
         )}
@@ -85,7 +87,7 @@ export default function ChatPanel() {
                   : "card-surface"
               }`}
             >
-              <div className="whitespace-pre-wrap">{m.text}</div>
+              <div className="whitespace-pre-wrap">{linkifyTicketKeys(m.text, jiraBaseUrl)}</div>
               {m.role === "error" && (
                 <button
                   onClick={retry}
@@ -97,13 +99,25 @@ export default function ChatPanel() {
                 </button>
               )}
               {m.sources && m.sources.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5 text-xs text-white/50">
+                <div className="mt-2 flex flex-wrap gap-1.5 text-xs text-fg/50">
                   Sources:
-                  {m.sources.map((s) => (
-                    <span key={s} className="rounded bg-white/10 px-1.5 py-0.5">
-                      {s}
-                    </span>
-                  ))}
+                  {m.sources.map((s) =>
+                    jiraTicketUrl(jiraBaseUrl, s) ? (
+                      <a
+                        key={s}
+                        href={jiraTicketUrl(jiraBaseUrl, s)!}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded bg-fg/10 px-1.5 py-0.5 text-accent hover:bg-fg/15 hover:underline"
+                      >
+                        {s}
+                      </a>
+                    ) : (
+                      <span key={s} className="rounded bg-fg/10 px-1.5 py-0.5">
+                        {s}
+                      </span>
+                    )
+                  )}
                 </div>
               )}
             </motion.div>
@@ -113,13 +127,13 @@ export default function ChatPanel() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center gap-1.5 text-sm text-white/40"
+            className="flex items-center gap-1.5 text-sm text-fg/40"
           >
             <span className="flex gap-0.5">
               {[0, 1, 2].map((i) => (
                 <motion.span
                   key={i}
-                  className="h-1.5 w-1.5 rounded-full bg-white/40"
+                  className="h-1.5 w-1.5 rounded-full bg-fg/40"
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
                 />
@@ -130,14 +144,14 @@ export default function ChatPanel() {
         )}
       </div>
 
-      <div className="glass border-t border-white/[0.06] p-4">
+      <div className="glass border-t border-fg/[0.06] p-4">
         <div className="flex gap-2">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Ask about your backlog…"
-            className="flex-1 rounded-lg border border-white/10 bg-panel px-3 py-2 text-sm outline-none transition-colors focus:border-accent"
+            className="flex-1 rounded-lg border border-fg/10 bg-panel px-3 py-2 text-sm outline-none transition-colors focus:border-accent"
           />
           <button
             onClick={send}

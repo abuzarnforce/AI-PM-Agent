@@ -34,7 +34,7 @@ const STATUS_DOT: Record<string, string> = {
   "needs triage": "bg-amber-400",
   "ready for grooming": "bg-sky-400",
   approved: "bg-emerald-400",
-  rejected: "bg-white/30",
+  rejected: "bg-fg/30",
 };
 
 function greeting(): string {
@@ -69,7 +69,7 @@ export default function OverviewPanel({ onNavigate }: { onNavigate: (t: Tab) => 
   const STATS = [
     { label: "Needs triage", value: needsTriage, icon: Clock3, tone: "text-amber-300" },
     { label: "Approved", value: approved, icon: CheckCircle2, tone: "text-emerald-300" },
-    { label: "Total drafts", value: drafts.length, icon: Inbox, tone: "text-white/70" },
+    { label: "Total drafts", value: drafts.length, icon: Inbox, tone: "text-fg/70" },
   ];
 
   return (
@@ -81,7 +81,7 @@ export default function OverviewPanel({ onNavigate }: { onNavigate: (t: Tab) => 
           transition={{ type: "spring", bounce: 0, duration: 0.35 }}
         >
           <div className="text-display">{greeting()}.</div>
-          <p className="mt-1 text-white/50">Here's where your backlog and drafts stand right now.</p>
+          <p className="mt-1 text-fg/50">Here's where your backlog and drafts stand right now.</p>
         </motion.div>
 
         <div className="mt-8 grid grid-cols-3 gap-3">
@@ -97,14 +97,14 @@ export default function OverviewPanel({ onNavigate }: { onNavigate: (t: Tab) => 
               >
                 <Icon size={16} className={s.tone} />
                 <div className="mt-2 text-2xl font-semibold tracking-tight">{s.value}</div>
-                <div className="text-xs text-white/40">{s.label}</div>
+                <div className="text-xs text-fg/40">{s.label}</div>
               </motion.div>
             );
           })}
         </div>
 
         <div className="mt-10">
-          <div className="mb-3 text-sm font-medium text-white/50">Quick actions</div>
+          <div className="mb-3 text-sm font-medium text-fg/50">Quick actions</div>
           <div className="grid grid-cols-2 gap-3">
             {QUICK_ACTIONS.map((a, i) => {
               const Icon = a.icon;
@@ -123,11 +123,11 @@ export default function OverviewPanel({ onNavigate }: { onNavigate: (t: Tab) => 
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-medium">{a.label}</div>
-                    <div className="text-xs text-white/40">{a.hint}</div>
+                    <div className="text-xs text-fg/40">{a.hint}</div>
                   </div>
                   <ArrowRight
                     size={15}
-                    className="shrink-0 text-white/20 transition-transform group-hover:translate-x-0.5 group-hover:text-white/50"
+                    className="shrink-0 text-fg/20 transition-transform group-hover:translate-x-0.5 group-hover:text-fg/50"
                   />
                 </motion.button>
               );
@@ -137,13 +137,13 @@ export default function OverviewPanel({ onNavigate }: { onNavigate: (t: Tab) => 
 
         <div className="mt-10">
           <div className="mb-3 flex items-center justify-between">
-            <div className="text-sm font-medium text-white/50">Recent drafts</div>
+            <div className="text-sm font-medium text-fg/50">Recent drafts</div>
             <button onClick={() => onNavigate("drafts")} className="btn text-xs text-accent hover:underline">
               View all
             </button>
           </div>
           {recent.length === 0 ? (
-            <div className="card-surface rounded-2xl p-6 text-center text-sm text-white/30">
+            <div className="card-surface rounded-2xl p-6 text-center text-sm text-fg/30">
               Nothing drafted yet — try Studio or Feedback Capture.
             </div>
           ) : (
@@ -158,7 +158,7 @@ export default function OverviewPanel({ onNavigate }: { onNavigate: (t: Tab) => 
                 >
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[d.status]}`} />
                   <span className="min-w-0 flex-1 truncate text-sm">{d.title}</span>
-                  <span className="shrink-0 text-xs text-white/30">{d.status}</span>
+                  <span className="shrink-0 text-xs text-fg/30">{d.status}</span>
                 </motion.div>
               ))}
             </div>
@@ -171,7 +171,7 @@ export default function OverviewPanel({ onNavigate }: { onNavigate: (t: Tab) => 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="btn mt-10 w-full rounded-2xl border border-dashed border-white/15 p-4 text-center text-sm text-white/40 hover:border-accent/40 hover:text-white/70"
+            className="btn mt-10 w-full rounded-2xl border border-dashed border-fg/15 p-4 text-center text-sm text-fg/40 hover:border-accent/40 hover:text-fg/70"
           >
             {!jiraConnected && !geminiConnected
               ? "Connect Jira and Gemini to get started →"

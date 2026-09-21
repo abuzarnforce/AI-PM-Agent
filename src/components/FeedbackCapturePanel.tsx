@@ -34,9 +34,9 @@ export default function FeedbackCapturePanel() {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-b border-white/[0.06] p-4">
+      <div className="border-b border-fg/[0.06] p-4">
         <h1 className="text-panel-title">Feedback Capture</h1>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-fg/50">
           Paste a raw comment, note, or transcript excerpt. It's checked for duplicates before a draft
           story is created — nothing is written to Jira here.
         </p>
@@ -48,20 +48,20 @@ export default function FeedbackCapturePanel() {
           onChange={(e) => setRawText(e.target.value)}
           placeholder="e.g. 'Customer on the call said they can't filter the export by date range...'"
           rows={6}
-          className="w-full rounded-lg border border-white/10 bg-panel px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent"
+          className="w-full rounded-lg border border-fg/10 bg-panel px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent"
         />
         <div className="flex flex-wrap gap-3">
           <input
             value={source}
             onChange={(e) => setSource(e.target.value)}
             placeholder="Source (meeting note, demo date + stakeholder, etc.)"
-            className="w-80 rounded-md border border-white/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
+            className="w-80 rounded-md border border-fg/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
           />
           <input
             value={projectKey}
             onChange={(e) => setProjectKey(e.target.value)}
             placeholder="Optional: project key for duplicate check + draft"
-            className="w-72 rounded-md border border-white/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
+            className="w-72 rounded-md border border-fg/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
           />
           <button
             onClick={submit}
@@ -100,7 +100,7 @@ export default function FeedbackCapturePanel() {
               {result.duplicateCheck.matches.map((m: any) => (
                 <div key={m.key} className="mb-1 rounded bg-bg px-3 py-2">
                   <span className="font-medium">{m.key}</span> ({m.confidence}) — {m.summary}
-                  <div className="text-white/50">{m.reason}</div>
+                  <div className="text-fg/50">{m.reason}</div>
                 </div>
               ))}
             </motion.div>
@@ -116,10 +116,10 @@ export default function FeedbackCapturePanel() {
               className="card-surface rounded-lg p-4 text-sm"
             >
               <div className="mb-2 font-medium text-emerald-300">Draft created — tagged "needs triage"</div>
-              <pre className="whitespace-pre-wrap rounded bg-bg p-3 text-xs text-white/80">
+              <pre className="whitespace-pre-wrap rounded bg-bg p-3 text-xs text-fg/80">
                 {result.draft.body}
               </pre>
-              <div className="mt-2 text-white/50">See the Drafts tab to approve or reject.</div>
+              <div className="mt-2 text-fg/50">See the Drafts tab to approve or reject.</div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -65,14 +65,14 @@ export default function StudioPanel() {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-b border-white/[0.06] p-4">
+      <div className="border-b border-fg/[0.06] p-4">
         <h1 className="text-panel-title">Studio</h1>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-fg/50">
           Draft a User Story, PRD, or BRD from a brief. Everything lands in Drafts as "needs
           triage" — nothing is written to Jira until you approve it.
         </p>
 
-        <div className="relative mt-4 inline-flex rounded-lg border border-white/10 bg-panel p-1">
+        <div className="relative mt-4 inline-flex rounded-lg border border-fg/10 bg-panel p-1">
           {KINDS.map((k) => {
             const isActive = kind === k.id;
             const Icon = k.icon;
@@ -93,7 +93,7 @@ export default function StudioPanel() {
                     transition={{ type: "spring", bounce: 0, duration: 0.35 }}
                   />
                 )}
-                <span className={`relative z-10 flex items-center gap-1.5 whitespace-nowrap ${isActive ? "text-white" : "text-white/60"}`}>
+                <span className={`relative z-10 flex items-center gap-1.5 whitespace-nowrap ${isActive ? "text-fg" : "text-fg/60"}`}>
                   <Icon size={14} strokeWidth={2.25} />
                   {k.label}
                 </span>
@@ -109,21 +109,21 @@ export default function StudioPanel() {
           onChange={(e) => setBrief(e.target.value)}
           placeholder={activeKind.placeholder}
           rows={5}
-          className="w-full rounded-lg border border-white/10 bg-panel px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent"
+          className="w-full rounded-lg border border-fg/10 bg-panel px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent"
         />
         <div className="flex flex-wrap gap-3">
           <input
             value={source}
             onChange={(e) => setSource(e.target.value)}
             placeholder="Source (meeting note, demo date + stakeholder, etc.)"
-            className="w-80 rounded-md border border-white/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
+            className="w-80 rounded-md border border-fg/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
           />
           {kind === "user_story" && (
             <input
               value={projectKey}
               onChange={(e) => setProjectKey(e.target.value)}
               placeholder="Optional: project key for duplicate check"
-              className="w-72 rounded-md border border-white/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
+              className="w-72 rounded-md border border-fg/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
             />
           )}
           <button
@@ -163,7 +163,7 @@ export default function StudioPanel() {
               {result.duplicateCheck.matches.map((m: any) => (
                 <div key={m.key} className="mb-1 rounded bg-bg px-3 py-2">
                   <span className="font-medium">{m.key}</span> ({m.confidence}) — {m.summary}
-                  <div className="text-white/50">{m.reason}</div>
+                  <div className="text-fg/50">{m.reason}</div>
                 </div>
               ))}
             </motion.div>
@@ -181,10 +181,10 @@ export default function StudioPanel() {
               <div className="mb-2 font-medium text-emerald-300">
                 Draft created — tagged "needs triage"
               </div>
-              <pre className="whitespace-pre-wrap rounded bg-bg p-3 text-xs text-white/80">
+              <pre className="whitespace-pre-wrap rounded bg-bg p-3 text-xs text-fg/80">
                 {result.draft.body}
               </pre>
-              <div className="mt-2 text-white/50">See the Drafts tab to approve or reject.</div>
+              <div className="mt-2 text-fg/50">See the Drafts tab to approve or reject.</div>
             </motion.div>
           )}
         </AnimatePresence>

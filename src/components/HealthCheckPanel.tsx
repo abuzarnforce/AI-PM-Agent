@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { useJiraBaseUrl, linkifyTicketKeys } from "@/lib/useJiraBaseUrl";
 
 const VERDICT_STYLES: Record<string, { text: string; ring: string; icon: typeof CheckCircle2 }> = {
   "on track": { text: "text-emerald-300", ring: "#34d399", icon: CheckCircle2 },
@@ -36,7 +37,7 @@ function RadialGauge({ score, total, color }: { score: number; total: number; co
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-sm font-semibold">{score}/{total}</span>
-        <span className="text-[9px] text-white/40">clean</span>
+        <span className="text-[9px] text-fg/40">clean</span>
       </div>
     </div>
   );
@@ -49,6 +50,7 @@ export default function HealthCheckPanel() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<any>(null);
+  const jiraBaseUrl = useJiraBaseUrl();
 
   async function run() {
     setLoading(true);
@@ -80,14 +82,14 @@ export default function HealthCheckPanel() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", bounce: 0, duration: 0.3, delay }}
     >
-      <div className="mb-1.5 text-sm font-medium text-white/70">{title}</div>
+      <div className="mb-1.5 text-sm font-medium text-fg/70">{title}</div>
       {items.length === 0 ? (
-        <div className="text-sm text-white/30">none found</div>
+        <div className="text-sm text-fg/30">none found</div>
       ) : (
         <ul className="space-y-1 text-sm">
           {items.map((it, i) => (
             <li key={i} className="card-surface rounded-lg px-3 py-1.5">
-              {it}
+              {linkifyTicketKeys(it, jiraBaseUrl)}
             </li>
           ))}
         </ul>
@@ -97,38 +99,38 @@ export default function HealthCheckPanel() {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-b border-white/[0.06] p-4">
+      <div className="border-b border-fg/[0.06] p-4">
         <h1 className="text-panel-title">Health Check</h1>
-        <p className="mb-3 text-sm text-white/50">
+        <p className="mb-3 text-sm text-fg/50">
           Report on an epic or sprint: missing AC, unestimated stories, stale tickets, scope drift, QA gaps.
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <label className="text-sm">
-            <div className="mb-1 text-white/50">Epic key</div>
+            <div className="mb-1 text-fg/50">Epic key</div>
             <input
               value={epicKey}
               onChange={(e) => setEpicKey(e.target.value)}
               placeholder="ONEHR-123"
-              className="w-40 rounded-md border border-white/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
+              className="w-40 rounded-md border border-fg/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
             />
           </label>
-          <span className="pb-2 text-white/30">or</span>
+          <span className="pb-2 text-fg/30">or</span>
           <label className="text-sm">
-            <div className="mb-1 text-white/50">Sprint name</div>
+            <div className="mb-1 text-fg/50">Sprint name</div>
             <input
               value={sprintName}
               onChange={(e) => setSprintName(e.target.value)}
               placeholder="Sprint 24"
-              className="w-40 rounded-md border border-white/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
+              className="w-40 rounded-md border border-fg/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
             />
           </label>
           <label className="text-sm">
-            <div className="mb-1 text-white/50">Stale after (days)</div>
+            <div className="mb-1 text-fg/50">Stale after (days)</div>
             <input
               type="number"
               value={staleDays}
               onChange={(e) => setStaleDays(Number(e.target.value))}
-              className="w-24 rounded-md border border-white/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
+              className="w-24 rounded-md border border-fg/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
             />
           </label>
           <button
@@ -181,7 +183,7 @@ export default function HealthCheckPanel() {
                       <VIcon size={15} />
                       {report.verdict.toUpperCase()}
                     </div>
-                    <div className="mt-0.5 text-sm text-white/60">{report.verdictReason}</div>
+                    <div className="mt-0.5 text-sm text-fg/60">{report.verdictReason}</div>
                   </div>
                 </motion.div>
               );

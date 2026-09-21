@@ -5,10 +5,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#0b0d10",
-        panel: "#14171c",
-        border: "#262b33",
-        accent: "#5b8def",
+        bg: "rgb(var(--color-bg) / <alpha-value>)",
+        panel: "rgb(var(--color-panel) / <alpha-value>)",
+        border: "rgb(var(--color-border) / <alpha-value>)",
+        accent: "rgb(var(--color-accent) / <alpha-value>)",
+        fg: "rgb(var(--color-fg) / <alpha-value>)",
       },
     },
   },
