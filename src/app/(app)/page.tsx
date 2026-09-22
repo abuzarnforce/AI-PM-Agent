@@ -13,6 +13,7 @@ import ConnectorPanel from "@/components/ConnectorPanel";
 import StudioPanel from "@/components/StudioPanel";
 import DashboardsPanel from "@/components/DashboardsPanel";
 import RepoActivityPanel from "@/components/RepoActivityPanel";
+import QaDashboardPanel from "@/components/QaDashboardPanel";
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("overview");
@@ -33,6 +34,8 @@ export default function Home() {
         return <DashboardsPanel />;
       case "repoActivity":
         return <RepoActivityPanel />;
+      case "qa":
+        return <QaDashboardPanel />;
       case "feedback":
         return <FeedbackCapturePanel />;
       case "connector":

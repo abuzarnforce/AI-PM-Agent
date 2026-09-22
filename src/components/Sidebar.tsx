@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { LayoutDashboard, LayoutGrid, MessageSquare, Activity, Inbox, Wand2, MessageSquarePlus, Plug, Sparkles, UserCircle2, GitBranch } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, MessageSquare, Activity, Inbox, Wand2, MessageSquarePlus, Plug, Sparkles, UserCircle2, GitBranch, FlaskConical } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import AccountModal from "./AccountModal";
 
-export type Tab = "overview" | "chat" | "health" | "drafts" | "studio" | "feedback" | "connector" | "dashboards" | "repoActivity";
+export type Tab = "overview" | "chat" | "health" | "drafts" | "studio" | "feedback" | "connector" | "dashboards" | "repoActivity" | "qa";
 
 const ITEMS: { id: Tab; label: string; hint: string; icon: typeof MessageSquare }[] = [
   { id: "overview", label: "Overview", hint: "Your backlog at a glance", icon: LayoutDashboard },
@@ -14,6 +14,7 @@ const ITEMS: { id: Tab; label: string; hint: string; icon: typeof MessageSquare 
   { id: "studio", label: "Studio", hint: "Draft stories, PRDs, BRDs", icon: Wand2 },
   { id: "dashboards", label: "Dashboards", hint: "Live status & trend widgets", icon: LayoutGrid },
   { id: "repoActivity", label: "Repo Activity", hint: "Daily commits & PRs by dev", icon: GitBranch },
+  { id: "qa", label: "QA Dashboard", hint: "Regression, test cases, automation", icon: FlaskConical },
   { id: "health", label: "Health Check", hint: "Epic / sprint report", icon: Activity },
   { id: "drafts", label: "Drafts", hint: "Pending PM approval", icon: Inbox },
   { id: "feedback", label: "Feedback Capture", hint: "Turn a note into a draft", icon: MessageSquarePlus },
