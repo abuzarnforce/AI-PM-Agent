@@ -1,49 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Activity, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import { CheckCircle2, AlertTriangle, XCircle, HeartPulse } from "lucide-react";
 import { useJiraBaseUrl, linkifyTicketKeys } from "@/lib/useJiraBaseUrl";
+import { useNav } from "@/lib/nav";
+import { logActivity } from "@/lib/activity";
+import { Button, EmptyState, ErrorState, Field, PageHeader, Section, SourceChip, Tabs, WorkingState, inputCls } from "./ui";
+import QaDashboardPanel from "./QaDashboardPanel";
 
-const VERDICT_STYLES: Record<string, { text: string; ring: string; icon: typeof CheckCircle2 }> = {
-  "on track": { text: "text-emerald-300", ring: "#34d399", icon: CheckCircle2 },
-  "at risk": { text: "text-amber-300", ring: "#fbbf24", icon: AlertTriangle },
-  blocked: { text: "text-red-300", ring: "#f87171", icon: XCircle },
-};
+type HealthTab = "check" | "qa";
 
-function RadialGauge({ score, total, color }: { score: number; total: number; color: string }) {
-  const size = 76;
-  const stroke = 7;
-  const r = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * r;
-  const fraction = total === 0 ? 1 : score / total;
+export default function HealthCenter() {
+  const { intent } = useNav();
+  const [tab, setTab] = useState<HealthTab>(intent?.subtab === "qa" ? "qa" : "check");
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} fill="none" />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          stroke={color}
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          fill="none"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: circumference * (1 - fraction) }}
-          transition={{ type: "spring", bounce: 0, duration: 0.8 }}
+    <div className="page">
+      <PageHeader
+        eyebrow="Health"
+        title="Is the work on track?"
+        description="Check an epic or sprint for missing acceptance criteria, estimates, stale tickets and scope drift — alongside what QA is telling you."
+      >
+        <Tabs
+          id="health"
+          active={tab}
+          onChange={setTab}
+          tabs={[
+            { id: "check", label: "Epic & sprint" },
+            { id: "qa", label: "QA" },
+          ]}
         />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-sm font-semibold">{score}/{total}</span>
-        <span className="text-[9px] text-fg/40">clean</span>
-      </div>
+      </PageHeader>
+      {tab === "check" ? <HealthCheck /> : <QaDashboardPanel />}
     </div>
   );
 }
 
-export default function HealthCheckPanel() {
+const VERDICT: Record<string, { tone: string; bg: string; icon: typeof CheckCircle2; label: string }> = {
+  "on track": { tone: "text-emerald-400", bg: "bg-emerald-500/[0.06] border-emerald-500/20", icon: CheckCircle2, label: "On track" },
+  "at risk": { tone: "text-amber-400", bg: "bg-amber-500/[0.06] border-amber-500/20", icon: AlertTriangle, label: "At risk" },
+  blocked: { tone: "text-red-400", bg: "bg-red-500/[0.06] border-red-500/20", icon: XCircle, label: "Blocked" },
+};
+
+const STEPS = [
+  "Reading Jira issues…",
+  "Checking acceptance criteria and estimates…",
+  "Comparing against the epic's original scope…",
+  "Cross-referencing QA results…",
+  "Writing your verdict…",
+];
+
+function HealthCheck() {
   const [epicKey, setEpicKey] = useState("");
   const [sprintName, setSprintName] = useState("");
   const [staleDays, setStaleDays] = useState(14);
@@ -60,15 +67,12 @@ export default function HealthCheckPanel() {
       const res = await fetch("/api/health-check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          epicKey: epicKey || undefined,
-          sprintName: sprintName || undefined,
-          staleDays,
-        }),
+        body: JSON.stringify({ epicKey: epicKey.trim() || undefined, sprintName: sprintName.trim() || undefined, staleDays }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setReport(data.report);
+      logActivity("health", `Health check on ${data.report.epicOrSprint}: ${data.report.verdict}`);
     } catch (err: any) {
       setError(err.message ?? "Something went wrong");
     } finally {
@@ -76,135 +80,120 @@ export default function HealthCheckPanel() {
     }
   }
 
-  const Section = ({ title, items, delay }: { title: string; items: string[]; delay: number }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", bounce: 0, duration: 0.3, delay }}
-    >
-      <div className="mb-1.5 text-sm font-medium text-fg/70">{title}</div>
-      {items.length === 0 ? (
-        <div className="text-sm text-fg/30">none found</div>
-      ) : (
-        <ul className="space-y-1 text-sm">
-          {items.map((it, i) => (
-            <li key={i} className="card-surface rounded-lg px-3 py-1.5">
-              {linkifyTicketKeys(it, jiraBaseUrl)}
-            </li>
-          ))}
-        </ul>
-      )}
-    </motion.div>
-  );
+  const checks = report
+    ? [
+        { title: "Missing acceptance criteria", question: "Can these be tested?", items: report.missingAcceptanceCriteria.map((i: any) => `${i.key}: ${i.summary}`) },
+        { title: "Unestimated", question: "Can we forecast this?", items: report.unestimated.map((i: any) => `${i.key}: ${i.summary}`) },
+        { title: "Scope drift", question: "Are we still building what we planned?", items: report.scopeDrift },
+        { title: "QA coverage gaps", question: "What could slip through?", items: report.qaCoverageGaps },
+      ]
+    : [];
+  const staleMax = report ? Math.max(...report.stale.map((s: any) => s.daysSinceUpdate), 1) : 1;
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-b border-fg/[0.06] p-4">
-        <h1 className="text-panel-title">Health Check</h1>
-        <p className="mb-3 text-sm text-fg/50">
-          Report on an epic or sprint: missing AC, unestimated stories, stale tickets, scope drift, QA gaps.
-        </p>
-        <div className="flex flex-wrap items-end gap-3">
-          <label className="text-sm">
-            <div className="mb-1 text-fg/50">Epic key</div>
-            <input
-              value={epicKey}
-              onChange={(e) => setEpicKey(e.target.value)}
-              placeholder="ONEHR-123"
-              className="w-40 rounded-md border border-fg/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
-            />
-          </label>
-          <span className="pb-2 text-fg/30">or</span>
-          <label className="text-sm">
-            <div className="mb-1 text-fg/50">Sprint name</div>
-            <input
-              value={sprintName}
-              onChange={(e) => setSprintName(e.target.value)}
-              placeholder="Sprint 24"
-              className="w-40 rounded-md border border-fg/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
-            />
-          </label>
-          <label className="text-sm">
-            <div className="mb-1 text-fg/50">Stale after (days)</div>
-            <input
-              type="number"
-              value={staleDays}
-              onChange={(e) => setStaleDays(Number(e.target.value))}
-              className="w-24 rounded-md border border-fg/10 bg-panel px-3 py-1.5 outline-none transition-colors focus:border-accent"
-            />
-          </label>
-          <button
-            onClick={run}
-            disabled={loading || (!epicKey && !sprintName)}
-            className="btn flex items-center gap-1.5 rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-          >
-            <Activity size={14} />
-            {loading ? "Running…" : "Run health check"}
-          </button>
-        </div>
-      </div>
+    <div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          run();
+        }}
+        className="flex flex-wrap items-end gap-3"
+      >
+        <Field label="Epic key" className="w-full sm:w-40">
+          <input value={epicKey} onChange={(e) => setEpicKey(e.target.value)} placeholder="ONEHR-123" className={inputCls} />
+        </Field>
+        <span className="hidden pb-2.5 text-sm text-subtle sm:block">or</span>
+        <Field label="Sprint name" className="w-full sm:w-48">
+          <input value={sprintName} onChange={(e) => setSprintName(e.target.value)} placeholder="Sprint 24" className={inputCls} />
+        </Field>
+        <Field label="Stale after" hint="days" className="w-28">
+          <input type="number" min={1} value={staleDays} onChange={(e) => setStaleDays(Number(e.target.value))} className={inputCls} />
+        </Field>
+        <Button type="submit" variant="primary" icon={HeartPulse} loading={loading} disabled={!epicKey.trim() && !sprintName.trim()}>
+          Run health check
+        </Button>
+      </form>
 
-      <div className="space-y-5 p-4">
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div className="mt-10">
+        {error && <ErrorState message={error} onRetry={run} />}
+        {loading && <WorkingState steps={STEPS} interval={2200} />}
+        {!report && !loading && !error && (
+          <EmptyState
+            icon={HeartPulse}
+            title="Pick an epic or a sprint"
+            description="PM Agent reads every issue in scope, flags what's missing, and ends with a one-line verdict you can defend."
+          />
+        )}
+
         {report && (
           <>
             {(() => {
-              const v = VERDICT_STYLES[report.verdict];
-              const VIcon = v.icon;
-              const checks = [
-                report.missingAcceptanceCriteria.length,
-                report.unestimated.length,
-                report.stale.length,
-                report.scopeDrift.length,
-                report.qaCoverageGaps.length,
-              ];
-              const cleanCount = checks.filter((c) => c === 0).length;
+              const v = VERDICT[report.verdict] ?? VERDICT["at risk"];
+              const Icon = v.icon;
               return (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ type: "spring", bounce: 0.1, duration: 0.35 }}
-                  className="card-surface flex items-center gap-4 rounded-2xl p-4"
-                >
-                  <RadialGauge score={cleanCount} total={checks.length} color={v.ring} />
-                  <div>
-                    <div className={`flex items-center gap-1.5 text-sm font-semibold ${v.text}`}>
-                      <VIcon size={15} />
-                      {report.verdict.toUpperCase()}
-                    </div>
-                    <div className="mt-0.5 text-sm text-fg/60">{report.verdictReason}</div>
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className={`rounded-xl border p-6 ${v.bg}`}>
+                  <div className="text-[13px] text-muted">{report.epicOrSprint} · verdict</div>
+                  <div className={`mt-2 flex items-center gap-2 text-2xl font-semibold tracking-tight ${v.tone}`}>
+                    <Icon size={22} />
+                    {v.label}
+                  </div>
+                  <p className="mt-2 max-w-3xl text-[15px] leading-relaxed">{linkifyTicketKeys(report.verdictReason, jiraBaseUrl)}</p>
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    <SourceChip kind="Jira" label={report.epicOrSprint} />
+                    <span className="self-center text-[11px] text-subtle">AI-assisted verdict — review before sharing.</span>
                   </div>
                 </motion.div>
               );
             })()}
-            <Section
-              title="Stories missing acceptance criteria"
-              items={report.missingAcceptanceCriteria.map((i: any) => `${i.key}: ${i.summary}`)}
-              delay={0.05}
-            />
-            <Section
-              title="Unestimated stories"
-              items={report.unestimated.map((i: any) => `${i.key}: ${i.summary}`)}
-              delay={0.1}
-            />
-            <Section
-              title="Stale tickets"
-              items={report.stale.map((i: any) => `${i.key}: ${i.summary} (${i.daysSinceUpdate}d)`)}
-              delay={0.15}
-            />
-            <Section title="Scope drift" items={report.scopeDrift} delay={0.2} />
-            <Section title="QA coverage gaps" items={report.qaCoverageGaps} delay={0.25} />
+
+            <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 border-y border-border py-6 sm:grid-cols-5">
+              {[...checks.slice(0, 2), { title: "Stale", items: report.stale }, ...checks.slice(2)].map((c) => (
+                <div key={c.title}>
+                  <div className="text-[13px] text-muted">{c.title}</div>
+                  <div className={`tabular mt-1 text-2xl font-semibold ${c.items.length ? "" : "text-emerald-400"}`}>{c.items.length || "✓"}</div>
+                </div>
+              ))}
+            </div>
+
+            <Section title="Which tickets are aging?" description={`No update in ${staleDays}+ days, oldest first.`} className="!mt-10">
+              {report.stale.length === 0 ? (
+                <p className="text-sm text-muted">Nothing stale. Every ticket moved recently.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {[...report.stale]
+                    .sort((a: any, b: any) => b.daysSinceUpdate - a.daysSinceUpdate)
+                    .map((s: any) => (
+                      <li key={s.key} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 text-sm sm:grid-cols-[minmax(0,1fr)_10rem_3rem]">
+                        <span className="truncate">{linkifyTicketKeys(`${s.key}: ${s.summary}`, jiraBaseUrl)}</span>
+                        <div className="hidden h-1.5 overflow-hidden rounded-full bg-fg/[0.06] sm:block">
+                          <motion.div
+                            className="h-full rounded-full bg-amber-400"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(s.daysSinceUpdate / staleMax) * 100}%` }}
+                          />
+                        </div>
+                        <span className="tabular text-right text-xs text-muted">{s.daysSinceUpdate}d</span>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </Section>
+
+            {checks.map((c) => (
+              <Section key={c.title} title={c.title} description={c.question}>
+                {c.items.length === 0 ? (
+                  <p className="text-sm text-muted">None found.</p>
+                ) : (
+                  <ul className="divide-hairline border-y border-border">
+                    {c.items.map((it: string, i: number) => (
+                      <li key={i} className="py-2.5 text-sm leading-relaxed">
+                        {linkifyTicketKeys(it, jiraBaseUrl)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            ))}
           </>
         )}
       </div>

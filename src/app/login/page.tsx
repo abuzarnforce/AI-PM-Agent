@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Sparkles, LogIn } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import IntelligenceLayer, { Logo } from "@/components/IntelligenceLayer";
+import { Button, Field, inputCls } from "@/components/ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,58 +37,66 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <motion.form
-        onSubmit={submit}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", bounce: 0, duration: 0.35 }}
-        className="card-surface w-full max-w-sm rounded-2xl p-6"
-      >
-        <div className="mb-6 flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-violet-500 text-white shadow-lg shadow-accent/20">
-            <Sparkles size={17} strokeWidth={2.25} />
-          </div>
-          <div>
-            <div className="text-sm font-semibold tracking-tight">AI PM Agent</div>
-            <div className="text-[11px] text-fg/40">Sign in to continue</div>
-          </div>
+    <div className="grid min-h-[100dvh] bg-bg lg:grid-cols-[1.15fr_1fr]">
+      <section className="relative hidden flex-col justify-between overflow-hidden border-r border-border p-12 lg:flex">
+        <div className="flex items-center gap-2.5">
+          <Logo />
+          <span className="text-sm font-semibold tracking-tight">PM Agent</span>
         </div>
-
-        <label className="mb-3 block text-sm">
-          <div className="mb-1 text-fg/50">Username</div>
-          <input
-            autoFocus
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full rounded-md border border-fg/10 bg-panel px-3 py-2 outline-none transition-colors focus:border-accent"
-          />
-        </label>
-        <label className="mb-4 block text-sm">
-          <div className="mb-1 text-fg/50">Password</div>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-fg/10 bg-panel px-3 py-2 outline-none transition-colors focus:border-accent"
-          />
-        </label>
-
-        {error && (
-          <div className="mb-4 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-            {error}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <h1 className="text-display max-w-xl">Your product deserves an intelligent workspace.</h1>
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">
+            Connect product, engineering, QA and delivery. Understand anything. Stay in control of every change.
+          </p>
+          <div className="mt-12 max-w-xl opacity-90">
+            <IntelligenceLayer />
           </div>
-        )}
+        </motion.div>
+        <div className="text-xs text-subtle">Connect everything. Understand anything. Move product forward.</div>
+      </section>
 
-        <button
-          type="submit"
-          disabled={loading || !username.trim() || !password}
-          className="btn flex w-full items-center justify-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+      <section className="flex items-center justify-center px-6 py-12">
+        <motion.form
+          onSubmit={submit}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-sm"
+          aria-labelledby="signin-title"
         >
-          <LogIn size={14} />
-          {loading ? "Signing in…" : "Sign in"}
-        </button>
-      </motion.form>
+          <div className="mb-10 flex items-center gap-2.5 lg:hidden">
+            <Logo />
+            <span className="text-sm font-semibold tracking-tight">PM Agent</span>
+          </div>
+          <h2 id="signin-title" className="text-page-title">
+            Sign in
+          </h2>
+          <p className="mt-2 text-sm text-muted">Use the account your workspace admin created for you.</p>
+
+          <div className="mt-8 space-y-4">
+            <Field label="Username">
+              <input autoFocus autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className={inputCls} />
+            </Field>
+            <Field label="Password">
+              <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} />
+            </Field>
+          </div>
+
+          {error && (
+            <div role="alert" className="mt-4 rounded-md border border-red-500/25 bg-red-500/[0.06] px-3 py-2 text-sm text-red-400">
+              {/invalid|incorrect|wrong/i.test(error) ? "That username and password don't match." : error}
+            </div>
+          )}
+
+          <Button type="submit" variant="primary" loading={loading} disabled={!username.trim() || !password} className="mt-6 h-10 w-full">
+            Continue
+          </Button>
+
+          <div className="mt-8 flex items-center gap-2 text-xs text-subtle">
+            <ShieldCheck size={13} />
+            AI suggests. You approve. Nothing reaches Jira without you.
+          </div>
+        </motion.form>
+      </section>
     </div>
   );
 }

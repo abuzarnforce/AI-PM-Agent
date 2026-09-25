@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plug, Sparkles, ShieldCheck, Unplug, Lock, GitBranch } from "lucide-react";
+import { Plug, Sparkles, ShieldCheck, Unplug, Lock, GitBranch, FileSpreadsheet } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { useNav } from "@/lib/nav";
+import { Badge, Button, Field, PageHeader, Section, inputCls } from "./ui";
+import IntelligenceLayer from "./IntelligenceLayer";
 
 interface Status {
   jira: { baseUrl: string; email: string; apiTokenMasked: string; configured: boolean };
@@ -45,37 +49,37 @@ export default function ConnectorPanel() {
 
   if (!unlocked) {
     return (
-      <div className="flex h-full items-center justify-center p-4">
+      <div className="flex min-h-[80dvh] items-center justify-center p-4">
         <motion.form
           onSubmit={unlock}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-          className="card-surface w-full max-w-xs rounded-2xl p-5 text-center"
+          className="w-full max-w-sm rounded-xl border border-border bg-panel p-6"
         >
-          <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-accent/15 text-accent">
+          <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted">
             <Lock size={16} />
           </div>
-          <div className="mb-1 text-sm font-semibold">Re-enter your password</div>
-          <p className="mb-4 text-xs text-fg/50">
-            The Connector holds your Jira, Gemini, and GitHub credentials, so it asks again every time.
+          <h1 className="text-lg font-semibold tracking-tight">Confirm it's you</h1>
+          <p className="mb-5 mt-1 text-sm text-muted">
+            Connections hold your Jira, Gemini and GitHub credentials, so PM Agent asks for your password each time.
           </p>
           <input
             autoFocus
             type="password"
+            aria-label="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="mb-3 w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
+            className={`${inputCls} mb-3`}
           />
-          {unlockError && <div className="mb-3 text-xs text-red-300">{unlockError}</div>}
-          <button
-            type="submit"
-            disabled={unlocking || !password}
-            className="btn w-full rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-          >
-            {unlocking ? "Checking…" : "Unlock"}
-          </button>
+          {unlockError && (
+            <div role="alert" className="mb-3 text-xs text-red-400">
+              {unlockError}
+            </div>
+          )}
+          <Button type="submit" variant="primary" loading={unlocking} disabled={!password} className="w-full">
+            Unlock
+          </Button>
         </motion.form>
       </div>
     );
@@ -85,6 +89,7 @@ export default function ConnectorPanel() {
 }
 
 function ConnectorPanelContent() {
+  const { navigate } = useNav();
   const [status, setStatus] = useState<Status | null>(null);
 
   const [jiraBaseUrl, setJiraBaseUrl] = useState("");
@@ -214,280 +219,254 @@ function ConnectorPanelContent() {
     }
   }
 
-  const Badge = ({ configured }: { configured: boolean }) => (
-    <span
-      className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
-        configured ? "bg-emerald-500/15 text-emerald-300" : "bg-fg/10 text-fg/40"
-      }`}
-    >
-      <motion.span
-        className={`h-1.5 w-1.5 rounded-full ${configured ? "bg-emerald-400" : "bg-fg/30"}`}
-        animate={configured ? { opacity: [1, 0.4, 1] } : {}}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-      {configured ? "Connected" : "Not connected"}
-    </span>
-  );
-
-  const ResultBanner = ({ result }: { result: TestResult }) => (
-    <AnimatePresence>
-      {result && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-          className="overflow-hidden"
-        >
-          <div
-            className={`mt-2 rounded-md border px-3 py-2 text-xs ${
-              result.ok
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                : "border-red-500/30 bg-red-500/10 text-red-300"
-            }`}
-          >
-            {result.detail}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-b border-fg/[0.06] p-4">
-        <h1 className="text-panel-title">Connector</h1>
-        <p className="text-sm text-fg/50">
-          Connect your own Jira site, Gemini API key, and a read-only GitHub repo. Credentials are
-          stored locally by this app instance — nothing is sent anywhere except Jira, Google's
-          Gemini API, and GitHub directly.
-        </p>
+    <div className="page">
+      <PageHeader
+        eyebrow="Connections"
+        title="Connect everything."
+        description="PM Agent reads from these services on your behalf. Credentials stay with this app and are only ever sent to the service they belong to."
+      />
+
+      <div className="mb-12 rounded-xl border border-border bg-panel px-4 py-6 sm:px-8">
+        <IntelligenceLayer
+          live={{
+            Jira: !!status?.jira.configured,
+            GitHub: !!status?.github.configured,
+            QA: true,
+            Feedback: !!status?.gemini.configured,
+            Analytics: false,
+          }}
+        />
       </div>
 
-      <div className="space-y-6 p-4">
-        {/* Jira */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-          className="card-surface rounded-xl p-4"
+      <div className="divide-hairline border-y border-border">
+        <Integration
+          name="Jira"
+          blurb="Issues, epics and sprints. The source for answers, health checks and duplicate detection — and the only place approved drafts are written."
+          icon={Plug}
+          configured={status?.jira.configured}
+          detail={status?.jira.configured ? status.jira.baseUrl : undefined}
+          onSave={saveJira}
+          saving={savingJira}
+          saveDisabled={!jiraBaseUrl || !jiraEmail}
+          onTest={() => test("jira")}
+          testing={testingJira}
+          onDisconnect={() => disconnect("jira")}
+          result={jiraTest}
+          help="Create a token at Atlassian account → Security → API tokens."
         >
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-medium">
-              <Plug size={16} className="text-fg/50" />
-              Jira
-            </div>
-            {status && <Badge configured={status.jira.configured} />}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm">
-              <div className="mb-1 text-fg/50">Site URL</div>
-              <input
-                value={jiraBaseUrl}
-                onChange={(e) => setJiraBaseUrl(e.target.value)}
-                placeholder="https://your-domain.atlassian.net"
-                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
-              />
-            </label>
-            <label className="text-sm">
-              <div className="mb-1 text-fg/50">Account email</div>
-              <input
-                value={jiraEmail}
-                onChange={(e) => setJiraEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
-              />
-            </label>
-            <label className="text-sm sm:col-span-2">
-              <div className="mb-1 text-fg/50">
-                API token{" "}
-                {status?.jira.apiTokenMasked && (
-                  <span className="text-fg/30">(current: {status.jira.apiTokenMasked})</span>
-                )}
-              </div>
-              <input
-                type="password"
-                value={jiraToken}
-                onChange={(e) => setJiraToken(e.target.value)}
-                placeholder={status?.jira.apiTokenMasked ? "Leave blank to keep current token" : "Paste your Jira API token"}
-                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
-              />
-            </label>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <button
-              onClick={saveJira}
-              disabled={savingJira || !jiraBaseUrl || !jiraEmail}
-              className="btn rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-            >
-              {savingJira ? "Saving…" : "Save"}
-            </button>
-            <button
-              onClick={() => test("jira")}
-              disabled={testingJira || !status?.jira.configured}
-              className="btn flex items-center gap-1.5 rounded-md border border-fg/10 px-4 py-1.5 text-sm text-fg/70 hover:bg-fg/5 disabled:opacity-50"
-            >
-              <ShieldCheck size={13} />
-              {testingJira ? "Testing…" : "Test connection"}
-            </button>
-            {status?.jira.configured && (
-              <button
-                onClick={() => disconnect("jira")}
-                className="btn flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm text-fg/40 hover:text-red-300"
-              >
-                <Unplug size={13} />
-                Disconnect
-              </button>
-            )}
-          </div>
-          <ResultBanner result={jiraTest} />
-          <div className="mt-2 text-xs text-fg/30">
-            Create a token at Atlassian account → Security → API tokens.
-          </div>
-        </motion.div>
+          <Field label="Site URL">
+            <input value={jiraBaseUrl} onChange={(e) => setJiraBaseUrl(e.target.value)} placeholder="https://your-domain.atlassian.net" className={inputCls} />
+          </Field>
+          <Field label="Account email">
+            <input value={jiraEmail} onChange={(e) => setJiraEmail(e.target.value)} placeholder="you@example.com" className={inputCls} />
+          </Field>
+          <Field label="API token" hint={status?.jira.apiTokenMasked ? `current: ${status.jira.apiTokenMasked}` : undefined} className="sm:col-span-2">
+            <input
+              type="password"
+              value={jiraToken}
+              onChange={(e) => setJiraToken(e.target.value)}
+              placeholder={status?.jira.apiTokenMasked ? "Leave blank to keep current token" : "Paste your Jira API token"}
+              className={inputCls}
+            />
+          </Field>
+        </Integration>
 
-        {/* Gemini */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", bounce: 0, duration: 0.3, delay: 0.05 }}
-          className="card-surface rounded-xl p-4"
+        <Integration
+          name="Gemini"
+          blurb="The reasoning engine behind answers, drafts and verdicts."
+          icon={Sparkles}
+          configured={status?.gemini.configured}
+          detail={status?.gemini.configured ? status.gemini.model : undefined}
+          onSave={saveGemini}
+          saving={savingGemini}
+          onTest={() => test("gemini")}
+          testing={testingGemini}
+          onDisconnect={() => disconnect("gemini")}
+          result={geminiTest}
+          help="Get a key from Google AI Studio."
         >
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-medium">
-              <Sparkles size={16} className="text-fg/50" />
-              Gemini
-            </div>
-            {status && <Badge configured={status.gemini.configured} />}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm sm:col-span-2">
-              <div className="mb-1 text-fg/50">
-                API key{" "}
-                {status?.gemini.apiKeyMasked && (
-                  <span className="text-fg/30">(current: {status.gemini.apiKeyMasked})</span>
-                )}
-              </div>
-              <input
-                type="password"
-                value={geminiKey}
-                onChange={(e) => setGeminiKey(e.target.value)}
-                placeholder={status?.gemini.apiKeyMasked ? "Leave blank to keep current key" : "Paste your Gemini API key"}
-                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
-              />
-            </label>
-            <label className="text-sm">
-              <div className="mb-1 text-fg/50">Model</div>
-              <input
-                value={geminiModel}
-                onChange={(e) => setGeminiModel(e.target.value)}
-                placeholder="gemini-3.5-flash-lite"
-                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
-              />
-            </label>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <button
-              onClick={saveGemini}
-              disabled={savingGemini}
-              className="btn rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-            >
-              {savingGemini ? "Saving…" : "Save"}
-            </button>
-            <button
-              onClick={() => test("gemini")}
-              disabled={testingGemini || !status?.gemini.configured}
-              className="btn flex items-center gap-1.5 rounded-md border border-fg/10 px-4 py-1.5 text-sm text-fg/70 hover:bg-fg/5 disabled:opacity-50"
-            >
-              <ShieldCheck size={13} />
-              {testingGemini ? "Testing…" : "Test connection"}
-            </button>
-            {status?.gemini.configured && (
-              <button
-                onClick={() => disconnect("gemini")}
-                className="btn flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm text-fg/40 hover:text-red-300"
-              >
-                <Unplug size={13} />
-                Disconnect
-              </button>
-            )}
-          </div>
-          <ResultBanner result={geminiTest} />
-          <div className="mt-2 text-xs text-fg/30">Get a key from Google AI Studio.</div>
-        </motion.div>
+          <Field label="API key" hint={status?.gemini.apiKeyMasked ? `current: ${status.gemini.apiKeyMasked}` : undefined}>
+            <input
+              type="password"
+              value={geminiKey}
+              onChange={(e) => setGeminiKey(e.target.value)}
+              placeholder={status?.gemini.apiKeyMasked ? "Leave blank to keep current key" : "Paste your Gemini API key"}
+              className={inputCls}
+            />
+          </Field>
+          <Field label="Model">
+            <input value={geminiModel} onChange={(e) => setGeminiModel(e.target.value)} placeholder="gemini-3.5-flash-lite" className={inputCls} />
+          </Field>
+        </Integration>
 
-        {/* GitHub */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", bounce: 0, duration: 0.3, delay: 0.1 }}
-          className="card-surface rounded-xl p-4"
+        <Integration
+          name="GitHub"
+          blurb="Read-only commit and Pull Request activity for one repository."
+          icon={GitBranch}
+          configured={status?.github.configured}
+          detail={status?.github.configured ? status.github.repo : undefined}
+          onSave={saveGithub}
+          saving={savingGithub}
+          saveDisabled={!githubRepo}
+          onTest={() => test("github")}
+          testing={testingGithub}
+          onDisconnect={() => disconnect("github")}
+          result={githubTest}
+          help="Create a fine-grained, read-only token at GitHub → Settings → Developer settings."
         >
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-medium">
-              <GitBranch size={16} className="text-fg/50" />
-              GitHub
-            </div>
-            {status && <Badge configured={status.github.configured} />}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm sm:col-span-2">
-              <div className="mb-1 text-fg/50">Repository</div>
-              <input
-                value={githubRepo}
-                onChange={(e) => setGithubRepo(e.target.value)}
-                placeholder="owner/repo or a github.com link"
-                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
-              />
-            </label>
-            <label className="text-sm sm:col-span-2">
-              <div className="mb-1 text-fg/50">
-                Personal access token{" "}
-                {status?.github.tokenMasked && (
-                  <span className="text-fg/30">(current: {status.github.tokenMasked})</span>
-                )}
-              </div>
-              <input
-                type="password"
-                value={githubToken}
-                onChange={(e) => setGithubToken(e.target.value)}
-                placeholder={status?.github.tokenMasked ? "Leave blank to keep current token" : "Paste a read-only fine-grained PAT"}
-                className="w-full rounded-md border border-fg/10 bg-bg px-3 py-1.5 outline-none transition-colors focus:border-accent"
-              />
-            </label>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <button
-              onClick={saveGithub}
-              disabled={savingGithub || !githubRepo}
-              className="btn rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-            >
-              {savingGithub ? "Saving…" : "Save"}
-            </button>
-            <button
-              onClick={() => test("github")}
-              disabled={testingGithub || !status?.github.configured}
-              className="btn flex items-center gap-1.5 rounded-md border border-fg/10 px-4 py-1.5 text-sm text-fg/70 hover:bg-fg/5 disabled:opacity-50"
-            >
-              <ShieldCheck size={13} />
-              {testingGithub ? "Testing…" : "Test connection"}
-            </button>
-            {status?.github.configured && (
-              <button
-                onClick={() => disconnect("github")}
-                className="btn flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm text-fg/40 hover:text-red-300"
-              >
-                <Unplug size={13} />
-                Disconnect
-              </button>
-            )}
-          </div>
-          <ResultBanner result={githubTest} />
-          <div className="mt-2 text-xs text-fg/30">
-            Create a fine-grained, read-only token at GitHub → Settings → Developer settings.
-          </div>
-        </motion.div>
+          <Field label="Repository">
+            <input value={githubRepo} onChange={(e) => setGithubRepo(e.target.value)} placeholder="owner/repo or a github.com link" className={inputCls} />
+          </Field>
+          <Field label="Personal access token" hint={status?.github.tokenMasked ? `current: ${status.github.tokenMasked}` : undefined}>
+            <input
+              type="password"
+              value={githubToken}
+              onChange={(e) => setGithubToken(e.target.value)}
+              placeholder={status?.github.tokenMasked ? "Leave blank to keep current token" : "Paste a read-only fine-grained PAT"}
+              className={inputCls}
+            />
+          </Field>
+        </Integration>
+
+        <div className="flex flex-wrap items-center gap-4 py-6">
+          <IntegrationTitle icon={FileSpreadsheet} name="QA spreadsheets" blurb="Excel workbooks with Regression, Testcase_Tracker and Automation_Scenarios sheets." />
+          <Button onClick={() => navigate("health", { subtab: "qa" })}>Manage in Health → QA</Button>
+        </div>
       </div>
+
+      <Section title="Coming soon" description="Not available yet — listed so you know what's planned." className="!mt-14">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {["Slack", "Confluence", "Analytics", "CRM"].map((n) => (
+            <div key={n} className="flex items-center justify-between rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted">
+              {n}
+              <Badge>Soon</Badge>
+            </div>
+          ))}
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+function IntegrationTitle({
+  icon: Icon,
+  name,
+  blurb,
+  configured,
+  detail,
+}: {
+  icon: LucideIcon;
+  name: string;
+  blurb: string;
+  configured?: boolean;
+  detail?: string;
+}) {
+  return (
+    <div className="flex min-w-0 flex-1 gap-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-panel">
+        <Icon size={18} />
+      </div>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-medium">{name}</span>
+          {configured !== undefined && (
+            <Badge tone={configured ? "green" : "neutral"} dot>
+              {configured ? "Connected" : "Not connected"}
+            </Badge>
+          )}
+        </div>
+        <p className="mt-0.5 text-sm text-muted">{blurb}</p>
+        {detail && <div className="mt-1 truncate text-xs text-subtle">{detail}</div>}
+      </div>
+    </div>
+  );
+}
+
+function Integration({
+  name,
+  blurb,
+  icon,
+  configured,
+  detail,
+  children,
+  onSave,
+  saving,
+  saveDisabled,
+  onTest,
+  testing,
+  onDisconnect,
+  result,
+  help,
+}: {
+  name: string;
+  blurb: string;
+  icon: LucideIcon;
+  configured?: boolean;
+  detail?: string;
+  children: React.ReactNode;
+  onSave: () => void;
+  saving: boolean;
+  saveDisabled?: boolean;
+  onTest: () => void;
+  testing: boolean;
+  onDisconnect: () => void;
+  result: TestResult;
+  help: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const expanded = open || configured === false;
+  return (
+    <div className="py-6">
+      <div className="flex flex-wrap items-start gap-4">
+        <IntegrationTitle icon={icon} name={name} blurb={blurb} configured={configured} detail={detail} />
+        {configured && (
+          <div className="flex gap-2">
+            <Button icon={ShieldCheck} loading={testing} onClick={onTest}>
+              Test connection
+            </Button>
+            <Button variant="ghost" onClick={() => setOpen((o) => !o)} aria-expanded={expanded}>
+              {expanded ? "Close" : "Configure"}
+            </Button>
+          </div>
+        )}
+      </div>
+      <AnimatePresence initial={false}>
+        {result && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+            <div
+              role="status"
+              className={`mt-3 rounded-md border px-3 py-2 text-xs sm:ml-14 ${
+                result.ok ? "border-emerald-500/25 bg-emerald-500/[0.06] text-emerald-400" : "border-red-500/25 bg-red-500/[0.06] text-red-400"
+              }`}
+            >
+              {result.ok ? "Healthy — " : "We couldn’t connect — "}
+              {result.detail}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+            <div className="mt-5 sm:ml-14">
+              <div className="grid gap-4 sm:grid-cols-2">{children}</div>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <Button variant="primary" loading={saving} disabled={saveDisabled} onClick={onSave}>
+                  Save
+                </Button>
+                {configured && (
+                  <Button variant="ghost" icon={Unplug} onClick={onDisconnect} className="hover:!text-red-400">
+                    Disconnect
+                  </Button>
+                )}
+                <span className="text-xs text-subtle">{help}</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

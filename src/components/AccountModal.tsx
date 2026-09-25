@@ -104,7 +104,7 @@ export default function AccountModal({
               <div className="text-panel-title">Account</div>
               <div className="text-sm text-fg/50">Signed in as {username}</div>
             </div>
-            <button onClick={onClose} className="btn rounded-md p-1.5 text-fg/40 hover:bg-fg/5 hover:text-fg/80">
+            <button onClick={onClose} className="btn rounded-full p-1.5 text-fg/40 hover:bg-fg/5 hover:text-fg/80">
               <X size={16} />
             </button>
           </div>
@@ -132,7 +132,7 @@ export default function AccountModal({
               <button
                 onClick={changePassword}
                 disabled={pwBusy || !currentPassword || newPassword.length < 8}
-                className="btn w-full rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                className="btn w-full rounded-full bg-accent px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 {pwBusy ? "Updating…" : "Update password"}
               </button>
@@ -166,7 +166,7 @@ export default function AccountModal({
               <button
                 onClick={addUser}
                 disabled={userBusy || !newUsername.trim() || newUserPassword.length < 8}
-                className="btn w-full rounded-md border border-fg/10 px-3 py-1.5 text-sm font-medium hover:bg-fg/5 disabled:opacity-50"
+                className="btn w-full rounded-full border border-fg/10 px-3 py-2 text-sm font-medium hover:bg-fg/5 disabled:opacity-50"
               >
                 {userBusy ? "Adding…" : "Add user"}
               </button>
@@ -196,7 +196,7 @@ export default function AccountModal({
 
           <button
             onClick={logout}
-            className="btn flex w-full items-center justify-center gap-1.5 rounded-md border border-red-500/30 px-3 py-1.5 text-sm font-medium text-red-300 hover:bg-red-500/10"
+            className="btn flex w-full items-center justify-center gap-1.5 rounded-full border border-red-500/30 px-3 py-2 text-sm font-medium text-red-300 hover:bg-red-500/10"
           >
             <LogOut size={14} />
             Sign out

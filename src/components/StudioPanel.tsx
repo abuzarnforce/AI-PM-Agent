@@ -1,42 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FileText, ScrollText, Briefcase, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { FileText, ScrollText, Briefcase, ListChecks, Megaphone, RotateCcw, Inbox, PenTool } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { useNav } from "@/lib/nav";
+import { getLastProject, logActivity } from "@/lib/activity";
+import { Badge, Button, ErrorState, Field, HumanApprovalNote, PageHeader, WorkingState, inputCls } from "./ui";
+import { DraftDocument, DuplicateMatches } from "./DraftDocument";
 
 type StudioKind = "user_story" | "prd" | "brd";
 
-const KINDS: { id: StudioKind; label: string; icon: typeof FileText; placeholder: string }[] = [
+const KINDS: { id: StudioKind | null; label: string; blurb: string; icon: LucideIcon; placeholder?: string }[] = [
   {
     id: "user_story",
     label: "User Story",
+    blurb: "Turn a requirement into a Jira-ready story with Gherkin criteria.",
     icon: FileText,
-    placeholder: "e.g. Managers need to bulk-approve leave requests instead of one at a time...",
+    placeholder: "Managers need to bulk-approve leave requests instead of one at a time…",
   },
-  {
-    id: "prd",
-    label: "PRD",
-    icon: ScrollText,
-    placeholder: "e.g. We want to add SSO login for enterprise customers because...",
-  },
-  {
-    id: "brd",
-    label: "BRD",
-    icon: Briefcase,
-    placeholder: "e.g. Finance needs automated expense-category validation to cut manual review time...",
-  },
+  { id: "prd", label: "PRD", blurb: "Problem, goals, metrics, scope, risks and rollout.", icon: ScrollText, placeholder: "We want SSO login for enterprise customers because…" },
+  { id: "brd", label: "BRD", blurb: "Business objective, stakeholders and numbered requirements.", icon: Briefcase, placeholder: "Finance needs automated expense-category validation to cut review time…" },
+  { id: null, label: "Acceptance Criteria", blurb: "Testable criteria for an existing story.", icon: ListChecks },
+  { id: null, label: "Stakeholder Update", blurb: "A concise executive update from live data.", icon: Megaphone },
 ];
 
+const STEPS: Record<StudioKind, string[]> = {
+  user_story: ["Reading your brief…", "Drafting the story and acceptance criteria…", "Checking the backlog for duplicates…", "Saving to Drafts…"],
+  prd: ["Reading your brief…", "Drafting the PRD…", "Saving to Drafts…"],
+  brd: ["Reading your brief…", "Drafting the BRD…", "Saving to Drafts…"],
+};
+
 export default function StudioPanel() {
-  const [kind, setKind] = useState<StudioKind>("user_story");
-  const [brief, setBrief] = useState("");
-  const [source, setSource] = useState("");
-  const [projectKey, setProjectKey] = useState("");
+  const { intent, navigate } = useNav();
+  const [kind, setKind] = useState<StudioKind>(intent?.studioKind ?? "user_story");
+  const [brief, setBrief] = useState(intent?.brief ?? "");
+  const [source, setSource] = useState(intent?.brief ? "PM Agent answer" : "");
+  const [projectKey, setProjectKey] = useState(getLastProject);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
 
-  const activeKind = KINDS.find((k) => k.id === kind)!;
+  const active = KINDS.find((k) => k.id === kind)!;
 
   async function generate() {
     setLoading(true);
@@ -50,12 +55,16 @@ export default function StudioPanel() {
           kind,
           brief,
           source,
-          projectKey: kind === "user_story" ? projectKey || undefined : undefined,
+          projectKey: kind === "user_story" ? projectKey.trim().toUpperCase() || undefined : undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResult(data);
+      logActivity(
+        "studio",
+        data.duplicateFound ? `Found possible duplicates for “${data.extracted?.title}”` : `Drafted ${active.label}: “${data.draft.title}”`
+      );
     } catch (err: any) {
       setError(err.message ?? "Something went wrong");
     } finally {
@@ -64,130 +73,109 @@ export default function StudioPanel() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto">
-      <div className="border-b border-fg/[0.06] p-4">
-        <h1 className="text-panel-title">Studio</h1>
-        <p className="text-sm text-fg/50">
-          Draft a User Story, PRD, or BRD from a brief. Everything lands in Drafts as "needs
-          triage" — nothing is written to Jira until you approve it.
-        </p>
+    <div className="page">
+      <PageHeader eyebrow="Studio" title="Build product artifacts faster." description="Start from a brief. PM Agent drafts it in your team's template and puts it in Drafts for review." />
 
-        <div className="relative mt-4 inline-flex rounded-lg border border-fg/10 bg-panel p-1">
-          {KINDS.map((k) => {
-            const isActive = kind === k.id;
-            const Icon = k.icon;
-            return (
-              <button
-                key={k.id}
-                onClick={() => {
-                  setKind(k.id);
-                  setResult(null);
-                  setError(null);
-                }}
-                className="btn relative rounded-md px-3.5 py-1.5 text-sm font-medium"
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="studio-kind-pill"
-                    className="absolute inset-0 rounded-md bg-accent shadow-sm"
-                    transition={{ type: "spring", bounce: 0, duration: 0.35 }}
-                  />
-                )}
-                <span className={`relative z-10 flex items-center gap-1.5 whitespace-nowrap ${isActive ? "text-fg" : "text-fg/60"}`}>
-                  <Icon size={14} strokeWidth={2.25} />
-                  {k.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div role="radiogroup" aria-label="Artifact type" className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        {KINDS.map((k) => {
+          const Icon = k.icon;
+          const selected = k.id === kind;
+          return (
+            <button
+              key={k.label}
+              role="radio"
+              aria-checked={selected}
+              disabled={!k.id}
+              onClick={() => {
+                if (!k.id) return;
+                setKind(k.id);
+                setResult(null);
+                setError(null);
+              }}
+              className={`btn relative rounded-lg border p-4 text-left transition-colors disabled:cursor-default ${
+                selected ? "border-fg/40 bg-panel" : "border-border hover:border-fg/20 disabled:hover:border-border"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <Icon size={18} className={selected ? "text-fg" : "text-muted"} />
+                {!k.id && <Badge>Coming soon</Badge>}
+              </div>
+              <div className={`mt-3 text-sm font-medium ${k.id ? "" : "text-muted"}`}>{k.label}</div>
+              <div className="mt-1 text-xs leading-relaxed text-muted">{k.blurb}</div>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="space-y-3 p-4">
-        <textarea
-          value={brief}
-          onChange={(e) => setBrief(e.target.value)}
-          placeholder={activeKind.placeholder}
-          rows={5}
-          className="w-full rounded-lg border border-fg/10 bg-panel px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent"
-        />
-        <div className="flex flex-wrap gap-3">
-          <input
-            value={source}
-            onChange={(e) => setSource(e.target.value)}
-            placeholder="Source (meeting note, demo date + stakeholder, etc.)"
-            className="w-80 rounded-md border border-fg/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
-          />
+      <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            generate();
+          }}
+          className="space-y-5"
+        >
+          <Field label="Brief" hint="What problem, for whom, and why now">
+            <textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder={active.placeholder} rows={8} className={`${inputCls} leading-relaxed`} />
+          </Field>
+          <Field label="Source" hint="Required — cited on the draft">
+            <input value={source} onChange={(e) => setSource(e.target.value)} placeholder="Meeting note, demo date + stakeholder, ticket…" className={inputCls} />
+          </Field>
           {kind === "user_story" && (
-            <input
-              value={projectKey}
-              onChange={(e) => setProjectKey(e.target.value)}
-              placeholder="Optional: project key for duplicate check"
-              className="w-72 rounded-md border border-fg/10 bg-panel px-3 py-1.5 text-sm outline-none transition-colors focus:border-accent"
-            />
+            <Field label="Project" hint="Checks for duplicates first">
+              <input value={projectKey} onChange={(e) => setProjectKey(e.target.value)} placeholder="e.g. ONEHR" className={`${inputCls} uppercase placeholder:normal-case`} />
+            </Field>
           )}
-          <button
-            onClick={generate}
-            disabled={loading || !brief.trim() || !source.trim()}
-            className="btn flex items-center gap-1.5 rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
-          >
-            <Sparkles size={14} />
-            {loading ? "Generating…" : `Generate ${activeKind.label}`}
-          </button>
-        </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="submit" variant="primary" icon={PenTool} loading={loading} disabled={!brief.trim() || !source.trim()}>
+              Draft {active.label}
+            </Button>
+            <HumanApprovalNote>Lands in Drafts — nothing is sent anywhere without your approval.</HumanApprovalNote>
+          </div>
+        </form>
 
-        <AnimatePresence mode="wait">
-          {error && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
-            >
-              {error}
-            </motion.div>
+        <div className="min-h-[18rem] rounded-xl border border-border bg-panel p-6 sm:p-8">
+          {error && <ErrorState message={error} onRetry={generate} />}
+          {loading && <WorkingState steps={STEPS[kind]} interval={2200} />}
+          {!loading && !error && !result && (
+            <div className="flex h-full flex-col items-center justify-center py-10 text-center">
+              <active.icon size={22} className="text-subtle" />
+              <div className="mt-3 text-sm font-medium">Your {active.label} will appear here</div>
+              <p className="mt-1 max-w-xs text-sm text-muted">Written in your team's template, ready for review.</p>
+            </div>
           )}
-
           {result?.duplicateFound && (
-            <motion.div
-              key="dup"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm"
-            >
-              <div className="mb-2 font-medium text-amber-300">
-                Possible duplicate(s) found — surfacing instead of drafting a new story
+            <div className="space-y-6">
+              <DuplicateMatches matches={result.duplicateCheck.matches} />
+              <div>
+                <div className="eyebrow mb-3">What PM Agent would have drafted</div>
+                <div className="text-lg font-semibold">{result.extracted.title}</div>
+                <p className="mt-1 text-sm text-muted">
+                  As a {result.extracted.persona}, I want {result.extracted.need}, so that {result.extracted.benefit}.
+                </p>
               </div>
-              {result.duplicateCheck.matches.map((m: any) => (
-                <div key={m.key} className="mb-1 rounded bg-bg px-3 py-2">
-                  <span className="font-medium">{m.key}</span> ({m.confidence}) — {m.summary}
-                  <div className="text-fg/50">{m.reason}</div>
-                </div>
-              ))}
-            </motion.div>
+            </div>
           )}
-
           {result?.draft && (
-            <motion.div
-              key="draft"
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
-              className="card-surface rounded-lg p-4 text-sm"
-            >
-              <div className="mb-2 font-medium text-emerald-300">
-                Draft created — tagged "needs triage"
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="mb-6 flex flex-wrap items-center gap-2">
+                <Badge tone="amber" dot>
+                  needs triage
+                </Badge>
+                <span className="text-xs text-muted">Saved to Drafts · review before publishing</span>
               </div>
-              <pre className="whitespace-pre-wrap rounded bg-bg p-3 text-xs text-fg/80">
-                {result.draft.body}
-              </pre>
-              <div className="mt-2 text-fg/50">See the Drafts tab to approve or reject.</div>
+              <DraftDocument body={result.draft.body} />
+              <div className="mt-8 flex flex-wrap gap-2 border-t border-border pt-5">
+                <Button variant="primary" icon={Inbox} onClick={() => navigate("drafts", { subtab: result.draft.id })}>
+                  Review in Drafts
+                </Button>
+                <Button icon={RotateCcw} onClick={generate} title="Creates a new draft; the current one stays in Drafts">
+                  Regenerate
+                </Button>
+              </div>
             </motion.div>
           )}
-        </AnimatePresence>
+        </div>
       </div>
     </div>
   );
