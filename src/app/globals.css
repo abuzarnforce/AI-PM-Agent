@@ -182,6 +182,7 @@ kbd, .kbd {
   font-family: inherit;
   font-size: 0.6875rem;
   font-weight: 500;
+  white-space: nowrap;
   color: rgb(var(--color-muted));
 }
 

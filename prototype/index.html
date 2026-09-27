@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM Agent — Autonomous Product Management Operating System</title>
+  <meta name="description" content="PM Agent connects Jira, GitHub, and QA into one intelligent workspace — AI does the heavy lifting, the PM stays in control.">
+  
+  <!-- Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app-container">
+
+  <!-- =========================================================================
+       SIDEBAR NAVIGATION
+       ========================================================================= -->
+  <aside id="app-sidebar">
+    <div class="sidebar-header">
+      <a href="#home" class="brand-lockup">
+        <div class="brand-icon">
+          <!-- Spark icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+        </div>
+        <span class="brand-name">PM Agent</span>
+        <span style="font-size: 10px; font-weight: 700; color: var(--accent-primary); background: var(--accent-primary-subtle); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--accent-primary-border); margin-left: 2px;">PRO</span>
+      </a>
+      <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="Toggle sidebar width" aria-label="Toggle sidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="9" y1="3" x2="9" y2="21"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sidebar-content">
+      <!-- Group 1: Core OS -->
+      <div class="nav-section-title">Workspace</div>
+      <div class="nav-group">
+        <a href="#home" class="nav-item active" data-tab="home" id="nav-home">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span class="nav-label">Command Center</span>
+        </a>
+
+        <a href="#agent" class="nav-item" data-tab="agent" id="nav-agent">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </span>
+          <span class="nav-label">AI Agent Copilot</span>
+          <span class="nav-badge positive">Live</span>
+        </a>
+
+        <a href="#projects" class="nav-item" data-tab="projects" id="nav-projects">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </span>
+          <span class="nav-label">QA & Release Matrix</span>
+          <span class="nav-badge warning">3 Blockers</span>
+        </a>
+
+        <a href="#drafts" class="nav-item" data-tab="drafts" id="nav-drafts">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </span>
+          <span class="nav-label">Drafts & Approvals</span>
+          <span class="nav-badge warning">2</span>
+        </a>
+      </div>
+
+      <!-- Group 2: Product Suite -->
+      <div class="nav-section-title">Product Studio</div>
+      <div class="nav-group">
+        <a href="#studio" class="nav-item" data-tab="studio" id="nav-studio">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          </span>
+          <span class="nav-label">Studio & PRD Specs</span>
+        </a>
+
+        <a href="#feedback" class="nav-item" data-tab="feedback" id="nav-feedback">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </span>
+          <span class="nav-label">Customer Feedback</span>
+          <span class="nav-badge">3 New</span>
+        </a>
+
+        <a href="#health" class="nav-item" data-tab="health" id="nav-health">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </span>
+          <span class="nav-label">Sprint 42 Radar</span>
+        </a>
+      </div>
+
+      <!-- Group 3: Infrastructure & Audit -->
+      <div class="nav-section-title">Governance</div>
+      <div class="nav-group">
+        <a href="#activity" class="nav-item" data-tab="activity" id="nav-activity">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+          <span class="nav-label">Activity & Audit</span>
+        </a>
+
+        <a href="#connections" class="nav-item" data-tab="connections" id="nav-connections">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
+          </span>
+          <span class="nav-label">Connected Graph</span>
+          <span class="nav-badge positive">4 Live</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Sidebar Footer / Sprint Tracker -->
+    <div class="sidebar-footer">
+      <div class="sprint-pill-card">
+        <div class="sprint-header">
+          <span style="color: var(--text-primary);">Sprint 42</span>
+          <span class="sprint-time">4 days left</span>
+        </div>
+        <div class="sprint-progress-bar">
+          <div class="sprint-progress-fill" style="width: 88.8%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-tertiary);">
+          <span>48 / 54 SP completed</span>
+          <span style="color: var(--status-positive); font-weight: 600;">88.8%</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       MAIN CONTENT CONTAINER
+       ========================================================================= -->
+  <main id="app-main">
+
+    <!-- Top App Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="workspace-badge">
+          <span class="status-dot"></span>
+          <span>NForce-One / OneHR Suite (Sprint 42)</span>
+        </div>
+
+        <button id="global-search-trigger" class="header-search-bar" aria-label="Open command search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search tickets, PRDs, specs...</span>
+          <kbd class="kbd-shortcut">⌘K</kbd>
+        </button>
+      </div>
+
+      <div class="header-right">
+        <!-- Theme Switcher -->
+        <button id="theme-toggle-btn" class="header-action-btn" title="Toggle Theme" aria-label="Toggle theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+
+        <!-- Notifications -->
+        <button class="header-action-btn" title="Notifications" aria-label="Notifications" onclick="alert('3 new automated actions logged in Sprint 42.')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="badge-dot"></span>
+        </button>
+
+        <!-- User profile -->
+        <div class="user-profile-btn" onclick="alert('Logged in as Lead Product Manager (Enterprise Admin)')">
+          <div class="user-avatar">AS</div>
+          <span class="user-name">Abuzar Siddiqui</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scrollable Panel Body -->
+    <div class="panel-container">
+
+      <!-- =====================================================================
+           VIEW 1: HOME (COMMAND CENTER)
+           ===================================================================== -->
+      <section id="panel-home" class="panel-view active">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>Executive Command Center</span>
+            </h1>
+            <p class="view-subtitle">Unified real-time intelligence across Jira, GitHub repositories, and QA matrices.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-secondary" onclick="window.navigateToTab('agent')">
+              <span>✦</span> Ask Agent
+            </button>
+            <button class="btn btn-primary" onclick="window.navigateToTab('studio')">
+              <span>✍️</span> Author PRD
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Metric Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Release Readiness</span>
+              <span class="metric-chip positive">↑ 3.2%</span>
+            </div>
+            <div class="metric-value-wrap">
+              <div class="metric-value accent">96.4%</div>
+            </div>
+            <div class="metric-sub">51 / 53 critical scenarios passing</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Sprint 42 Velocity</span>
+              <span class="metric-chip positive">On Track</span>
+            </div>
+            <div class="metric-value-wrap">
+              <div class="metric-value">48 <span style="font-size: 16px; color: var(--text-tertiary);">/ 54 SP</span></div>
+            </div>
+            <div class="metric-sub">4 days remaining in cycle</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Active Blockers</span>
+              <span class="metric-chip warning">Requires Triage</span>
+            </div>
+            <div class="metric-value-wrap">
+              <div class="metric-value" style="color: var(--status-warning);">3</div>
+            </div>
+            <div class="metric-sub">ONEHR-115, ONEHR-336, TC-407</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-top">
+              <span class="metric-label">Engineering Throughput</span>
+              <span class="metric-chip neutral">Active</span>
+            </div>
+            <div class="metric-value-wrap">
+              <div class="metric-value">17</div>
+            </div>
+            <div class="metric-sub">Commits merged across 2 repos today</div>
+          </div>
+        </div>
+
+        <!-- Live Intelligence Layer Node Architecture -->
+        <div class="intel-diagram-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 13px; font-weight: 650; color: var(--text-primary);">Autonomous Intelligence Layer</span>
+              <span class="status-pill pass">Continuous Polling</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-tertiary);">Updated 2 minutes ago · Gemini 1.5 Pro</span>
+          </div>
+
+          <div class="intel-canvas">
+            <!-- Left Data Ingestion Nodes -->
+            <div class="intel-node-column">
+              <div class="intel-node">
+                <span style="color: #3b82f6;">●</span> Jira Cloud (ONEHR-115, ONEHR-336)
+              </div>
+              <div class="intel-node">
+                <span style="color: #10b981;">●</span> GitHub (PR #142 Merged)
+              </div>
+              <div class="intel-node">
+                <span style="color: #f59e0b;">●</span> QA Matrix (qa-sheet.xlsx · 53 tests)
+              </div>
+            </div>
+
+            <!-- Center Agent Core -->
+            <div class="intel-core-node">
+              <div style="font-size: 20px;">✦</div>
+              <div class="intel-core-title">PM Agent Core</div>
+              <div class="intel-core-subtitle">Multi-Source Cross Reference</div>
+            </div>
+
+            <!-- Right Output Synthesis Nodes -->
+            <div class="intel-node-column">
+              <div class="intel-node">
+                <span style="color: #8b5cf6;">✓</span> Automated User Stories
+              </div>
+              <div class="intel-node">
+                <span style="color: #10b981;">✓</span> Executable Gherkin Criteria
+              </div>
+              <div class="intel-node">
+                <span style="color: #ef4444;">⚠</span> Early Blocker Radar
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Column Section: Sourced Insights & Sprint Radar -->
+        <div class="grid-2" style="margin-top: 24px;">
+          <!-- Left: Sourced Insights Feed -->
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <h2 style="font-size: 16px; font-weight: 650; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <span>AI Sourced Insights</span>
+                <span class="metric-chip positive">3 New</span>
+              </h2>
+              <a href="#activity" onclick="window.navigateToTab('activity')" style="font-size: 12.5px; color: var(--accent-primary); text-decoration: none;">View Audit Log →</a>
+            </div>
+
+            <div class="insights-feed">
+              <div class="insight-card critical">
+                <div class="insight-icon">⚠️</div>
+                <div class="insight-content">
+                  <div class="insight-header">
+                    <span class="insight-title">Token Demotion Session Leakage</span>
+                    <span class="source-tag">Source: QA Sheet Row 14</span>
+                  </div>
+                  <p class="insight-desc">
+                    Scenario <code>TC-402</code> failed in regression run. When an organization admin is demoted to member, existing refresh tokens remain valid until expiration.
+                  </p>
+                  <div class="insight-actions">
+                    <button class="btn btn-primary btn-sm" onclick="window.inspectTicket('ONEHR-115')">Inspect ONEHR-115</button>
+                    <button class="btn btn-outline btn-sm" onclick="window.navigateToTab('drafts')">Review Fix Draft</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="insight-card">
+                <div class="insight-icon" style="background: var(--accent-primary-subtle); color: var(--accent-primary);">⚡</div>
+                <div class="insight-content">
+                  <div class="insight-header">
+                    <span class="insight-title">Webhook Throttling Spike Detected</span>
+                    <span class="source-tag">Source: Sentry + Slack API</span>
+                  </div>
+                  <p class="insight-desc">
+                    Outgoing deployment webhooks to Slack are experiencing HTTP 429 rate limit errors during high-volume deployment periods. Needs exponential backoff.
+                  </p>
+                  <div class="insight-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="window.inspectTicket('ONEHR-336')">Inspect ONEHR-336</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="insight-card">
+                <div class="insight-icon" style="background: var(--status-positive-bg); color: var(--status-positive);">✓</div>
+                <div class="insight-content">
+                  <div class="insight-header">
+                    <span class="insight-title">Payroll Rounding Precision Verified</span>
+                    <span class="source-tag">Source: GitHub PR #142</span>
+                  </div>
+                  <p class="insight-desc">
+                    California state tax deduction precision rounding fix was merged to <code>release/v2.4</code> and passed all 8 banking unit tests.
+                  </p>
+                  <div class="insight-actions">
+                    <button class="btn btn-outline btn-sm" onclick="showToast('PR #142 verified and deployed to staging', 'success')">Verify Staging</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Sprint Release Gate Checklist -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">
+                <span>🛡️</span> Sprint 42 Release Gate Checklist
+              </span>
+              <span class="status-pill pass">Target: Friday</span>
+            </div>
+            <div class="card-body">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: 8px;">
+                  <div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">SAML 2.0 Identity Provider Handshake</div>
+                    <div style="font-size: 11.5px; color: var(--text-tertiary);">Module: Auth / SSO · Test TC-401</div>
+                  </div>
+                  <span class="status-pill pass">✓ Pass</span>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: 8px; border-left: 3px solid var(--status-warning);">
+                  <div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">OAuth2 Session Revocation on Demotion</div>
+                    <div style="font-size: 11.5px; color: var(--text-tertiary);">Module: Auth / SSO · ONEHR-115</div>
+                  </div>
+                  <span class="status-pill blocked">⚠ Blocked</span>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: 8px;">
+                  <div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">Batch CSV Payroll Export (50k rows)</div>
+                    <div style="font-size: 11.5px; color: var(--text-tertiary);">Module: Payroll Engine · Test TC-404</div>
+                  </div>
+                  <span class="status-pill pass">✓ Pass (4.8s)</span>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: 8px; border-left: 3px solid var(--status-critical);">
+                  <div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary);">Leave Accrual Carryover Overflow</div>
+                    <div style="font-size: 11.5px; color: var(--text-tertiary);">Module: Leaves · ONEHR-140</div>
+                  </div>
+                  <span class="status-pill fail">✕ Failed</span>
+                </div>
+
+                <div style="margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 12.5px; color: var(--text-secondary);">Automated sign-off status:</span>
+                  <button class="btn btn-secondary btn-sm" onclick="window.navigateToTab('projects')">Inspect Full QA Sheet →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           VIEW 2: AI AGENT CHAT
+           ===================================================================== -->
+      <section id="panel-agent" class="panel-view">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>✦ PM Agent Intelligence Copilot</span>
+            </h1>
+            <p class="view-subtitle">Ask questions about Sprint 42, generate Gherkin scenarios, cite Jira tickets, or query QA matrices.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('chat-history').innerHTML=''; showToast('Chat history cleared', 'info');">Clear Chat</button>
+          </div>
+        </div>
+
+        <div class="chat-container">
+          <!-- Chat Message Feed -->
+          <div class="chat-history" id="chat-history">
+            <!-- Agent Welcome Message -->
+            <div class="message-row">
+              <div class="message-avatar agent">✦</div>
+              <div class="message-body" style="max-width: 720px;">
+                <div class="message-bubble">
+                  <p><strong>Hello Abuzar!</strong> I am actively synchronizing telemetry across <strong>Jira (ONEHR)</strong>, <strong>GitHub (nforce-onehr)</strong>, and <strong>qa-sheet.xlsx</strong>.</p>
+                  <p style="margin-top: 8px; color: var(--text-secondary);">
+                    Current status: <strong>96.4% QA pass rate</strong>, 4 days left in Sprint 42. How can I assist you with grooming, PRD generation, or blocker resolution today?
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Example User Query -->
+            <div class="message-row user">
+              <div class="message-avatar user">AS</div>
+              <div class="message-body">
+                <div class="message-bubble">
+                  What are the top blockers threatening our Sprint 42 enterprise release?
+                </div>
+              </div>
+            </div>
+
+            <!-- Example Agent Answer with Reasoning Theater & Citations -->
+            <div class="message-row">
+              <div class="message-avatar agent">✦</div>
+              <div class="message-body" style="max-width: 820px;">
+                <!-- Reasoning Box -->
+                <div class="reasoning-box">
+                  <div class="reasoning-step">
+                    <span class="step-status-icon">✓</span>
+                    <span>Parsed intent: Sprint Blocker & Triage Analysis</span>
+                  </div>
+                  <div class="reasoning-step">
+                    <span class="step-status-icon">✓</span>
+                    <span>Searched Jira (12 issues inspected in Sprint 42)</span>
+                  </div>
+                  <div class="reasoning-step">
+                    <span class="step-status-icon">✓</span>
+                    <span>Cross-referenced QA test matrix (3 blockers located in qa-sheet.xlsx)</span>
+                  </div>
+                </div>
+
+                <div class="message-bubble" style="margin-top: 8px;">
+                  <p><strong>There are 3 critical blockers impacting Sprint 42 release readiness:</strong></p>
+                  <ul style="margin: 10px 0 10px 20px; line-height: 1.7;">
+                    <li>
+                      <span class="citation-chip" onclick="window.inspectTicket('ONEHR-115')">ONEHR-115</span>
+                      <strong>OAuth2 Session Demotion:</strong> Refresh tokens fail to invalidate when user role is demoted from Admin to Member in test scenario <code>TC-402</code>.
+                    </li>
+                    <li>
+                      <span class="citation-chip" onclick="window.inspectTicket('ONEHR-336')">ONEHR-336</span>
+                      <strong>Slack Webhook Rate-Limiter:</strong> Outgoing alerts trigger HTTP 429 errors without exponential backoff retry logic.
+                    </li>
+                    <li>
+                      <span class="citation-chip" onclick="window.inspectTicket('ONEHR-140')">ONEHR-140</span>
+                      <strong>Leave Accrual Overflow:</strong> Year-end carryover calculation throws unhandled null exception for contractors in <code>TC-407</code>.
+                    </li>
+                  </ul>
+                  <p style="color: var(--text-secondary); margin-top: 8px;">
+                    <strong>Recommended Next Step:</strong> Review and sign off on <span class="citation-chip" onclick="window.navigateToTab('drafts')">Draft ONEHR-115</span> so the backend team can pull the verified Gherkin criteria directly into Jira.
+                  </p>
+                  <div style="margin-top: 14px; display: flex; gap: 8px;">
+                    <button class="btn btn-primary btn-sm" onclick="window.navigateToTab('drafts')">Review Pending Drafts</button>
+                    <button class="btn btn-secondary btn-sm" onclick="window.navigateToTab('projects')">Inspect QA Sheet</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prompt Suggestions Chips -->
+          <div class="suggestions-bar">
+            <button class="prompt-chip-btn" data-prompt="What is blocking Sprint 42 release?">
+              <span>🛡️</span> What is blocking Sprint 42 release?
+            </button>
+            <button class="prompt-chip-btn" data-prompt="Draft Gherkin criteria for ONEHR-115">
+              <span>✍️</span> Draft Gherkin criteria for ONEHR-115
+            </button>
+            <button class="prompt-chip-btn" data-prompt="Summarize customer feedback from Acme Corp">
+              <span>💬</span> Summarize customer feedback from Acme Corp
+            </button>
+            <button class="prompt-chip-btn" data-prompt="Generate PRD for OAuth token revocation">
+              <span>📄</span> Generate PRD for OAuth token revocation
+            </button>
+          </div>
+
+          <!-- Chat Input Composer -->
+          <div class="chat-composer-wrap">
+            <div class="composer-box">
+              <textarea id="chat-input" class="composer-textarea" rows="2" placeholder="Ask PM Agent anything about Jira, GitHub PRs, QA test runs, or customer feedback... (Press Enter to send)"></textarea>
+              <div class="composer-toolbar">
+                <div class="composer-tools">
+                  <span class="tool-chip"><span>●</span> Jira API</span>
+                  <span class="tool-chip"><span>●</span> GitHub PRs</span>
+                  <span class="tool-chip"><span>●</span> QA Spreadsheet</span>
+                  <span class="tool-chip" style="color: var(--accent-primary);">✦ Gemini 1.5 Pro</span>
+                </div>
+                <button id="chat-send-btn" class="send-btn" title="Send message" aria-label="Send message">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           VIEW 3: QA & RELEASE READINESS MATRIX
+           ===================================================================== -->
+      <section id="panel-projects" class="panel-view">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>QA & Release Readiness Matrix</span>
+            </h1>
+            <p class="view-subtitle">Live test suite telemetry synchronized with qa-sheet-sprint42.xlsx and CI/CD pipelines.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-secondary" onclick="showToast('Re-syncing with qa-sheet.xlsx...', 'info')">
+              <span>⟳</span> Sync QA Sheet
+            </button>
+            <button class="btn btn-primary" onclick="showToast('QA Release report exported as PDF', 'success')">
+              <span>↓</span> Export Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Release Meter Bar -->
+        <div class="release-meter-card">
+          <div class="release-meter-top">
+            <div class="release-status-text">
+              Sprint 42 Release Gate: <span style="color: var(--status-positive);">96.4% Passed</span>
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary); font-family: var(--font-mono);">
+              51 PASS · 2 BLOCKED · 1 FAIL
+            </div>
+          </div>
+          <div class="release-bar-track">
+            <div class="release-bar-pass" style="width: 96.4%;"></div>
+            <div class="release-bar-blocked" style="width: 3.6%;"></div>
+          </div>
+          <div class="release-legend">
+            <div class="legend-item">
+              <span class="legend-dot" style="background: var(--status-positive);"></span>
+              <span>Passed Scenarios (51)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: var(--status-warning);"></span>
+              <span>Blocked Scenarios (2)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: var(--status-critical);"></span>
+              <span>Regression Failures (1)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Table Card -->
+        <div class="data-table-card">
+          <div class="table-toolbar">
+            <input type="text" id="qa-search-input" class="table-search-input" placeholder="Filter by test ID, title, or Jira ticket...">
+            <div class="table-filters">
+              <button class="filter-btn active qa-filter-btn" data-filter="all">All (8)</button>
+              <button class="filter-btn qa-filter-btn" data-filter="pass">Passed</button>
+              <button class="filter-btn qa-filter-btn" data-filter="blocked">Blocked</button>
+              <button class="filter-btn qa-filter-btn" data-filter="fail">Failed</button>
+            </div>
+          </div>
+
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th style="width: 100px;">Test ID</th>
+                <th>Scenario & Module</th>
+                <th style="width: 120px;">Status</th>
+                <th style="width: 100px;">Duration</th>
+                <th style="width: 140px;">Linked Jira</th>
+                <th style="width: 90px;">Logs</th>
+              </tr>
+            </thead>
+            <tbody id="qa-table-body">
+              <!-- Rendered dynamically by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           VIEW 4: DRAFTS & APPROVALS (HUMAN-IN-THE-LOOP)
+           ===================================================================== -->
+      <section id="panel-drafts" class="panel-view">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>Drafts & Human-in-the-Loop Approval</span>
+            </h1>
+            <p class="view-subtitle">AI drafts user stories and acceptance criteria from test results. You retain full approval before pushing to Jira.</p>
+          </div>
+          <div class="view-actions">
+            <span class="status-pill blocked">2 Pending Approval</span>
+          </div>
+        </div>
+
+        <div class="grid-1-2">
+          <!-- Left Column: Draft Queue -->
+          <div>
+            <div style="font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 12px;">
+              Queue Items (2)
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="card" style="padding: 16px; border-color: var(--accent-primary); cursor: pointer; background: var(--bg-elevated);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span class="citation-chip">ONEHR-115</span>
+                  <span class="status-pill blocked" style="font-size: 11px;">P0 Blocker</span>
+                </div>
+                <div style="font-size: 14px; font-weight: 650; color: var(--text-primary); margin-bottom: 6px;">
+                  Multi-tenant SSO Session Invalidation on Demotion
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+                  Generated by Gemini Agent from QA-Sheet line 14 failure.
+                </div>
+                <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 10px;">
+                  Today at 2:14 PM · Needs Sign-off
+                </div>
+              </div>
+
+              <div class="card" style="padding: 16px; cursor: pointer;" onclick="showToast('Selected ONEHR-336 draft', 'info')">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span class="citation-chip">ONEHR-336</span>
+                  <span class="status-pill" style="background: var(--bg-elevated); color: var(--text-tertiary); font-size: 11px;">P1 Triage</span>
+                </div>
+                <div style="font-size: 14px; font-weight: 650; color: var(--text-primary); margin-bottom: 6px;">
+                  Exponential Backoff for Slack Webhooks
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+                  Automated from Sentry rate-limiting alerts.
+                </div>
+                <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 10px;">
+                  Today at 11:30 AM · Needs Sign-off
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Full Spec Viewer & Approval Action -->
+          <div class="card">
+            <div class="card-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="draft-status-badge" class="status-pill blocked">Ready for Grooming</span>
+                <span style="font-size: 13px; color: var(--text-tertiary); font-family: var(--font-mono);">DRAFT-104 · Key: ONEHR-115</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline btn-sm" onclick="showToast('Draft edited', 'info')">Edit Spec</button>
+                <button id="approve-draft-btn" class="btn btn-primary btn-sm">
+                  <span>✓</span> Approve & Push to Jira
+                </button>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div style="margin-bottom: 18px;">
+                <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+                  Multi-tenant SSO Session Invalidation on Demotion
+                </h2>
+                <div style="font-size: 12.5px; color: var(--text-secondary); display: flex; align-items: center; gap: 14px;">
+                  <span>Author: <strong>Gemini Agent</strong></span>
+                  <span>Source: <code>qa-sheet-sprint42.xlsx (TC-402)</code></span>
+                  <span>Target: <code>nforceonehr.atlassian.net</code></span>
+                </div>
+              </div>
+
+              <!-- Context Callout -->
+              <div class="doc-callout warning" style="margin-top: 0;">
+                <span style="font-size: 18px;">🛡️</span>
+                <div>
+                  <strong style="color: var(--text-primary);">Human Approval Required:</strong>
+                  This change enforces immediate OAuth2 token revocation when enterprise role changes occur. Once approved, PM Agent creates the corresponding Jira user story with linked regression test cases.
+                </div>
+              </div>
+
+              <!-- Synthesized Gherkin Syntax Block -->
+              <div style="margin-top: 18px;">
+                <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 8px;">
+                  Acceptance Criteria (Gherkin Syntax)
+                </div>
+
+                <div class="gherkin-container">
+                  <span class="gh-keyword">Feature:</span> Multi-tenant SSO Session Invalidation<br>
+                  &nbsp;&nbsp;<span class="gh-keyword">As an</span> Enterprise Security Administrator<br>
+                  &nbsp;&nbsp;<span class="gh-keyword">I want</span> user sessions revoked immediately upon permission demotion<br>
+                  &nbsp;&nbsp;<span class="gh-keyword">So that</span> former admins cannot access restricted HR payroll data<br><br>
+                  &nbsp;&nbsp;<span class="gh-keyword">Scenario:</span> Session revocation on privilege demotion<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="gh-keyword">Given</span> an active enterprise user <span class="gh-string">"alex@acme.com"</span> with <span class="gh-string">"ADMIN"</span> role<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="gh-keyword">When</span> the organization admin changes Alexander's role to <span class="gh-string">"MEMBER"</span> in IAM<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="gh-keyword">Then</span> all active OAuth refresh tokens for <span class="gh-string">"alex@acme.com"</span> MUST be revoked<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="gh-keyword">And</span> the subsequent API call to <span class="gh-string">"/api/v2/payroll"</span> returns HTTP 401 Unauthorized<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span class="gh-keyword">And</span> an audit log is emitted with action <span class="gh-string">"IAM_SESSION_REVOKED"</span>
+                </div>
+              </div>
+
+              <!-- Linked Evidence -->
+              <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+                <div style="font-size: 12px; color: var(--text-tertiary);">
+                  Automated verification hash: <code>sha256:b4f81c9e782</code>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="window.copyMarkdown('Feature: Multi-tenant SSO Session Invalidation...')">Copy Markdown</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           VIEW 5: STUDIO & PRD SPECS (NOTION / APPLE CALIBER)
+           ===================================================================== -->
+      <section id="panel-studio" class="panel-view">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>Product Studio & PRD Specs</span>
+            </h1>
+            <p class="view-subtitle">High-fidelity requirements editor with AI generation, live Gherkin syntax, and Confluence sync.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-outline btn-sm" onclick="window.copyMarkdown('# PRD: Multi-tenant SSO & Privilege Demotion Guardrails')">Copy Markdown</button>
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Exported PRD to Confluence space ONEHR', 'success')">Export to Confluence</button>
+            <button class="btn btn-primary btn-sm" onclick="showToast('AI PRD Generator launched', 'info')">✦ New AI Spec</button>
+          </div>
+        </div>
+
+        <div class="doc-canvas">
+          <div class="doc-cover-icon">📄</div>
+          <h1 class="doc-title">PRD: Multi-tenant SSO & Privilege Demotion Guardrails</h1>
+
+          <div class="doc-meta-row">
+            <div class="doc-meta-item">
+              <span style="color: var(--text-tertiary);">Lead PM:</span>
+              <strong style="color: var(--text-primary);">Abuzar Siddiqui</strong>
+            </div>
+            <div class="doc-meta-item">
+              <span style="color: var(--text-tertiary);">Release:</span>
+              <span class="status-pill pass">Sprint 42</span>
+            </div>
+            <div class="doc-meta-item">
+              <span style="color: var(--text-tertiary);">Status:</span>
+              <span class="status-pill blocked">Under Review</span>
+            </div>
+            <div class="doc-meta-item">
+              <span style="color: var(--text-tertiary);">Target SLA:</span>
+              <strong style="color: var(--text-primary);">Immediate (&lt; 200ms)</strong>
+            </div>
+          </div>
+
+          <!-- Document Callout -->
+          <div class="doc-callout">
+            <span style="font-size: 20px;">💡</span>
+            <div>
+              <strong style="color: var(--text-primary);">Executive Summary:</strong>
+              Enterprise HR customers (Acme Corp, Stripe Labs) require strict SOC2 Type II compliance. Currently, when an administrator's privileges are modified or revoked, cached OAuth refresh tokens can linger for up to 60 minutes. This PRD specifies real-time revocation across all multi-tenant endpoints.
+            </div>
+          </div>
+
+          <h2 class="doc-section-h2">1. Problem Statement & Customer Impact</h2>
+          <p class="doc-p">
+            During quarterly security reviews, enterprise clients noticed that access to confidential payroll and compensation bands persisted after role demotions. QA scenario <code>TC-402</code> highlighted that Redis session invalidation was decoupled from the primary IAM database transaction.
+          </p>
+
+          <h2 class="doc-section-h2">2. User Stories & Acceptance Criteria</h2>
+          
+          <div class="story-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <strong style="color: var(--text-primary); font-size: 14px;">US-101: Synchronous Token Invalidation</strong>
+              <span class="citation-chip">ONEHR-115</span>
+            </div>
+            <p class="doc-p" style="margin-bottom: 8px;">
+              As an Enterprise IT Admin, when I demote an employee in Okta or Google Workspace, their active session in OneHR must be terminated within 200ms.
+            </p>
+            <ul class="doc-list">
+              <li>Webhook listener on <code>/api/v2/iam/events</code> processes demotion payloads.</li>
+              <li>Pub/Sub broadcast to all regional API gateways invalidates Redis token caches.</li>
+              <li>Next client HTTP request receives HTTP 401 with payload <code>{ "code": "SESSION_REVOKED" }</code>.</li>
+            </ul>
+          </div>
+
+          <div class="story-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <strong style="color: var(--text-primary); font-size: 14px;">US-102: Audit Trail Event Emission</strong>
+              <span class="citation-chip">ONEHR-116</span>
+            </div>
+            <p class="doc-p" style="margin-bottom: 8px;">
+              As a Compliance Officer, I must have an immutable audit log detailing every token invalidation event with timestamp, actor IP, and affected tenant ID.
+            </p>
+          </div>
+
+          <h2 class="doc-section-h2">3. Non-Functional Requirements</h2>
+          <ul class="doc-list">
+            <li><strong>Latency:</strong> Token purge propagation must complete in &lt; 200ms across 99th percentile.</li>
+            <li><strong>Reliability:</strong> Zero dropped demotion events. Failures must route to Dead Letter Queue (DLQ).</li>
+            <li><strong>Security:</strong> All revocation events signed with HMAC-SHA256.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           VIEW 6: CUSTOMER FEEDBACK INGESTION
+           ===================================================================== -->
+      <section id="panel-feedback" class="panel-view">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>Customer Voice & Feedback Triage</span>
+            </h1>
+            <p class="view-subtitle">Aggregated customer tickets from Intercom, Zendesk, and Gong calls triaged by PM Agent.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Syncing Intercom & Zendesk feeds...', 'info')">
+              <span>⟳</span> Fetch Fresh Feedback
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <!-- Feedback Item 1 -->
+          <div class="fb-item-card" data-feedback-id="FB-201">
+            <div class="fb-top-row">
+              <div class="fb-customer-meta">
+                <span class="fb-company-name">Acme Corp</span>
+                <span class="fb-arr-badge">$240k ARR</span>
+              </div>
+              <span class="status-pill fail" style="font-size: 10.5px;">Urgent</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-tertiary);">
+              Source: <strong>Intercom</strong> · 42 minutes ago
+            </div>
+            <div class="fb-quote">
+              "Our payroll team experienced a 4-second delay during 10k employee CSV export. We need this optimized before month-end closing."
+            </div>
+            <div class="fb-recommendation">
+              <span>✦</span> AI Recommendation: Batch streaming pagination on payroll engine.
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+              <span class="fb-converted-badge">✓ Converted to Story</span>
+              <button class="btn btn-primary btn-sm" onclick="convertFeedbackToTicket('FB-201')">Convert to Ticket</button>
+            </div>
+          </div>
+
+          <!-- Feedback Item 2 -->
+          <div class="fb-item-card" data-feedback-id="FB-202">
+            <div class="fb-top-row">
+              <div class="fb-customer-meta">
+                <span class="fb-company-name">Stripe Labs</span>
+                <span class="fb-arr-badge">$180k ARR</span>
+              </div>
+              <span class="status-pill pass" style="font-size: 10.5px;">Feature Req</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-tertiary);">
+              Source: <strong>Zendesk</strong> · 2 hours ago
+            </div>
+            <div class="fb-quote">
+              "Would love to see dark mode support on the manager approval portal. Our engineers are requesting it."
+            </div>
+            <div class="fb-recommendation">
+              <span>✦</span> AI Recommendation: Add CSS theme switcher to self-service portal.
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+              <span class="fb-converted-badge">✓ Converted to Story</span>
+              <button class="btn btn-primary btn-sm" onclick="convertFeedbackToTicket('FB-202')">Convert to Ticket</button>
+            </div>
+          </div>
+
+          <!-- Feedback Item 3 -->
+          <div class="fb-item-card" data-feedback-id="FB-203">
+            <div class="fb-top-row">
+              <div class="fb-customer-meta">
+                <span class="fb-company-name">Linear Global</span>
+                <span class="fb-arr-badge">$60k ARR</span>
+              </div>
+              <span class="status-pill pass" style="font-size: 10.5px; background: rgba(59, 130, 246, 0.1); color: var(--accent-primary);">Positive</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-tertiary);">
+              Source: <strong>Gong Call</strong> · 5 hours ago
+            </div>
+            <div class="fb-quote">
+              "The new automated Slack notifications for pending leave requests cut our approval times by 60%. Huge win!"
+            </div>
+            <div class="fb-recommendation">
+              <span>✦</span> AI Recommendation: Highlight in case study and expand to MS Teams.
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+              <span class="fb-converted-badge">✓ Converted to Story</span>
+              <button class="btn btn-secondary btn-sm" onclick="convertFeedbackToTicket('FB-203')">Save Highlight</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           VIEW 7: SPRINT 42 HEALTH & RISK RADAR
+           ===================================================================== -->
+      <section id="panel-health" class="panel-view">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>Sprint 42 Health & Risk Radar</span>
+            </h1>
+            <p class="view-subtitle">Predictive burndown analytics, PR merge bottlenecks, and engineer capacity allocations.</p>
+          </div>
+          <div class="view-actions">
+            <span class="status-pill pass">Sprint 42 Health: 91% (Normal)</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Left: Burndown Velocity -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span>📊</span> Velocity Burndown</span>
+              <span style="font-size: 12px; color: var(--text-tertiary);">48 of 54 SP Burned</span>
+            </div>
+            <div class="card-body">
+              <div style="margin-bottom: 18px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                  <span style="color: var(--text-secondary);">Target Completion</span>
+                  <span style="color: var(--text-primary); font-weight: 600;">88.8% Completed</span>
+                </div>
+                <div class="release-bar-track" style="height: 12px;">
+                  <div class="release-bar-pass" style="width: 88.8%;"></div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+                  <span style="color: var(--text-secondary);">Engineering Days Left:</span>
+                  <strong style="color: var(--text-primary);">4 Days</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+                  <span style="color: var(--text-secondary);">Average PR Turnaround Time:</span>
+                  <strong style="color: var(--text-primary);">2.4 Hours (Fast)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+                  <span style="color: var(--text-secondary);">Open Pull Requests:</span>
+                  <strong style="color: var(--accent-primary);">3 Pending Review</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-secondary);">Sentry Errors Today:</span>
+                  <strong style="color: var(--status-positive);">0 Fatal (Healthy)</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Risk Factor Assessment -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span>🛡️</span> AI Risk Factor Assessment</span>
+              <span class="status-pill blocked">1 Elevated Risk</span>
+            </div>
+            <div class="card-body">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="padding: 12px; background: var(--bg-subtle); border-radius: 8px; border-left: 3px solid var(--status-warning);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <strong style="font-size: 13.5px; color: var(--text-primary);">SSO Demotion Test Flakiness</strong>
+                    <span class="status-pill blocked" style="font-size: 11px;">Elevated</span>
+                  </div>
+                  <p style="font-size: 12.5px; color: var(--text-secondary);">
+                    TC-402 fails intermittently on staging cluster due to Redis replica replication lag.
+                  </p>
+                </div>
+
+                <div style="padding: 12px; background: var(--bg-subtle); border-radius: 8px; border-left: 3px solid var(--status-positive);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <strong style="font-size: 13.5px; color: var(--text-primary);">Payroll Engine Throughput</strong>
+                    <span class="status-pill pass" style="font-size: 11px;">Low Risk</span>
+                  </div>
+                  <p style="font-size: 12.5px; color: var(--text-secondary);">
+                    50,000 row batch calculation executes in 4.8 seconds, well within the 10.0s SLA.
+                  </p>
+                </div>
+
+                <div style="padding: 12px; background: var(--bg-subtle); border-radius: 8px; border-left: 3px solid var(--status-positive);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <strong style="font-size: 13.5px; color: var(--text-primary);">Dependencies & Vulnerabilities</strong>
+                    <span class="status-pill pass" style="font-size: 11px;">Zero High CVEs</span>
+                  </div>
+                  <p style="font-size: 12.5px; color: var(--text-secondary);">
+                    Dependabot reports 0 open critical security vulnerabilities in <code>nforce-onehr</code>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           VIEW 8: ACTIVITY AUDIT TRAIL
+           ===================================================================== -->
+      <section id="panel-activity" class="panel-view">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>Activity & Audit Trail</span>
+            </h1>
+            <p class="view-subtitle">Immutable timeline of actions performed by PM Agent and product team members.</p>
+          </div>
+          <div class="view-actions">
+            <span class="status-pill pass">Live Telemetry Active</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding: 28px;">
+          <div class="timeline-feed">
+            <!-- Event 1 -->
+            <div class="timeline-event">
+              <div class="timeline-node-dot alert"></div>
+              <div class="timeline-header-line">
+                <span class="timeline-actor">PM Agent</span>
+                <span>ingested test matrix update from <code>qa-sheet-sprint42.xlsx</code></span>
+                <span class="timeline-time">Today, 2:14 PM</span>
+              </div>
+              <div class="timeline-card-content">
+                Identified regression failure in test case <code>TC-402</code> (OAuth2 Session Demotion). Generated draft story <span class="citation-chip" onclick="window.navigateToTab('drafts')">DRAFT-104</span> for human approval.
+              </div>
+            </div>
+
+            <!-- Event 2 -->
+            <div class="timeline-event">
+              <div class="timeline-node-dot success"></div>
+              <div class="timeline-header-line">
+                <span class="timeline-actor">GitHub Actions CI</span>
+                <span>merged PR #142 into <code>release/v2.4</code></span>
+                <span class="timeline-time">Today, 1:48 PM</span>
+              </div>
+              <div class="timeline-card-content">
+                California tax deduction precision rounding fix verified. Closed regression bug <code>ONEHR-95</code>.
+              </div>
+            </div>
+
+            <!-- Event 3 -->
+            <div class="timeline-event">
+              <div class="timeline-node-dot alert"></div>
+              <div class="timeline-header-line">
+                <span class="timeline-actor">Sentry Integration</span>
+                <span>emitted webhook rate-limit warning</span>
+                <span class="timeline-time">Today, 11:30 AM</span>
+              </div>
+              <div class="timeline-card-content">
+                HTTP 429 status code returned by Slack Webhook API. PM Agent drafted mitigation ticket <span class="citation-chip" onclick="window.inspectTicket('ONEHR-336')">ONEHR-336</span>.
+              </div>
+            </div>
+
+            <!-- Event 4 -->
+            <div class="timeline-event">
+              <div class="timeline-node-dot success"></div>
+              <div class="timeline-header-line">
+                <span class="timeline-actor">Abuzar Siddiqui (Lead PM)</span>
+                <span>approved and closed PRD: Multi-tenant SSO</span>
+                <span class="timeline-time">Yesterday, 5:20 PM</span>
+              </div>
+              <div class="timeline-card-content">
+                Exported specifications to Confluence and aligned engineering leads for Sprint 42 kickoff.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           VIEW 9: CONNECTIONS & INTEGRATIONS GRAPH
+           ===================================================================== -->
+      <section id="panel-connections" class="panel-view">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h1>
+              <span>Connected Integrations Graph</span>
+            </h1>
+            <p class="view-subtitle">Manage enterprise data sources powering PM Agent's cross-referencing engine.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-primary btn-sm" onclick="showToast('Add Integration modal opened', 'info')">
+              <span>+</span> Add Connection
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <!-- Connection 1: Jira -->
+          <div class="connection-card">
+            <div>
+              <div class="connection-top">
+                <div class="connection-icon-wrap" style="color: #2684ff;">🔷</div>
+                <span class="connection-status-pill connected">● Connected</span>
+              </div>
+              <div class="connection-title" style="margin-top: 12px;">Jira Cloud</div>
+              <div class="connection-desc">
+                Project <code>ONEHR</code> · Bi-directional ticket synchronization and automated Gherkin spec creation.
+              </div>
+            </div>
+            <div>
+              <div class="connection-meta">
+                <span>Latency: 114ms</span>
+                <span>142 Tickets</span>
+              </div>
+              <div class="connection-actions">
+                <span style="font-size: 11.5px; color: var(--text-tertiary);">nforceonehr.atlassian.net</span>
+                <button class="btn btn-outline btn-sm" onclick="window.testConnection('Jira Cloud')">Test Ping</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection 2: GitHub -->
+          <div class="connection-card">
+            <div>
+              <div class="connection-top">
+                <div class="connection-icon-wrap" style="color: #ffffff;">🐙</div>
+                <span class="connection-status-pill connected">● Connected</span>
+              </div>
+              <div class="connection-title" style="margin-top: 12px;">GitHub Enterprise</div>
+              <div class="connection-desc">
+                Repo <code>NForce-One/NForce-OneHR</code> · Scans PRs, commit messages, and automated CI test results.
+              </div>
+            </div>
+            <div>
+              <div class="connection-meta">
+                <span>Latency: 88ms</span>
+                <span>17 PRs today</span>
+              </div>
+              <div class="connection-actions">
+                <span style="font-size: 11.5px; color: var(--text-tertiary);">Branch: release/v2.4</span>
+                <button class="btn btn-outline btn-sm" onclick="window.testConnection('GitHub Enterprise')">Test Ping</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection 3: QA Spreadsheet -->
+          <div class="connection-card">
+            <div>
+              <div class="connection-top">
+                <div class="connection-icon-wrap" style="color: #10b981;">📊</div>
+                <span class="connection-status-pill syncing">⟳ Live Sync</span>
+              </div>
+              <div class="connection-title" style="margin-top: 12px;">QA Test Sheet</div>
+              <div class="connection-desc">
+                File <code>qa-sheet-sprint42.xlsx</code> · Continuous ingestion of manual and automated QA test runs.
+              </div>
+            </div>
+            <div>
+              <div class="connection-meta">
+                <span>53 Test Rows</span>
+                <span>Synced 2m ago</span>
+              </div>
+              <div class="connection-actions">
+                <span style="font-size: 11.5px; color: var(--text-tertiary);">Google Drive Sync</span>
+                <button class="btn btn-outline btn-sm" onclick="window.testConnection('QA Spreadsheet')">Test Ping</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection 4: Google Gemini -->
+          <div class="connection-card">
+            <div>
+              <div class="connection-top">
+                <div class="connection-icon-wrap" style="color: #3b82f6;">✦</div>
+                <span class="connection-status-pill connected">● Active</span>
+              </div>
+              <div class="connection-title" style="margin-top: 12px;">Google Gemini 1.5 Pro</div>
+              <div class="connection-desc">
+                Reasoning & cross-referencing core. Synthesizes PRDs, extracts edge cases, and drafts user stories.
+              </div>
+            </div>
+            <div>
+              <div class="connection-meta">
+                <span>Latency: 240ms</span>
+                <span>99.98% SLA</span>
+              </div>
+              <div class="connection-actions">
+                <span style="font-size: 11.5px; color: var(--text-tertiary);">Model: gemini-1.5-pro</span>
+                <button class="btn btn-outline btn-sm" onclick="window.testConnection('Gemini 1.5 Pro')">Test Ping</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection 5: Slack -->
+          <div class="connection-card">
+            <div>
+              <div class="connection-top">
+                <div class="connection-icon-wrap" style="color: #e01e5a;">#</div>
+                <span class="connection-status-pill connected">● Connected</span>
+              </div>
+              <div class="connection-title" style="margin-top: 12px;">Slack Workspace</div>
+              <div class="connection-desc">
+                Channel <code>#product-releases</code> · Instant notifications on critical test blockers and approvals.
+              </div>
+            </div>
+            <div>
+              <div class="connection-meta">
+                <span>Status: Operational</span>
+                <span>Rate-limited</span>
+              </div>
+              <div class="connection-actions">
+                <span style="font-size: 11.5px; color: var(--text-tertiary);">Webhook v2</span>
+                <button class="btn btn-outline btn-sm" onclick="window.testConnection('Slack Workspace')">Test Ping</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection 6: Sentry -->
+          <div class="connection-card">
+            <div>
+              <div class="connection-top">
+                <div class="connection-icon-wrap" style="color: #ff4757;">🛡️</div>
+                <span class="connection-status-pill connected">● Connected</span>
+              </div>
+              <div class="connection-title" style="margin-top: 12px;">Sentry Telemetry</div>
+              <div class="connection-desc">
+                Real-time runtime exception monitoring and automated ticket generation for critical crashes.
+              </div>
+            </div>
+            <div>
+              <div class="connection-meta">
+                <span>0 Fatal / 4h</span>
+                <span>SDK v7.4</span>
+              </div>
+              <div class="connection-actions">
+                <span style="font-size: 11.5px; color: var(--text-tertiary);">Production Cluster</span>
+                <button class="btn btn-outline btn-sm" onclick="window.testConnection('Sentry Telemetry')">Test Ping</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- End .panel-container -->
+
+  </main>
+</div><!-- End #app-container -->
+
+<!-- =========================================================================
+     COMMAND PALETTE MODAL (Ctrl/Cmd + K)
+     ========================================================================= -->
+<div id="cmd-palette-modal" class="cmd-palette-modal" role="dialog" aria-modal="true" aria-label="Command search">
+  <div class="cmd-palette-box">
+    <div class="cmd-input-wrap">
+      <span style="color: var(--accent-primary); font-size: 16px;">✦</span>
+      <input type="text" id="cmd-search-input" class="cmd-search-input" placeholder="Type a command, navigate, or search tickets..." autocomplete="off">
+      <kbd class="kbd-shortcut">ESC</kbd>
+    </div>
+    <div id="cmd-results-list" class="cmd-results-list">
+      <!-- Populated dynamically by app.js -->
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================================
+     GENERIC ACTION MODAL
+     ========================================================================= -->
+<div id="modal-backdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="modal-window">
+    <div class="modal-header">
+      <h3 id="modal-title" class="modal-title">Action Confirmation</h3>
+      <button id="modal-close-btn" class="header-action-btn" aria-label="Close dialog">✕</button>
+    </div>
+    <div id="modal-body" class="modal-body">
+      <!-- Modal body injected dynamically -->
+    </div>
+    <div class="modal-footer">
+      <button id="modal-cancel-btn" class="btn btn-secondary">Cancel</button>
+      <button id="modal-confirm-btn" class="btn btn-primary">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================================
+     TOAST NOTIFICATIONS CONTAINER
+     ========================================================================= -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- Application Logic -->
+<script src="app.js"></script>
+
+</body>
+</html>
