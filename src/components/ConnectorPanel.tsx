@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plug, Sparkles, ShieldCheck, Unplug, Lock, GitBranch, FileSpreadsheet } from "lucide-react";
+import { Plug, Sparkles, ShieldCheck, Unplug, Lock, GitBranch, FileSpreadsheet, MessageSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useNav } from "@/lib/nav";
 import { Badge, Button, Field, PageHeader, Section, inputCls } from "./ui";
@@ -12,6 +12,7 @@ interface Status {
   jira: { baseUrl: string; email: string; apiTokenMasked: string; configured: boolean };
   gemini: { model: string; apiKeyMasked: string; configured: boolean };
   github: { repo: string; tokenMasked: string; configured: boolean };
+  slack?: { defaultChannel: string; botTokenMasked: string; appTokenMasked: string; configured: boolean };
 }
 
 type TestResult = { ok: boolean; detail: string } | null;
@@ -96,19 +97,25 @@ function ConnectorPanelContent() {
   const [jiraEmail, setJiraEmail] = useState("");
   const [jiraToken, setJiraToken] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
-  const [geminiModel, setGeminiModel] = useState("gemini-3.5-flash-lite");
+  const [geminiModel, setGeminiModel] = useState("gemini-3.6-flash");
   const [githubRepo, setGithubRepo] = useState("");
   const [githubToken, setGithubToken] = useState("");
+  const [slackBotToken, setSlackBotToken] = useState("");
+  const [slackAppToken, setSlackAppToken] = useState("");
+  const [slackChannel, setSlackChannel] = useState("");
 
   const [savingJira, setSavingJira] = useState(false);
   const [savingGemini, setSavingGemini] = useState(false);
   const [savingGithub, setSavingGithub] = useState(false);
+  const [savingSlack, setSavingSlack] = useState(false);
   const [testingJira, setTestingJira] = useState(false);
   const [testingGemini, setTestingGemini] = useState(false);
   const [testingGithub, setTestingGithub] = useState(false);
+  const [testingSlack, setTestingSlack] = useState(false);
   const [jiraTest, setJiraTest] = useState<TestResult>(null);
   const [geminiTest, setGeminiTest] = useState<TestResult>(null);
   const [githubTest, setGithubTest] = useState<TestResult>(null);
+  const [slackTest, setSlackTest] = useState<TestResult>(null);
 
   async function load() {
     const res = await fetch("/api/connector");
@@ -116,8 +123,9 @@ function ConnectorPanelContent() {
     setStatus(data);
     setJiraBaseUrl(data.jira.baseUrl);
     setJiraEmail(data.jira.email);
-    setGeminiModel(data.gemini.model || "gemini-3.5-flash-lite");
+    setGeminiModel(data.gemini.model || "gemini-3.6-flash");
     setGithubRepo(data.github.repo);
+    setSlackChannel(data.slack?.defaultChannel || "");
   }
 
   useEffect(() => {
@@ -146,11 +154,16 @@ function ConnectorPanelContent() {
     setSavingGemini(true);
     setGeminiTest(null);
     try {
+      let modelToSave = geminiModel;
+      if (geminiKey.startsWith("nvapi-") && (!modelToSave || modelToSave.startsWith("gemini"))) {
+        modelToSave = "meta/llama-3.2-11b-vision-instruct";
+        setGeminiModel(modelToSave);
+      }
       await fetch("/api/connector", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          gemini: { apiKey: geminiKey || undefined, model: geminiModel },
+          gemini: { apiKey: geminiKey || undefined, model: modelToSave },
         }),
       });
       setGeminiKey("");
@@ -178,7 +191,30 @@ function ConnectorPanelContent() {
     }
   }
 
-  async function disconnect(kind: "jira" | "gemini" | "github") {
+  async function saveSlack() {
+    setSavingSlack(true);
+    setSlackTest(null);
+    try {
+      await fetch("/api/connector", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slack: {
+            botToken: slackBotToken || undefined,
+            appToken: slackAppToken || undefined,
+            defaultChannel: slackChannel || undefined,
+          },
+        }),
+      });
+      setSlackBotToken("");
+      setSlackAppToken("");
+      await load();
+    } finally {
+      setSavingSlack(false);
+    }
+  }
+
+  async function disconnect(kind: "jira" | "gemini" | "github" | "slack") {
     await fetch("/api/connector", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -192,17 +228,36 @@ function ConnectorPanelContent() {
     } else if (kind === "gemini") {
       setGeminiKey("");
       setGeminiTest(null);
-    } else {
+    } else if (kind === "github") {
       setGithubRepo("");
       setGithubToken("");
       setGithubTest(null);
+    } else {
+      setSlackBotToken("");
+      setSlackAppToken("");
+      setSlackChannel("");
+      setSlackTest(null);
     }
     await load();
   }
 
-  async function test(target: "jira" | "gemini" | "github") {
-    const setTesting = target === "jira" ? setTestingJira : target === "gemini" ? setTestingGemini : setTestingGithub;
-    const setResult = target === "jira" ? setJiraTest : target === "gemini" ? setGeminiTest : setGithubTest;
+  async function test(target: "jira" | "gemini" | "github" | "slack") {
+    const setTesting =
+      target === "jira"
+        ? setTestingJira
+        : target === "gemini"
+        ? setTestingGemini
+        : target === "github"
+        ? setTestingGithub
+        : setTestingSlack;
+    const setResult =
+      target === "jira"
+        ? setJiraTest
+        : target === "gemini"
+        ? setGeminiTest
+        : target === "github"
+        ? setGithubTest
+        : setSlackTest;
     setTesting(true);
     setResult(null);
     try {
@@ -273,33 +328,56 @@ function ConnectorPanelContent() {
           </Field>
         </Integration>
 
-        <Integration
-          name="Gemini"
-          blurb="The reasoning engine behind answers, drafts and verdicts."
-          icon={Sparkles}
-          configured={status?.gemini.configured}
-          detail={status?.gemini.configured ? status.gemini.model : undefined}
-          onSave={saveGemini}
-          saving={savingGemini}
-          onTest={() => test("gemini")}
-          testing={testingGemini}
-          onDisconnect={() => disconnect("gemini")}
-          result={geminiTest}
-          help="Get a key from Google AI Studio."
-        >
-          <Field label="API key" hint={status?.gemini.apiKeyMasked ? `current: ${status.gemini.apiKeyMasked}` : undefined}>
-            <input
-              type="password"
-              value={geminiKey}
-              onChange={(e) => setGeminiKey(e.target.value)}
-              placeholder={status?.gemini.apiKeyMasked ? "Leave blank to keep current key" : "Paste your Gemini API key"}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Model">
-            <input value={geminiModel} onChange={(e) => setGeminiModel(e.target.value)} placeholder="gemini-3.5-flash-lite" className={inputCls} />
-          </Field>
-        </Integration>
+        {(() => {
+          const isNvidia = geminiKey.startsWith("nvapi-") || (status?.gemini.apiKeyMasked?.startsWith("nvap") ?? false);
+          return (
+            <Integration
+              name={isNvidia ? "NVIDIA NIM" : "Gemini / NVIDIA NIM"}
+              blurb="The reasoning engine behind answers, drafts and verdicts."
+              icon={Sparkles}
+              configured={status?.gemini.configured}
+              detail={status?.gemini.configured ? status.gemini.model : undefined}
+              onSave={saveGemini}
+              saving={savingGemini}
+              onTest={() => test("gemini")}
+              testing={testingGemini}
+              onDisconnect={() => disconnect("gemini")}
+              result={geminiTest}
+              help={isNvidia ? "Connected using NVIDIA NIM API key." : "Supports Google AI Studio (Gemini) or NVIDIA NIM (nvapi-...) keys."}
+            >
+              <Field label="API key" hint={status?.gemini.apiKeyMasked ? `current: ${status.gemini.apiKeyMasked}` : undefined}>
+                <input
+                  type="password"
+                  value={geminiKey}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setGeminiKey(val);
+                    if (val.startsWith("nvapi-") && (!geminiModel || geminiModel.startsWith("gemini"))) {
+                      setGeminiModel("meta/llama-3.2-11b-vision-instruct");
+                    }
+                  }}
+                  placeholder={status?.gemini.apiKeyMasked ? "Leave blank to keep current key" : "Paste your Gemini or NVIDIA NIM key"}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Model" hint={isNvidia ? "e.g. meta/llama-3.2-11b-vision-instruct" : "e.g. gemini-3.6-flash or meta/llama-3.2-11b-vision-instruct"}>
+                <input
+                  value={geminiModel}
+                  onChange={(e) => setGeminiModel(e.target.value)}
+                  placeholder={isNvidia ? "meta/llama-3.2-11b-vision-instruct" : "gemini-3.6-flash"}
+                  list="gemini-model-suggestions"
+                  className={inputCls}
+                />
+                <datalist id="gemini-model-suggestions">
+                  <option value="meta/llama-3.2-11b-vision-instruct" />
+                  <option value="meta/llama-3.2-90b-vision-instruct" />
+                  <option value="gemini-3.6-flash" />
+                  <option value="gemini-3.8-flash" />
+                </datalist>
+              </Field>
+            </Integration>
+          );
+        })()}
 
         <Integration
           name="GitHub"
@@ -330,6 +408,48 @@ function ConnectorPanelContent() {
           </Field>
         </Integration>
 
+        <Integration
+          name="Slack"
+          blurb="Interact with PM Agent directly from your Slack workspace (Socket Mode supported)."
+          icon={MessageSquare}
+          configured={status?.slack?.configured}
+          detail={status?.slack?.configured ? (status.slack.defaultChannel || "Connected") : undefined}
+          onSave={saveSlack}
+          saving={savingSlack}
+          onTest={() => test("slack")}
+          testing={testingSlack}
+          onDisconnect={() => disconnect("slack")}
+          result={slackTest}
+          help="Create a Slack App with Bot Token (xoxb-) and App-Level Token (xapp-)."
+        >
+          <Field label="Bot User OAuth Token" hint={status?.slack?.botTokenMasked ? `current: ${status.slack.botTokenMasked}` : undefined}>
+            <input
+              type="password"
+              value={slackBotToken}
+              onChange={(e) => setSlackBotToken(e.target.value)}
+              placeholder={status?.slack?.botTokenMasked ? "Leave blank to keep current token" : "xoxb-..."}
+              className={inputCls}
+            />
+          </Field>
+          <Field label="App-Level Token (Socket Mode)" hint={status?.slack?.appTokenMasked ? `current: ${status.slack.appTokenMasked}` : undefined}>
+            <input
+              type="password"
+              value={slackAppToken}
+              onChange={(e) => setSlackAppToken(e.target.value)}
+              placeholder={status?.slack?.appTokenMasked ? "Leave blank to keep current token" : "xapp-..."}
+              className={inputCls}
+            />
+          </Field>
+          <Field label="Default Channel" hint="e.g. #general or #pm-agent">
+            <input
+              value={slackChannel}
+              onChange={(e) => setSlackChannel(e.target.value)}
+              placeholder="#general"
+              className={inputCls}
+            />
+          </Field>
+        </Integration>
+
         <div className="flex flex-wrap items-center gap-4 py-6">
           <IntegrationTitle icon={FileSpreadsheet} name="QA spreadsheets" blurb="Excel workbooks with Regression, Testcase_Tracker and Automation_Scenarios sheets." />
           <Button onClick={() => navigate("health", { subtab: "qa" })}>Manage in Health → QA</Button>
@@ -338,7 +458,7 @@ function ConnectorPanelContent() {
 
       <Section title="Coming soon" description="Not available yet — listed so you know what's planned." className="!mt-14">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {["Slack", "Confluence", "Analytics", "CRM"].map((n) => (
+          {["Confluence", "Analytics", "CRM", "Notion"].map((n) => (
             <div key={n} className="flex items-center justify-between rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted">
               {n}
               <Badge>Soon</Badge>

@@ -14,14 +14,20 @@ export interface ConnectorConfig {
     repo: string; // "owner/name"
     token: string;
   };
+  slack: {
+    botToken: string;
+    appToken: string;
+    defaultChannel: string;
+  };
 }
 
 const STORE_KEY = "connectors";
 
 const EMPTY: ConnectorConfig = {
   jira: { baseUrl: "", email: "", apiToken: "" },
-  gemini: { apiKey: "", model: "gemini-3.5-flash-lite" },
+  gemini: { apiKey: "", model: "gemini-3.6-flash" },
   github: { repo: "", token: "" },
+  slack: { botToken: "", appToken: "", defaultChannel: "" },
 };
 
 /** Env vars act only as an initial seed for first run (handy for the maintainer's own
@@ -37,11 +43,16 @@ function envSeed(): ConnectorConfig {
     },
     gemini: {
       apiKey: process.env.GEMINI_API_KEY ?? "",
-      model: process.env.GEMINI_MODEL ?? "gemini-3.5-flash-lite",
+      model: process.env.GEMINI_MODEL ?? "gemini-3.6-flash",
     },
     github: {
       repo: process.env.GITHUB_REPO ?? "",
       token: process.env.GITHUB_TOKEN ?? "",
+    },
+    slack: {
+      botToken: process.env.SLACK_BOT_TOKEN ?? "",
+      appToken: process.env.SLACK_APP_TOKEN ?? "",
+      defaultChannel: process.env.SLACK_DEFAULT_CHANNEL ?? "",
     },
   };
 }
@@ -64,6 +75,11 @@ export async function loadConnectorConfig(): Promise<ConnectorConfig> {
       repo: stored.github?.repo || seed.github.repo,
       token: stored.github?.token || seed.github.token,
     },
+    slack: {
+      botToken: stored.slack?.botToken || seed.slack.botToken,
+      appToken: stored.slack?.appToken || seed.slack.appToken,
+      defaultChannel: stored.slack?.defaultChannel || seed.slack.defaultChannel,
+    },
   };
 }
 
@@ -71,18 +87,20 @@ export async function saveConnectorConfig(partial: {
   jira?: Partial<ConnectorConfig["jira"]>;
   gemini?: Partial<ConnectorConfig["gemini"]>;
   github?: Partial<ConnectorConfig["github"]>;
+  slack?: Partial<ConnectorConfig["slack"]>;
 }): Promise<ConnectorConfig> {
   const current = await loadConnectorConfig();
   const next: ConnectorConfig = {
     jira: { ...current.jira, ...partial.jira },
     gemini: { ...current.gemini, ...partial.gemini },
     github: { ...current.github, ...partial.github },
+    slack: { ...current.slack, ...partial.slack },
   };
   await writeJson(STORE_KEY, next);
   return next;
 }
 
-export async function clearConnector(kind: "jira" | "gemini" | "github"): Promise<ConnectorConfig> {
+export async function clearConnector(kind: "jira" | "gemini" | "github" | "slack"): Promise<ConnectorConfig> {
   const current = await loadConnectorConfig();
   const next: ConnectorConfig = {
     ...current,
@@ -117,6 +135,12 @@ export async function connectorStatus() {
       repo: cfg.github.repo,
       tokenMasked: mask(cfg.github.token),
       configured: Boolean(cfg.github.repo && cfg.github.token),
+    },
+    slack: {
+      defaultChannel: cfg.slack?.defaultChannel ?? "",
+      botTokenMasked: mask(cfg.slack?.botToken ?? ""),
+      appTokenMasked: mask(cfg.slack?.appToken ?? ""),
+      configured: Boolean(cfg.slack?.botToken),
     },
   };
 }

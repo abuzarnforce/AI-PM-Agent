@@ -28,3 +28,12 @@ export async function isGithubConfigured(): Promise<boolean> {
   const { repo, token } = await getGithubConfig();
   return Boolean(repo && token);
 }
+
+export async function getSlackConfig() {
+  return (await loadConnectorConfig()).slack;
+}
+
+export async function isSlackConfigured(): Promise<boolean> {
+  const { botToken } = await getSlackConfig();
+  return Boolean(botToken);
+}

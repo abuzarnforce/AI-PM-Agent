@@ -32,13 +32,15 @@ export const NAV: { id: Tab; label: string; icon: LucideIcon; key: string; hint:
   { id: "feedback", label: "Feedback", icon: MessagesSquare, key: "f", hint: "Turn feedback into work" },
   { id: "drafts", label: "Drafts", icon: Inbox, key: "d", hint: "Awaiting your review" },
   { id: "activity", label: "Activity", icon: History, key: "y", hint: "What PM Agent did" },
-  { id: "connections", label: "Connections", icon: Cable, key: "c", hint: "Jira, Gemini, GitHub" },
+  { id: "connections", label: "Connections", icon: Cable, key: "c", hint: "Jira, AI, GitHub" },
 ];
 
 export interface AppStatus {
   jiraConfigured: boolean;
   geminiConfigured: boolean;
+  aiProvider?: "NVIDIA" | "Gemini" | string;
   githubConfigured: boolean;
+  slackConfigured?: boolean;
   jiraBaseUrl: string | null;
 }
 
@@ -70,10 +72,12 @@ export default function Sidebar({
   }, []);
 
   const workspace = status?.jiraBaseUrl ? new URL(status.jiraBaseUrl).hostname.replace(".atlassian.net", "") : null;
+  const aiLabel = status?.aiProvider || "NVIDIA";
   const conns = [
     { label: "Jira", on: status?.jiraConfigured },
-    { label: "Gemini", on: status?.geminiConfigured },
+    { label: aiLabel, on: status?.geminiConfigured },
     { label: "GitHub", on: status?.githubConfigured },
+    { label: "Slack", on: status?.slackConfigured },
   ];
 
   return (

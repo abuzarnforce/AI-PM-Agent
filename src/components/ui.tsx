@@ -276,10 +276,10 @@ export function WorkingState({ steps, interval = 1600 }: { steps: string[]; inte
 /* ------------------------------------------------------------ ErrorState */
 
 function humanize(msg: string): { title: string; detail: string; reconnect: boolean } {
-  if (/gemini is not configured/i.test(msg))
-    return { title: "PM Agent's AI isn't connected yet.", detail: "Add a Gemini API key in Connections to enable answers and drafting.", reconnect: true };
-  if (/jira and gemini must/i.test(msg))
-    return { title: "Jira and Gemini both need to be connected.", detail: "Health checks read Jira and reason with Gemini.", reconnect: true };
+  if (/(?:gemini|nvidia|ai) is not configured/i.test(msg))
+    return { title: "PM Agent's AI isn't connected yet.", detail: "Add an API key in Connections to enable answers and drafting.", reconnect: true };
+  if (/jira and (?:gemini|nvidia|ai) (?:both )?need/i.test(msg) || /jira and gemini must/i.test(msg))
+    return { title: "Jira and AI both need to be connected.", detail: "Health checks read Jira and reason with your AI engine.", reconnect: true };
   if (/jira is not configured/i.test(msg))
     return { title: "Jira isn't connected yet.", detail: "Connect your Jira site to start understanding your product.", reconnect: true };
   if (/github is not configured/i.test(msg))

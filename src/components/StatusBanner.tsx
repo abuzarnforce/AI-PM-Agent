@@ -5,7 +5,8 @@ import { ArrowRight } from "lucide-react";
 import type { AppStatus } from "./Sidebar";
 
 export default function StatusBanner({ status, onConfigure }: { status: AppStatus | null; onConfigure: () => void }) {
-  const missing = status ? [!status.jiraConfigured && "Jira", !status.geminiConfigured && "Gemini"].filter(Boolean) : [];
+  const aiName = status?.aiProvider || "NVIDIA";
+  const missing = status ? [!status.jiraConfigured && "Jira", !status.geminiConfigured && aiName].filter(Boolean) : [];
 
   return (
     <AnimatePresence initial={false}>

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getJiraConfig, isJiraConfigured, isGeminiConfigured, isGithubConfigured, getGithubConfig } from "@/lib/config";
+import { getJiraConfig, isJiraConfigured, isGeminiConfigured, getGeminiConfig, isGithubConfigured, getGithubConfig, isSlackConfigured } from "@/lib/config";
 import { generateText } from "@/lib/gemini";
 import { testAccess } from "@/lib/github";
+import { testSlackAccess } from "@/lib/slack";
 
 async function testJira(): Promise<{ ok: boolean; detail: string }> {
   if (!(await isJiraConfigured())) return { ok: false, detail: "Jira is not configured yet." };
@@ -26,12 +27,15 @@ async function testJira(): Promise<{ ok: boolean; detail: string }> {
 }
 
 async function testGemini(): Promise<{ ok: boolean; detail: string }> {
-  if (!(await isGeminiConfigured())) return { ok: false, detail: "Gemini is not configured yet." };
+  if (!(await isGeminiConfigured())) return { ok: false, detail: "AI engine is not configured yet." };
   try {
+    const config = await getGeminiConfig();
+    const isNvidia = config.apiKey.startsWith("nvapi-");
+    const engineName = isNvidia ? "NVIDIA NIM" : "Gemini";
     const text = await generateText('Reply with exactly one word: "pong".');
-    return { ok: true, detail: `Model responded: ${text.trim().slice(0, 60)}` };
+    return { ok: true, detail: `${engineName} responded: ${text.trim().slice(0, 60)}` };
   } catch (err: any) {
-    return { ok: false, detail: err.message ?? "Could not reach Gemini." };
+    return { ok: false, detail: err.message ?? "Could not reach AI provider." };
   }
 }
 
@@ -48,11 +52,28 @@ async function testGithub(): Promise<{ ok: boolean; detail: string }> {
   }
 }
 
-export async function POST(req: NextRequest) {
-  const { target } = (await req.json()) as { target: "jira" | "gemini" | "github" };
-  if (target !== "jira" && target !== "gemini" && target !== "github") {
-    return NextResponse.json({ error: "target must be 'jira', 'gemini', or 'github'" }, { status: 400 });
+async function testSlack(): Promise<{ ok: boolean; detail: string }> {
+  if (!(await isSlackConfigured())) return { ok: false, detail: "Slack is not configured yet." };
+  try {
+    const auth = await testSlackAccess();
+    return { ok: true, detail: `Connected as @${auth.user} to workspace "${auth.team}" (${auth.url})` };
+  } catch (err: any) {
+    return { ok: false, detail: err.message ?? "Could not reach Slack." };
   }
-  const result = target === "jira" ? await testJira() : target === "gemini" ? await testGemini() : await testGithub();
+}
+
+export async function POST(req: NextRequest) {
+  const { target } = (await req.json()) as { target: "jira" | "gemini" | "github" | "slack" };
+  if (target !== "jira" && target !== "gemini" && target !== "github" && target !== "slack") {
+    return NextResponse.json({ error: "target must be 'jira', 'gemini', 'github', or 'slack'" }, { status: 400 });
+  }
+  const result =
+    target === "jira"
+      ? await testJira()
+      : target === "gemini"
+      ? await testGemini()
+      : target === "github"
+      ? await testGithub()
+      : await testSlack();
   return NextResponse.json(result);
 }

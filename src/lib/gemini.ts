@@ -1,23 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getGeminiConfig, isGeminiConfigured } from "./config";
 
-/** No cached singleton: the API key can change at any time via the Connector UI,
- * so a fresh client is built from the current stored config on every call. */
-async function getClient(): Promise<{ client: GoogleGenerativeAI; model: string }> {
-  if (!(await isGeminiConfigured())) {
-    throw new Error("Gemini is not configured. Connect it from the Connector tab.");
-  }
-  const { apiKey, model } = await getGeminiConfig();
-  return { client: new GoogleGenerativeAI(apiKey), model };
-}
+const RETRY_DELAYS_MS = [500, 1500, 4000];
 
-/** A hard per-day (or otherwise non-recoverable-soon) quota cap — retrying within
- * the same request just burns time, since Google won't lift it for hours. */
 function isDailyQuotaExhausted(message: string): boolean {
   return /PerDay/i.test(message) && /quota/i.test(message);
 }
 
-/** A genuine transient blip (server overload, short per-minute burst) worth retrying. */
 function isTransient(err: unknown): boolean {
   const status = (err as { status?: number })?.status;
   const message = String((err as Error)?.message ?? "");
@@ -25,14 +14,63 @@ function isTransient(err: unknown): boolean {
   return status === 503 || status === 429 || /503|429|overloaded|high demand/i.test(message);
 }
 
-const RETRY_DELAYS_MS = [500, 1500, 4000];
+async function generateTextNvidia(
+  apiKey: string,
+  model: string,
+  prompt: string,
+  systemInstruction?: string
+): Promise<string> {
+  const chosenModel = !model || model.startsWith("gemini") ? "meta/llama-3.2-11b-vision-instruct" : model;
+  const messages: Array<{ role: "system" | "user"; content: string }> = [];
+  if (systemInstruction) {
+    messages.push({ role: "system", content: systemInstruction });
+  }
+  messages.push({ role: "user", content: prompt });
 
-/** Gemini's free tier returns transient 503 ("high demand") / short-burst 429 errors
- * fairly often. Retry a few times with backoff before giving up, so a brief spike on
- * Google's side doesn't surface as a broken feature — but never retry a per-day quota
- * exhaustion, since that won't clear until Google resets it. */
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    try {
+      const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: chosenModel,
+          messages,
+          temperature: 0.2,
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        const detail = errJson.detail || errJson.title || errJson.error?.message || res.statusText;
+        throw new Error(`[NVIDIA NIM Error]: ${res.status} ${detail}`);
+      }
+
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content ?? "";
+    } catch (err) {
+      lastError = err;
+      if (attempt === RETRY_DELAYS_MS.length) break;
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
+    }
+  }
+  throw lastError;
+}
+
 export async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
-  const { client, model } = await getClient();
+  if (!(await isGeminiConfigured())) {
+    throw new Error("AI engine is not configured. Connect it from the Connector tab.");
+  }
+  const { apiKey, model } = await getGeminiConfig();
+
+  if (apiKey.startsWith("nvapi-")) {
+    return generateTextNvidia(apiKey, model, prompt, systemInstruction);
+  }
+
+  const client = new GoogleGenerativeAI(apiKey);
   const generativeModel = client.getGenerativeModel({ model, systemInstruction });
 
   let lastError: unknown;
@@ -61,8 +99,6 @@ export async function generateText(prompt: string, systemInstruction?: string): 
   throw lastError;
 }
 
-/** Asks Gemini to produce strict JSON matching the given shape description.
- * Retries once with a correction prompt if the first response isn't valid JSON. */
 export async function generateJson<T>(prompt: string, systemInstruction?: string): Promise<T> {
   const raw = await generateText(
     `${prompt}\n\nRespond with ONLY valid JSON, no markdown fences, no commentary.`,
@@ -80,5 +116,5 @@ export async function generateJson<T>(prompt: string, systemInstruction?: string
 }
 
 function stripFences(text: string): string {
-  return text.trim().replace(/^```(json)?/i, "").replace(/```$/, "").trim();
+  return text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
 }
