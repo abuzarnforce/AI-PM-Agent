@@ -7,6 +7,7 @@ import StatusBanner from "@/components/StatusBanner";
 import CommandPalette from "@/components/CommandPalette";
 import HomePanel from "@/components/HomePanel";
 import ChatPanel from "@/components/ChatPanel";
+import StandupPanel from "@/components/StandupPanel";
 import HealthCheckPanel from "@/components/HealthCheckPanel";
 import DraftsPanel from "@/components/DraftsPanel";
 import FeedbackCapturePanel from "@/components/FeedbackCapturePanel";
@@ -19,6 +20,7 @@ import { NavContext, type NavIntent, type Tab } from "@/lib/nav";
 const PANELS: Record<Tab, () => JSX.Element> = {
   home: () => <HomePanel />,
   agent: () => <ChatPanel />,
+  standup: () => <StandupPanel />,
   projects: () => <DashboardsPanel />,
   health: () => <HealthCheckPanel />,
   studio: () => <StudioPanel />,

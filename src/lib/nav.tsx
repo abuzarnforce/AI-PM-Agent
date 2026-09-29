@@ -5,6 +5,7 @@ import { createContext, useContext } from "react";
 export type Tab =
   | "home"
   | "agent"
+  | "standup"
   | "projects"
   | "health"
   | "studio"

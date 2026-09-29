@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   Home,
   Sparkles,
+  CalendarCheck,
   FolderKanban,
   HeartPulse,
   PenTool,
@@ -26,6 +27,7 @@ import { Logo } from "./IntelligenceLayer";
 export const NAV: { id: Tab; label: string; icon: LucideIcon; key: string; hint: string }[] = [
   { id: "home", label: "Home", icon: Home, key: "h", hint: "What changed today" },
   { id: "agent", label: "AI Agent", icon: Sparkles, key: "a", hint: "Ask your product anything" },
+  { id: "standup", label: "Standup", icon: CalendarCheck, key: "u", hint: "Daily team execution hub" },
   { id: "projects", label: "Projects", icon: FolderKanban, key: "p", hint: "Live delivery by project" },
   { id: "health", label: "Health", icon: HeartPulse, key: "e", hint: "Epic, sprint and QA health" },
   { id: "studio", label: "Studio", icon: PenTool, key: "s", hint: "Stories, PRDs, BRDs" },
