@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, ArrowUp, Bug, FlaskConical, Inbox, Cable } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useNav } from "@/lib/nav";
-import { getLastProject, readActivity, type ActivityEvent } from "@/lib/activity";
+import { getLastProject, setLastProject, readActivity, type ActivityEvent } from "@/lib/activity";
 import { Badge, Button, FadeIn, Metric, Section, Skeleton, SourceChip, relativeTime, type Tone } from "./ui";
 import IntelligenceLayer from "./IntelligenceLayer";
 
@@ -68,13 +68,33 @@ export default function HomePanel() {
     json("/api/auth/me").then((d) => setUsername(d?.username ?? null));
     json("/api/drafts").then((d) => setDrafts(d?.drafts ?? []));
     json("/api/qa-sheet").then((d) => setQa(d?.snapshot ?? null));
-    json("/api/status").then((s) => {
+    async function loadProjectData(k: string) {
+      setProjectKey(k);
+      json(`/api/dashboard-widgets?projectKey=${encodeURIComponent(k)}`).then(setProject);
+      json(`/api/release-status?projectKey=${encodeURIComponent(k)}&version=${encodeURIComponent("MVP 2.0")}`).then(setRelease);
+    }
+
+    json("/api/status").then(async (s) => {
       setStatus(s);
       if (s?.githubConfigured) json("/api/repo-activity").then((d) => setRepo(d?.snapshot ?? null));
       else setRepo(null);
-      if (s?.jiraConfigured && key) {
-        json(`/api/dashboard-widgets?projectKey=${encodeURIComponent(key)}`).then(setProject);
-        json(`/api/release-status?projectKey=${encodeURIComponent(key)}&version=${encodeURIComponent("MVP 2.0")}`).then(setRelease);
+
+      if (!s?.jiraConfigured) {
+        setProject(null);
+        setRelease(null);
+        return;
+      }
+      if (key) {
+        loadProjectData(key);
+        return;
+      }
+      // No project chosen yet in this browser (e.g. first visit) — if the Jira
+      // site only has one project, use it instead of showing empty widgets
+      // until the PM happens to visit Projects and type it in.
+      const projects = await json("/api/jira-projects");
+      if (projects?.projects?.length === 1) {
+        setLastProject(projects.projects[0].key);
+        loadProjectData(projects.projects[0].key);
       } else {
         setProject(null);
         setRelease(null);

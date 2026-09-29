@@ -140,6 +140,16 @@ export async function searchIssues(jql: string, maxResults = 50): Promise<JiraIs
   return (data.issues ?? []).map((raw: any) => mapIssue(raw, baseUrl));
 }
 
+export interface JiraProject {
+  key: string;
+  name: string;
+}
+
+export async function getProjects(): Promise<JiraProject[]> {
+  const data = await jiraFetch(`/rest/api/3/project/search`);
+  return (data?.values ?? []).map((p: any) => ({ key: p.key, name: p.name }));
+}
+
 export interface JiraVersion {
   id: string;
   name: string;
