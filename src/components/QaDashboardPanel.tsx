@@ -84,6 +84,7 @@ function StackBar({ parts, total }: { parts: { label: string; value: number; col
 function ReleaseCard({ r }: { r: RegressionSummary }) {
   const v = releaseVerdict(r);
   const executed = r.pass + r.fail + r.blocked;
+  const executedPct = r.total ? Math.round((executed / r.total) * 100) : null;
   const passRate = executed ? Math.round((r.pass / executed) * 100) : null;
 
   return (
@@ -95,8 +96,9 @@ function ReleaseCard({ r }: { r: RegressionSummary }) {
         </Badge>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
-        <Metric label="Pass rate" value={passRate != null ? `${passRate}%` : "—"} />
+      <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-5">
+        <Metric label="Executed" value={executedPct != null ? `${executedPct}%` : "—"} caption={`${executed}/${r.total} cases`} />
+        <Metric label="Pass rate" value={passRate != null ? `${passRate}%` : "—"} caption={executed ? `of ${executed} executed` : "nothing executed yet"} />
         <Metric label="Test cases" value={String(r.total)} />
         <Metric label="Blocked" value={String(r.blocked)} tone={r.blocked ? "red" : undefined} />
         <Metric label="Testers executed" value={String(r.testers.length)} caption={r.testers.length ? r.testers.join(", ") : undefined} />
