@@ -17,11 +17,18 @@ interface RegressionSummary {
   failingOrBlocked: { feature: string; scenario: string; assignee: string; result: string; remark: string }[];
 }
 
+interface TestCaseTrackerSummary {
+  total: number;
+  done: number;
+  byAssignee: { assignee: string; total: number; done: number }[];
+  releases?: { release: string; total: number; done: number; byAssignee: { assignee: string; total: number; done: number }[] }[];
+}
+
 interface QaSnapshot {
   uploadedAt: string;
   sourceFileName: string;
   regression: RegressionSummary | null;
-  testcaseTracker: { total: number; done: number; byAssignee: { assignee: string; total: number; done: number }[] } | null;
+  testcaseTracker: TestCaseTrackerSummary | null;
   automation: { total: number; done: number; inProgress: number; notStarted: number } | null;
 }
 
@@ -109,6 +116,7 @@ export default function QaDashboardPanel() {
   const executed = reg ? reg.pass + reg.fail + reg.blocked : 0;
   const passRate = reg && executed ? Math.round((reg.pass / executed) * 100) : null;
   const testerMax = tracker ? Math.max(...tracker.byAssignee.map((a) => a.total), 1) : 1;
+  const mvp2 = tracker?.releases?.find((r) => /2/.test(r.release));
 
   const uploadBtn = (
     <>
@@ -152,6 +160,47 @@ export default function QaDashboardPanel() {
             </div>
             <div className="flex gap-2">{uploadBtn}</div>
           </div>
+
+          <Section title="MVP 2.0 status" description="From the Testcase_Tracker sheet's MVP 2 block." className="!mt-6">
+            {!tracker?.releases ? (
+              <p className="text-sm text-muted">Re-upload the QA sheet to see MVP 2.0 broken out from the overall total.</p>
+            ) : !mvp2 || mvp2.total === 0 ? (
+              <p className="text-sm text-muted">No MVP 2.0 test cases logged yet in the tracker.</p>
+            ) : (
+              <div className="rounded-xl border border-border bg-panel p-5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <div className="text-2xl font-semibold tracking-tight">
+                    {mvp2.done}/{mvp2.total} <span className="text-sm font-normal text-muted">test cases done</span>
+                  </div>
+                  <span className="tabular text-sm text-muted">{Math.round((mvp2.done / mvp2.total) * 100)}%</span>
+                </div>
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-fg/[0.06]">
+                  <motion.div className="h-full rounded-full bg-fg/70" initial={{ width: 0 }} animate={{ width: `${(mvp2.done / mvp2.total) * 100}%` }} />
+                </div>
+                {mvp2.byAssignee.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+                    {[...mvp2.byAssignee]
+                      .sort((a, b) => b.total - a.total)
+                      .map((a) => (
+                        <span key={a.assignee}>
+                          {a.assignee} <span className="tabular font-medium text-fg">{a.done}/{a.total}</span>
+                        </span>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {tracker?.releases && tracker.releases.length > 1 && (
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+                By release:{" "}
+                {tracker.releases.map((r) => (
+                  <span key={r.release}>
+                    {r.release} <span className="tabular font-medium text-fg">{r.done}/{r.total}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </Section>
 
           <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-8 border-y border-border py-6 lg:grid-cols-4">
             <Metric

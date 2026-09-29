@@ -15,6 +15,11 @@ export interface TestCaseTrackerSummary {
   total: number;
   done: number;
   byAssignee: { assignee: string; total: number; done: number }[];
+  /** Testcase_Tracker stacks one table per release (e.g. "MVP 1 Test cases Tracker",
+   * "MVP 2 Test cases Tracker") — split out here so the QA dashboard can show MVP 2.0
+   * status on its own instead of folded into the overall total. Rows before the first
+   * release header are attributed to "MVP 1". */
+  releases: { release: string; total: number; done: number; byAssignee: { assignee: string; total: number; done: number }[] }[];
 }
 
 export interface AutomationSummary {
@@ -125,20 +130,39 @@ function parseTestcaseTracker(wb: XLSX.WorkBook): TestCaseTrackerSummary | null 
   if (rows.length === 0) return null;
 
   const byAssignee = new Map<string, { total: number; done: number }>();
+  const releases = new Map<string, { total: number; done: number; byAssignee: Map<string, { total: number; done: number }> }>();
+  let currentRelease = "MVP 1";
   let total = 0,
     done = 0;
+
+  const emptyRelease = () => ({ total: 0, done: 0, byAssignee: new Map<string, { total: number; done: number }>() });
 
   for (let i = 1; i < rows.length; i++) {
     const userStory = cell(rows[i], 0);
     const assigneeRaw = cell(rows[i], 1);
     const testCaseId = cell(rows[i], 2);
     const status = cell(rows[i], 3);
+
+    // A stacked section header like "MVP 2 Test cases Tracker" — only the first
+    // column is filled, the rest are blank. Switch release context and register it
+    // (even with zero rows so far) so an empty upcoming release still shows as "not started".
+    const releaseMatch = !assigneeRaw && userStory.match(/mvp\s*(\d+(?:\.\d+)?)/i);
+    if (releaseMatch) {
+      currentRelease = `MVP ${releaseMatch[1]}`;
+      if (!releases.has(currentRelease)) releases.set(currentRelease, emptyRelease());
+      continue;
+    }
+
     if (!userStory || !assigneeRaw || status.toLowerCase() === "testcase status") continue; // header/blank rows
     if (!testCaseId) continue;
 
     total++;
     const isDone = status.toLowerCase() === "done";
     if (isDone) done++;
+
+    const release = releases.get(currentRelease) ?? emptyRelease();
+    release.total++;
+    if (isDone) release.done++;
 
     // A handful of rows credit a test case to more than one tester in a single
     // comma-separated cell (e.g. "Sai Krishna ,Nikitha") — split so both get credit
@@ -152,7 +176,13 @@ function parseTestcaseTracker(wb: XLSX.WorkBook): TestCaseTrackerSummary | null 
       entry.total++;
       if (isDone) entry.done++;
       byAssignee.set(assignee, entry);
+
+      const relEntry = release.byAssignee.get(assignee) ?? { total: 0, done: 0 };
+      relEntry.total++;
+      if (isDone) relEntry.done++;
+      release.byAssignee.set(assignee, relEntry);
     }
+    releases.set(currentRelease, release);
   }
 
   if (total === 0) return null;
@@ -160,6 +190,12 @@ function parseTestcaseTracker(wb: XLSX.WorkBook): TestCaseTrackerSummary | null 
     total,
     done,
     byAssignee: [...byAssignee.entries()].map(([assignee, v]) => ({ assignee, ...v })),
+    releases: [...releases.entries()].map(([release, v]) => ({
+      release,
+      total: v.total,
+      done: v.done,
+      byAssignee: [...v.byAssignee.entries()].map(([assignee, vv]) => ({ assignee, ...vv })),
+    })),
   };
 }
 
