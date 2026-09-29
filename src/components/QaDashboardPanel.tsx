@@ -4,15 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { FlaskConical, Upload } from "lucide-react";
 import { logActivity } from "@/lib/activity";
-import { Button, EmptyState, ErrorState, Metric, Section, Skeleton, relativeTime } from "./ui";
+import { Badge, Button, EmptyState, ErrorState, Metric, Section, Skeleton, relativeTime, type Tone } from "./ui";
 
 interface RegressionSummary {
+  release: string;
   total: number;
   pass: number;
   fail: number;
   blocked: number;
+  inProgress: number;
   notExecuted: number;
   executionPct: number;
+  testers: string[];
   byFeature: { feature: string; pass: number; fail: number; blocked: number; notExecuted: number }[];
   failingOrBlocked: { feature: string; scenario: string; assignee: string; result: string; remark: string }[];
 }
@@ -28,6 +31,7 @@ interface QaSnapshot {
   uploadedAt: string;
   sourceFileName: string;
   regression: RegressionSummary | null;
+  regressionByRelease: RegressionSummary[];
   testcaseTracker: TestCaseTrackerSummary | null;
   automation: { total: number; done: number; inProgress: number; notStarted: number } | null;
 }
@@ -36,8 +40,20 @@ const C = {
   pass: "rgb(var(--tone-green))",
   fail: "rgb(var(--tone-red))",
   blocked: "rgb(var(--tone-orange))",
+  progress: "rgb(var(--tone-blue))",
   idle: "rgb(var(--color-fg) / 0.12)",
 };
+
+/** Not a fabricated AI judgment — a plain rule over the counts already on screen
+ * (blocked > 0, any failures, or nothing executed yet), so the badge always
+ * traces back to a number the PM can see right next to it. */
+function releaseVerdict(r: RegressionSummary): { label: string; tone: Tone } {
+  if (r.blocked > 0) return { label: "Blocked", tone: "red" };
+  if (r.fail > 0) return { label: "At risk", tone: "amber" };
+  if (r.pass === 0 && r.inProgress === 0) return { label: "Not started", tone: "neutral" };
+  if (r.executionPct < 100) return { label: "In progress", tone: "amber" };
+  return { label: "On track", tone: "green" };
+}
 
 function StackBar({ parts, total }: { parts: { label: string; value: number; color: string }[]; total: number }) {
   return (
@@ -61,6 +77,57 @@ function StackBar({ parts, total }: { parts: { label: string; value: number; col
           </span>
         ))}
       </div>
+    </div>
+  );
+}
+
+function ReleaseCard({ r }: { r: RegressionSummary }) {
+  const v = releaseVerdict(r);
+  const executed = r.pass + r.fail + r.blocked;
+  const passRate = executed ? Math.round((r.pass / executed) * 100) : null;
+
+  return (
+    <div className="rounded-xl border border-border bg-panel p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="text-lg font-semibold tracking-tight">{r.release}</div>
+        <Badge tone={v.tone} dot>
+          {v.label}
+        </Badge>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+        <Metric label="Pass rate" value={passRate != null ? `${passRate}%` : "—"} />
+        <Metric label="Test cases" value={String(r.total)} />
+        <Metric label="Blocked" value={String(r.blocked)} tone={r.blocked ? "red" : undefined} />
+        <Metric label="Testers executed" value={String(r.testers.length)} caption={r.testers.length ? r.testers.join(", ") : undefined} />
+      </div>
+
+      <div className="mt-4">
+        <StackBar
+          total={r.total}
+          parts={[
+            { label: "Pass", value: r.pass, color: C.pass },
+            { label: "Fail", value: r.fail, color: C.fail },
+            { label: "Blocked", value: r.blocked, color: C.blocked },
+            { label: "In progress", value: r.inProgress, color: C.progress },
+            { label: "Not executed", value: r.notExecuted, color: C.idle },
+          ]}
+        />
+      </div>
+
+      {r.failingOrBlocked.length > 0 && (
+        <div className="mt-4 space-y-1.5 border-t border-border pt-3">
+          {r.failingOrBlocked.slice(0, 4).map((f, i) => (
+            <div key={i} className="flex gap-2 text-xs">
+              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-sm" style={{ backgroundColor: f.result === "Fail" ? C.fail : C.blocked }} />
+              <span className="text-muted">
+                <span className="text-fg">{f.feature}</span> — {f.scenario} ({f.assignee || "unassigned"})
+              </span>
+            </div>
+          ))}
+          {r.failingOrBlocked.length > 4 && <div className="pl-3.5 text-xs text-subtle">+{r.failingOrBlocked.length - 4} more</div>}
+        </div>
+      )}
     </div>
   );
 }
@@ -111,12 +178,12 @@ export default function QaDashboardPanel() {
   }
 
   const reg = snapshot?.regression;
+  const releases = snapshot?.regressionByRelease ?? [];
   const tracker = snapshot?.testcaseTracker;
   const automation = snapshot?.automation;
   const executed = reg ? reg.pass + reg.fail + reg.blocked : 0;
   const passRate = reg && executed ? Math.round((reg.pass / executed) * 100) : null;
   const testerMax = tracker ? Math.max(...tracker.byAssignee.map((a) => a.total), 1) : 1;
-  const mvp2 = tracker?.releases?.find((r) => /2/.test(r.release));
 
   const uploadBtn = (
     <>
@@ -161,48 +228,23 @@ export default function QaDashboardPanel() {
             <div className="flex gap-2">{uploadBtn}</div>
           </div>
 
-          <Section title="MVP 2.0 status" description="From the Testcase_Tracker sheet's MVP 2 block." className="!mt-6">
-            {!tracker?.releases ? (
-              <p className="text-sm text-muted">Re-upload the QA sheet to see MVP 2.0 broken out from the overall total.</p>
-            ) : !mvp2 || mvp2.total === 0 ? (
-              <p className="text-sm text-muted">No MVP 2.0 test cases logged yet in the tracker.</p>
+          <Section
+            title="By MVP release"
+            description={releases.length ? `${releases.length} release${releases.length === 1 ? "" : "s"} tracked — regression status, blockers, testers and test case counts.` : undefined}
+            className="!mt-6"
+          >
+            {releases.length === 0 ? (
+              <p className="text-sm text-muted">No release-tagged Regression sheet found (expected a sheet name like "Regression MVP 2.0").</p>
             ) : (
-              <div className="rounded-xl border border-border bg-panel p-5">
-                <div className="flex items-baseline justify-between gap-3">
-                  <div className="text-2xl font-semibold tracking-tight">
-                    {mvp2.done}/{mvp2.total} <span className="text-sm font-normal text-muted">test cases done</span>
-                  </div>
-                  <span className="tabular text-sm text-muted">{Math.round((mvp2.done / mvp2.total) * 100)}%</span>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-fg/[0.06]">
-                  <motion.div className="h-full rounded-full bg-fg/70" initial={{ width: 0 }} animate={{ width: `${(mvp2.done / mvp2.total) * 100}%` }} />
-                </div>
-                {mvp2.byAssignee.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
-                    {[...mvp2.byAssignee]
-                      .sort((a, b) => b.total - a.total)
-                      .map((a) => (
-                        <span key={a.assignee}>
-                          {a.assignee} <span className="tabular font-medium text-fg">{a.done}/{a.total}</span>
-                        </span>
-                      ))}
-                  </div>
-                )}
-              </div>
-            )}
-            {tracker?.releases && tracker.releases.length > 1 && (
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
-                By release:{" "}
-                {tracker.releases.map((r) => (
-                  <span key={r.release}>
-                    {r.release} <span className="tabular font-medium text-fg">{r.done}/{r.total}</span>
-                  </span>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {releases.map((r) => (
+                  <ReleaseCard key={r.release} r={r} />
                 ))}
               </div>
             )}
           </Section>
 
-          <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-8 border-y border-border py-6 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 border-y border-border py-6 lg:grid-cols-4">
             <Metric
               label="Pass rate (executed)"
               value={passRate != null ? `${passRate}%` : "—"}
@@ -214,43 +256,8 @@ export default function QaDashboardPanel() {
             <Metric label="Automated" value={automation ? `${automation.done}/${automation.total}` : "—"} caption={automation ? `${automation.inProgress} in progress` : undefined} />
           </div>
 
-          {reg && (
-            <Section title="Are we ready to release?" description="Regression results across the whole suite." className="!mt-10">
-              <StackBar
-                total={reg.total}
-                parts={[
-                  { label: "Pass", value: reg.pass, color: C.pass },
-                  { label: "Fail", value: reg.fail, color: C.fail },
-                  { label: "Blocked", value: reg.blocked, color: C.blocked },
-                  { label: "Not executed", value: reg.notExecuted, color: C.idle },
-                ]}
-              />
-            </Section>
-          )}
-
-          {reg && reg.failingOrBlocked.length > 0 && (
-            <Section title="What's failing right now?" description={`${reg.failingOrBlocked.length} scenarios, from the Regression sheet.`}>
-              <ul className="divide-hairline border-y border-border">
-                {reg.failingOrBlocked.map((r, i) => (
-                  <li key={i} className="flex gap-3 py-3 text-sm">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-sm" style={{ backgroundColor: r.result === "Fail" ? C.fail : C.blocked }} />
-                    <div className="min-w-0">
-                      <div>
-                        <span className="font-medium">{r.feature}</span> — {r.scenario}
-                      </div>
-                      <div className="mt-0.5 text-xs text-muted">
-                        {r.result} · {r.assignee}
-                        {r.remark ? ` · ${r.remark}` : ""}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Section>
-          )}
-
           {reg && reg.byFeature.length > 0 && (
-            <Section title="Where are defects concentrated?" description="Results by feature, most failures first.">
+            <Section title="Where are defects concentrated?" description={`${reg.release} — results by feature, most failures first.`}>
               <div className="space-y-3">
                 {[...reg.byFeature]
                   .sort((a, b) => b.fail + b.blocked - (a.fail + a.blocked))
