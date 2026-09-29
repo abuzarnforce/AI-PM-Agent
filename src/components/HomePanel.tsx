@@ -53,6 +53,7 @@ export default function HomePanel() {
   const [qa, setQa] = useState<any>(undefined);
   const [repo, setRepo] = useState<any>(undefined);
   const [project, setProject] = useState<any>(undefined);
+  const [release, setRelease] = useState<any>(undefined);
   const [projectKey, setProjectKey] = useState("");
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [ask, setAsk] = useState("");
@@ -71,8 +72,13 @@ export default function HomePanel() {
       setStatus(s);
       if (s?.githubConfigured) json("/api/repo-activity").then((d) => setRepo(d?.snapshot ?? null));
       else setRepo(null);
-      if (s?.jiraConfigured && key) json(`/api/dashboard-widgets?projectKey=${encodeURIComponent(key)}`).then(setProject);
-      else setProject(null);
+      if (s?.jiraConfigured && key) {
+        json(`/api/dashboard-widgets?projectKey=${encodeURIComponent(key)}`).then(setProject);
+        json(`/api/release-status?projectKey=${encodeURIComponent(key)}&version=${encodeURIComponent("MVP 2.0")}`).then(setRelease);
+      } else {
+        setProject(null);
+        setRelease(null);
+      }
     });
   }, []);
 
@@ -274,6 +280,31 @@ export default function HomePanel() {
         )}
       </Section>
 
+      {/* Release status */}
+      {release !== undefined && release !== null && (
+        <Section
+          className="!mt-12"
+          title={release.found ? `Release: ${release.version}` : "Release status"}
+          description={release.found ? `${release.total} issues in ${projectKey} tagged for this release.` : undefined}
+          action={
+            release.found ? (
+              <a href={release.jiraUrl} target="_blank" rel="noreferrer" className="text-[13px] font-medium text-accent hover:text-accent-hover">
+                Open in Jira
+              </a>
+            ) : undefined
+          }
+        >
+          {release.found ? (
+            <ReleaseDonut total={release.total} statusBreakdown={release.statusBreakdown} />
+          ) : (
+            <p className="text-sm text-muted">
+              No version named "MVP 2.0" found in {projectKey}.
+              {release.availableVersions?.length > 0 && ` Versions available: ${release.availableVersions.join(", ")}.`}
+            </p>
+          )}
+        </Section>
+      )}
+
       {/* Ask */}
       <Section title="Ask your product anything">
         <form
@@ -343,6 +374,73 @@ export default function HomePanel() {
           )}
         </Section>
       </div>
+    </div>
+  );
+}
+
+const STATUS_TONE: { test: RegExp; hex: string }[] = [
+  { test: /ready for deployment|^done$|closed/i, hex: "#34d399" }, // green
+  { test: /qa failed|blocked|not a defect/i, hex: "#f87171" }, // red
+  { test: /code review/i, hex: "#a78bfa" }, // violet
+  { test: /qa/i, hex: "#fbbf24" }, // amber
+  { test: /progress|to do|enhancement/i, hex: "#38bdf8" }, // blue
+];
+function statusColor(status: string): string {
+  return STATUS_TONE.find((t) => t.test.test(status))?.hex ?? "rgb(var(--color-fg) / 0.3)";
+}
+
+/** A plain SVG ring chart — no charting library, just stacked <circle> strokes
+ * with a running dash offset. Fine at this size and this few segments. */
+function ReleaseDonut({ total, statusBreakdown }: { total: number; statusBreakdown: { status: string; count: number }[] }) {
+  const size = 180;
+  const thickness = 24;
+  const r = (size - thickness) / 2;
+  const circumference = 2 * Math.PI * r;
+  let offset = 0;
+
+  return (
+    <div className="flex flex-col items-center gap-8 sm:flex-row">
+      <div className="relative shrink-0" style={{ width: size, height: size }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgb(var(--color-fg) / 0.06)" strokeWidth={thickness} />
+          {statusBreakdown
+            .filter((s) => s.count > 0)
+            .map((s) => {
+              const dash = total ? (s.count / total) * circumference : 0;
+              const el = (
+                <circle
+                  key={s.status}
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={r}
+                  fill="none"
+                  stroke={statusColor(s.status)}
+                  strokeWidth={thickness}
+                  strokeDasharray={`${dash} ${circumference - dash}`}
+                  strokeDashoffset={-offset}
+                  transform={`rotate(-90 ${size / 2} ${size / 2})`}
+                />
+              );
+              offset += dash;
+              return el;
+            })}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="tabular text-2xl font-semibold tracking-tight">{total}</div>
+          <div className="text-[11px] text-muted">issues</div>
+        </div>
+      </div>
+      <ul className="min-w-0 flex-1 space-y-1.5">
+        {statusBreakdown.map((s) => (
+          <li key={s.status} className="flex items-center justify-between gap-3 text-sm">
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: statusColor(s.status) }} />
+              <span className="truncate">{s.status}</span>
+            </span>
+            <span className="tabular shrink-0 font-medium">{s.count}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

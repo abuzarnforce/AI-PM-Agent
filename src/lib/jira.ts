@@ -140,6 +140,39 @@ export async function searchIssues(jql: string, maxResults = 50): Promise<JiraIs
   return (data.issues ?? []).map((raw: any) => mapIssue(raw, baseUrl));
 }
 
+export interface JiraVersion {
+  id: string;
+  name: string;
+  released: boolean;
+}
+
+export async function getVersions(projectKey: string): Promise<JiraVersion[]> {
+  const data = await jiraFetch(`/rest/api/3/project/${encodeURIComponent(projectKey)}/versions`);
+  return (data ?? []).map((v: any) => ({ id: v.id, name: v.name, released: !!v.released }));
+}
+
+/** Exact status counts for a JQL scope (e.g. one fixVersion) — approximateCount
+ * only gives a total, not a breakdown, so this pages through /search/jql fetching
+ * just the status field (light payload) and tallies client-side. Capped at a few
+ * pages so a huge scope can't turn a dashboard widget into a slow crawl. */
+export async function getStatusBreakdown(jql: string, maxPages = 5): Promise<{ status: string; count: number }[]> {
+  const counts = new Map<string, number>();
+  let nextPageToken: string | undefined;
+  for (let page = 0; page < maxPages; page++) {
+    const data = await jiraFetch(`/rest/api/3/search/jql`, {
+      method: "POST",
+      body: JSON.stringify({ jql, maxResults: 100, fields: ["status"], ...(nextPageToken ? { nextPageToken } : {}) }),
+    });
+    for (const raw of data.issues ?? []) {
+      const name = raw.fields?.status?.name ?? "Unknown";
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+    if (data.isLast || !data.nextPageToken) break;
+    nextPageToken = data.nextPageToken;
+  }
+  return [...counts.entries()].map(([status, count]) => ({ status, count })).sort((a, b) => b.count - a.count);
+}
+
 export async function getIssue(key: string): Promise<JiraIssue> {
   const [raw, { baseUrl }] = await Promise.all([jiraFetch(`/rest/api/3/issue/${key}`), getJiraConfig()]);
   return mapIssue(raw, baseUrl);
