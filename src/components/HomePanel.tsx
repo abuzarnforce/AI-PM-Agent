@@ -418,6 +418,11 @@ function ReleaseDonut({ total, statusBreakdown }: { total: number; statusBreakdo
   const circumference = 2 * Math.PI * r;
   let offset = 0;
 
+  const readyCount = statusBreakdown
+    .filter((s) => STATUS_TONE[0].test.test(s.status))
+    .reduce((sum, s) => sum + s.count, 0);
+  const readyPct = total ? Math.round((readyCount / total) * 100) : null;
+
   return (
     <div className="flex flex-col items-center gap-8 sm:flex-row">
       <div className="relative shrink-0" style={{ width: size, height: size }}>
@@ -446,8 +451,8 @@ function ReleaseDonut({ total, statusBreakdown }: { total: number; statusBreakdo
             })}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="tabular text-2xl font-semibold tracking-tight">{total}</div>
-          <div className="text-[11px] text-muted">issues</div>
+          <div className="tabular text-2xl font-semibold tracking-tight">{readyPct != null ? `${readyPct}%` : total}</div>
+          <div className="text-[11px] text-muted">{readyPct != null ? `${readyCount} of ${total} ready` : "issues"}</div>
         </div>
       </div>
       <ul className="min-w-0 flex-1 space-y-1.5">
