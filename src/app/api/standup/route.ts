@@ -39,6 +39,8 @@ export async function GET(req: NextRequest) {
   const now = Date.now();
   const isOverdue = (due: string | null) => !!due && new Date(due).getTime() < now;
 
+  const absentCount = team.filter((m) => updates.find((u) => u.memberId === m.id)?.present === false).length;
+
   const kpis = {
     teamMembers: team.length,
     inProgress: allIssues.filter((i) => /in progress/i.test(i.status)).length,
@@ -49,6 +51,8 @@ export async function GET(req: NextRequest) {
       followups.filter((f) => f.status !== "Completed" && f.status !== "Cancelled" && isOverdue(f.dueDate)).length +
       blockers.filter((b) => b.status !== "Resolved" && b.status !== "Closed" && Date.now() - new Date(b.reportedAt).getTime() > 3 * 86400000).length,
     atRisk: updates.filter((u) => u.confidence === "at_risk" || u.confidence === "blocked").length,
+    present: team.length - absentCount,
+    absent: absentCount,
   };
 
   return NextResponse.json({ date, team, updates, followups, blockers, jiraByMember, jiraError, kpis });

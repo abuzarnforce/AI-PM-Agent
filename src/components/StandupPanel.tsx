@@ -31,7 +31,7 @@ interface StandupData {
   blockers: Blocker[];
   jiraByMember: Record<string, any[]>;
   jiraError: string | null;
-  kpis: { teamMembers: number; inProgress: number; completed: number; blocked: number; followUps: number; overdue: number; atRisk: number };
+  kpis: { teamMembers: number; inProgress: number; completed: number; blocked: number; followUps: number; overdue: number; atRisk: number; present: number; absent: number };
 }
 
 export default function StandupPanel() {
@@ -110,9 +110,11 @@ export default function StandupPanel() {
             </div>
           )}
 
-          <div className="mb-8 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4 lg:grid-cols-7">
+          <div className="mb-8 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4 lg:grid-cols-9">
             {[
               { label: "Team Members", value: data.kpis.teamMembers },
+              { label: "Present", value: data.kpis.present },
+              { label: "Absent", value: data.kpis.absent, tone: data.kpis.absent ? "amber" : undefined },
               { label: "In Progress", value: data.kpis.inProgress },
               { label: "Completed", value: data.kpis.completed },
               { label: "Blocked", value: data.kpis.blocked, tone: data.kpis.blocked ? "red" : undefined },
@@ -218,9 +220,36 @@ function TeamView({ date, data, jiraBaseUrl, onReload }: { date: string; data: S
     );
   }
 
+  const present = data.team.filter((m) => data.updates.find((u) => u.memberId === m.id)?.present !== false);
+  const absent = data.team.filter((m) => data.updates.find((u) => u.memberId === m.id)?.present === false);
+
   return (
     <Section title="Today's Standup" action={<Button size="sm" icon={UserPlus} onClick={() => setAddingMember((v) => !v)}>Add member</Button>}>
       {addingMember && <AddMemberForm onDone={() => { setAddingMember(false); onReload(); }} />}
+
+      <div className="mb-4 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-lg border border-border bg-panel p-3">
+          <div className="text-[11px] font-medium uppercase tracking-wide text-subtle">Who's present today ({present.length})</div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {present.map((m) => (
+              <Badge key={m.id} tone="green">{m.name}</Badge>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-lg border border-border bg-panel p-3">
+          <div className="text-[11px] font-medium uppercase tracking-wide text-subtle">Who's absent today ({absent.length})</div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {absent.length === 0 ? (
+              <span className="text-xs text-muted">No one — full team present</span>
+            ) : (
+              absent.map((m) => (
+                <Badge key={m.id} tone="amber">{m.name}</Badge>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-3">
         {data.team.map((member) => (
           <MemberCard
@@ -296,7 +325,19 @@ function MemberCard({
   const [blockers, setBlockers] = useState(update?.blockers ?? "");
   const [confidence, setConfidence] = useState<Confidence>(update?.confidence ?? "on_track");
   const [saving, setSaving] = useState(false);
+  const [present, setPresent] = useState(update?.present ?? true);
   const open = mode !== "closed";
+
+  async function toggleAttendance() {
+    const next = !present;
+    setPresent(next);
+    await fetch("/api/standup/updates", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date, memberId: member.id, present: next }),
+    });
+    onReload();
+  }
 
   function startEdit() {
     setYesterday(update?.yesterday ?? "");
@@ -311,7 +352,7 @@ function MemberCard({
     await fetch("/api/standup/updates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date, memberId: member.id, yesterday, today, blockers, confidence, relatedIssueKeys: issues.map((i) => i.key) }),
+      body: JSON.stringify({ date, memberId: member.id, yesterday, today, blockers, confidence, present, relatedIssueKeys: issues.map((i) => i.key) }),
     });
     setSaving(false);
     setMode("view");
@@ -339,6 +380,12 @@ function MemberCard({
         </button>
         <div className="flex shrink-0 items-center gap-3">
           {issues.length > 0 && <span className="text-xs text-subtle">{issues.length} Jira issue{issues.length === 1 ? "" : "s"}</span>}
+          <button
+            onClick={toggleAttendance}
+            className={`btn rounded-md border px-2 py-0.5 text-[11px] font-medium ${present ? "border-border text-muted hover:text-fg" : "border-amber-500/30 bg-amber-500/10 text-amber-400"}`}
+          >
+            {present ? "Present" : "Absent"}
+          </button>
           {update && (
             <Badge tone={CONFIDENCE_TONE[update.confidence as Confidence]} dot>
               {CONFIDENCE_LABEL[update.confidence as Confidence]}

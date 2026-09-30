@@ -20,6 +20,7 @@ export interface StandupUpdate {
   confidence: Confidence;
   notes: string;
   relatedIssueKeys: string[];
+  present: boolean; // defaults to true — absence must be marked explicitly
   updatedAt: string;
 }
 
@@ -109,6 +110,35 @@ export async function upsertUpdate(
     return existing;
   }
   const record: StandupUpdate = { id: randomUUID(), updatedAt, ...input };
+  all.push(record);
+  await save(UPDATES_KEY, all);
+  return record;
+}
+
+/** Marks a member present/absent for a date without touching their standup text, if any. */
+export async function setAttendance(date: string, memberId: string, present: boolean): Promise<StandupUpdate> {
+  const all = await load<StandupUpdate>(UPDATES_KEY);
+  const existing = all.find((u) => u.date === date && u.memberId === memberId);
+  const updatedAt = new Date().toISOString();
+  if (existing) {
+    existing.present = present;
+    existing.updatedAt = updatedAt;
+    await save(UPDATES_KEY, all);
+    return existing;
+  }
+  const record: StandupUpdate = {
+    id: randomUUID(),
+    date,
+    memberId,
+    yesterday: "",
+    today: "",
+    blockers: "",
+    confidence: "on_track",
+    notes: "",
+    relatedIssueKeys: [],
+    present,
+    updatedAt,
+  };
   all.push(record);
   await save(UPDATES_KEY, all);
   return record;
