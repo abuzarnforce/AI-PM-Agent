@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Plus, Sparkles, Trash2, UserPlus, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Sparkles, Trash2, UserPlus, Users } from "lucide-react";
 import { useJiraBaseUrl, linkifyTicketKeys } from "@/lib/useJiraBaseUrl";
 import { logActivity } from "@/lib/activity";
 import type { Blocker, Confidence, FollowUp, TeamMember } from "@/lib/standup";
@@ -289,12 +289,22 @@ function MemberCard({
   jiraBaseUrl: string | null;
   onReload: () => void;
 }) {
-  const [open, setOpen] = useState(!update);
+  // "closed": card collapsed. "view": read-only saved update. "edit": editable form.
+  const [mode, setMode] = useState<"closed" | "view" | "edit">(update ? "closed" : "edit");
   const [yesterday, setYesterday] = useState(update?.yesterday ?? "");
   const [today, setToday] = useState(update?.today ?? "");
   const [blockers, setBlockers] = useState(update?.blockers ?? "");
   const [confidence, setConfidence] = useState<Confidence>(update?.confidence ?? "on_track");
   const [saving, setSaving] = useState(false);
+  const open = mode !== "closed";
+
+  function startEdit() {
+    setYesterday(update?.yesterday ?? "");
+    setToday(update?.today ?? "");
+    setBlockers(update?.blockers ?? "");
+    setConfidence(update?.confidence ?? "on_track");
+    setMode("edit");
+  }
 
   async function save() {
     setSaving(true);
@@ -304,7 +314,7 @@ function MemberCard({
       body: JSON.stringify({ date, memberId: member.id, yesterday, today, blockers, confidence, relatedIssueKeys: issues.map((i) => i.key) }),
     });
     setSaving(false);
-    setOpen(false);
+    setMode("view");
     onReload();
   }
 
@@ -317,7 +327,10 @@ function MemberCard({
   return (
     <div className="rounded-lg border border-border bg-panel">
       <div className="flex w-full items-center justify-between gap-3 px-4 py-3">
-        <button onClick={() => setOpen((v) => !v)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+        <button
+          onClick={() => setMode((m) => (m === "closed" ? (update ? "view" : "edit") : "closed"))}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        >
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fg/10 text-[12px] font-semibold uppercase">{member.name.slice(0, 1)}</span>
           <div className="min-w-0">
             <div className="truncate text-sm font-medium">{member.name}</div>
@@ -326,9 +339,11 @@ function MemberCard({
         </button>
         <div className="flex shrink-0 items-center gap-3">
           {issues.length > 0 && <span className="text-xs text-subtle">{issues.length} Jira issue{issues.length === 1 ? "" : "s"}</span>}
-          <Badge tone={CONFIDENCE_TONE[(update?.confidence ?? confidence) as Confidence]} dot>
-            {CONFIDENCE_LABEL[(update?.confidence ?? confidence) as Confidence]}
-          </Badge>
+          {update && (
+            <Badge tone={CONFIDENCE_TONE[update.confidence as Confidence]} dot>
+              {CONFIDENCE_LABEL[update.confidence as Confidence]}
+            </Badge>
+          )}
           <button onClick={remove} className="btn text-muted hover:text-red-400" aria-label={`Remove ${member.name}`} title="Remove from team">
             <Trash2 size={14} />
           </button>
@@ -351,35 +366,64 @@ function MemberCard({
             </div>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Yesterday">
-              <textarea value={yesterday} onChange={(e) => setYesterday(e.target.value)} rows={2} className={`${inputCls} resize-none`} placeholder="What did you complete yesterday?" />
-            </Field>
-            <Field label="Today">
-              <textarea value={today} onChange={(e) => setToday(e.target.value)} rows={2} className={`${inputCls} resize-none`} placeholder="What are you planning to work on today?" />
-            </Field>
-          </div>
-          <Field label="Blockers">
-            <textarea value={blockers} onChange={(e) => setBlockers(e.target.value)} rows={2} className={`${inputCls} resize-none`} placeholder="Are you blocked by anything?" />
-          </Field>
-          <Field label="Confidence">
-            <div className="flex gap-2">
-              {(["on_track", "at_risk", "blocked"] as Confidence[]).map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setConfidence(c)}
-                  className={`btn rounded-md border px-2.5 py-1 text-xs font-medium ${confidence === c ? "border-accent bg-accent/10 text-accent" : "border-border text-muted hover:text-fg"}`}
-                >
-                  {CONFIDENCE_LABEL[c]}
-                </button>
-              ))}
-            </div>
-          </Field>
-          <div className="flex justify-end gap-2">
-            <Button size="sm" loading={saving} variant="primary" onClick={save}>
-              Save update
-            </Button>
-          </div>
+          {mode === "view" && update ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Yesterday">
+                  <p className="whitespace-pre-wrap text-sm">{update.yesterday || <span className="text-muted">—</span>}</p>
+                </Field>
+                <Field label="Today">
+                  <p className="whitespace-pre-wrap text-sm">{update.today || <span className="text-muted">—</span>}</p>
+                </Field>
+              </div>
+              <Field label="Blockers">
+                <p className="whitespace-pre-wrap text-sm">{update.blockers || <span className="text-muted">—</span>}</p>
+              </Field>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-subtle">Saved</span>
+                <Button size="sm" icon={Pencil} onClick={startEdit}>
+                  Edit
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Yesterday">
+                  <textarea value={yesterday} onChange={(e) => setYesterday(e.target.value)} rows={2} className={`${inputCls} resize-none`} placeholder="What did you complete yesterday?" />
+                </Field>
+                <Field label="Today">
+                  <textarea value={today} onChange={(e) => setToday(e.target.value)} rows={2} className={`${inputCls} resize-none`} placeholder="What are you planning to work on today?" />
+                </Field>
+              </div>
+              <Field label="Blockers">
+                <textarea value={blockers} onChange={(e) => setBlockers(e.target.value)} rows={2} className={`${inputCls} resize-none`} placeholder="Are you blocked by anything?" />
+              </Field>
+              <Field label="Confidence">
+                <div className="flex gap-2">
+                  {(["on_track", "at_risk", "blocked"] as Confidence[]).map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setConfidence(c)}
+                      className={`btn rounded-md border px-2.5 py-1 text-xs font-medium ${confidence === c ? "border-accent bg-accent/10 text-accent" : "border-border text-muted hover:text-fg"}`}
+                    >
+                      {CONFIDENCE_LABEL[c]}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+              <div className="flex justify-end gap-2">
+                {update && (
+                  <Button size="sm" variant="ghost" onClick={() => setMode("view")}>
+                    Cancel
+                  </Button>
+                )}
+                <Button size="sm" loading={saving} variant="primary" onClick={save}>
+                  Save update
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
