@@ -7,6 +7,7 @@ export type Tab =
   | "agent"
   | "standup"
   | "projects"
+  | "roadmap"
   | "health"
   | "studio"
   | "feedback"

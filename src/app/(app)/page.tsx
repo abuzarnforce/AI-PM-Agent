@@ -14,6 +14,7 @@ import FeedbackCapturePanel from "@/components/FeedbackCapturePanel";
 import ConnectorPanel from "@/components/ConnectorPanel";
 import StudioPanel from "@/components/StudioPanel";
 import DashboardsPanel from "@/components/DashboardsPanel";
+import RoadmapPanel from "@/components/RoadmapPanel";
 import ActivityPanel from "@/components/ActivityPanel";
 import { NavContext, type NavIntent, type Tab } from "@/lib/nav";
 
@@ -22,6 +23,7 @@ const PANELS: Record<Tab, () => JSX.Element> = {
   agent: () => <ChatPanel />,
   standup: () => <StandupPanel />,
   projects: () => <DashboardsPanel />,
+  roadmap: () => <RoadmapPanel />,
   health: () => <HealthCheckPanel />,
   studio: () => <StudioPanel />,
   feedback: () => <FeedbackCapturePanel />,
