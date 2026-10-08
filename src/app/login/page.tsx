@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { ShieldCheck } from "lucide-react";
-import IntelligenceLayer, { Logo } from "@/components/IntelligenceLayer";
+import { motion, useReducedMotion } from "framer-motion";
+import { ShieldCheck, Volume2, VolumeX } from "lucide-react";
+import { Logo } from "@/components/IntelligenceLayer";
 import { Button, Field, inputCls } from "@/components/ui";
 
 export default function LoginPage() {
@@ -48,9 +48,7 @@ export default function LoginPage() {
           <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">
             Connect product, engineering, QA and delivery. Understand anything. Stay in control of every change.
           </p>
-          <div className="mt-12 max-w-xl opacity-90">
-            <IntelligenceLayer />
-          </div>
+          <ProductFilm />
         </motion.div>
         <div className="text-xs text-subtle">Connect everything. Understand anything. Move product forward.</div>
       </section>
@@ -98,5 +96,57 @@ export default function LoginPage() {
         </motion.form>
       </section>
     </div>
+  );
+}
+
+/** The launch film, framed as a floating product window. Muted autoplay loop; sound is opt-in. */
+function ProductFilm() {
+  const ref = useRef<HTMLVideoElement>(null);
+  const reduceMotion = useReducedMotion();
+  const [muted, setMuted] = useState(true);
+
+  function toggleSound() {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = !muted;
+    if (muted) {
+      v.currentTime = 0; // with sound, start the story from the top
+      v.play();
+    }
+    setMuted(!muted);
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: 0.15, duration: 0.6 }}
+      className="group relative mt-12 max-w-2xl overflow-hidden rounded-2xl border border-border bg-panel [box-shadow:var(--overlay-shadow)]"
+    >
+      <video
+        ref={ref}
+        src="/pm-agent-film.mp4"
+        poster="/pm-agent-film-poster.jpg"
+        autoPlay={!reduceMotion}
+        controls={!!reduceMotion}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-label="PM Agent product film"
+        className="block aspect-video w-full"
+      />
+      {!reduceMotion && (
+        <button
+          type="button"
+          onClick={toggleSound}
+          aria-label={muted ? "Play with sound" : "Mute"}
+          className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur transition-opacity hover:bg-black/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+        >
+          {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+          {muted ? "Watch with sound" : "Mute"}
+        </button>
+      )}
+    </motion.div>
   );
 }
