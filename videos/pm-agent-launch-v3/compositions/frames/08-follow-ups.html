@@ -1,0 +1,194 @@
+<template>
+  <div id="root" data-composition-id="08-follow-ups" data-width="1920" data-height="1080" data-duration="7.3">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f08-bg { position: absolute; inset: 0; background: #F7F7F5; }
+      #f08-persp { position: absolute; inset: 0; perspective: 2200px; }
+      #f08-cam { position: absolute; inset: 0; transform-origin: 960px 575px; }
+      #f08-block { position: absolute; left: 60px; top: 40px; right: 60px; bottom: 40px; border-radius: 56px; background: linear-gradient(160deg, #FFDCD2 0%, #FFEAE3 100%); }
+
+      #f08-hl { position: absolute; left: 150px; top: 92px; font-size: 110px; font-weight: 750; letter-spacing: -0.04em; line-height: 1; white-space: nowrap; }
+      .f08-w { display: inline-block; }
+
+      #f08-win { position: absolute; left: 250px; top: 262px; width: 1420px; height: 628px; background: #FFFFFF; border-radius: 30px; border: 1px solid #E5E7EB; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 50px 100px -24px rgba(194,65,12,.28); transform-origin: 50% 0%; }
+
+      #f08-head { position: absolute; left: 40px; right: 40px; top: 30px; height: 76px; display: flex; align-items: center; gap: 20px; }
+      #f08-logo { width: 56px; height: 56px; border-radius: 15px; background: #111111; display: flex; align-items: center; justify-content: center; flex: none; }
+      .f08-tline { display: flex; align-items: center; gap: 16px; }
+      #f08-title { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+      #f08-sub { font-size: 21px; font-weight: 500; color: #6B7280; margin-top: 4px; }
+      #f08-nij { height: 40px; padding: 0 16px 0 12px; border-radius: 999px; background: #FFDCD2; color: #9A3412; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+      #f08-kpis { margin-left: auto; display: flex; gap: 12px; }
+      .f08-kpi { height: 58px; padding: 0 18px; border-radius: 16px; border: 1px solid #E5E7EB; background: #FAFAF9; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 550; color: #6B7280; }
+      .f08-kpi b { display: inline-block; font-size: 30px; font-weight: 750; letter-spacing: -0.02em; color: #111111; }
+
+      #f08-cols { position: absolute; left: 32px; right: 32px; top: 138px; height: 24px; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9CA3AF; }
+      #f08-cols span { position: absolute; top: 0; }
+
+      .f08-row { position: absolute; left: 32px; right: 32px; height: 92px; border-radius: 18px; border: 1px solid #E5E7EB; background: #FFFFFF; }
+      .f08-cb { position: absolute; left: 26px; top: 28px; width: 34px; height: 34px; border-radius: 10px; border: 2px solid #D1D5DB; box-sizing: border-box; }
+      .f08-cbf { position: absolute; left: -2px; top: -2px; width: 34px; height: 34px; border-radius: 10px; background: #16A34A; display: flex; align-items: center; justify-content: center; opacity: 0; }
+      .f08-task { position: absolute; left: 84px; top: 15px; }
+      .f08-tt { position: relative; display: inline-block; font-size: 26px; font-weight: 650; letter-spacing: -0.015em; white-space: nowrap; }
+      .f08-st { position: absolute; left: -4px; right: -4px; top: 52%; height: 3px; border-radius: 2px; background: #6B7280; transform-origin: 0 50%; }
+      .f08-meta { font-size: 20px; font-weight: 500; color: #6B7280; margin-top: 4px; white-space: nowrap; }
+      .f08-own { position: absolute; left: 640px; top: 0; bottom: 0; display: flex; align-items: center; gap: 14px; }
+      .f08-av { width: 46px; height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 750; letter-spacing: 0.02em; flex: none; }
+      .f08-on { font-size: 22px; font-weight: 600; color: #1F2937; white-space: nowrap; }
+      .f08-due { position: absolute; left: 920px; top: 25px; height: 42px; padding: 0 16px 0 12px; border-radius: 999px; background: #F3F4F6; color: #374151; font-size: 20px; font-weight: 650; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+      .f08-stat { position: absolute; left: 1130px; top: 25px; width: 200px; height: 42px; }
+      .f08-pill { position: absolute; left: 0; top: 0; height: 42px; padding: 0 16px; border-radius: 999px; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+      .f08-pill i { width: 10px; height: 10px; border-radius: 999px; display: block; }
+      .f08-open { background: #F3F4F6; color: #374151; }
+      .f08-open i { background: #9CA3AF; }
+      .f08-late { background: #FEF3C7; color: #92400E; opacity: 0; }
+      .f08-late i { background: #D97706; }
+      .f08-done { background: #DCFCE7; color: #166534; opacity: 0; }
+      .f08-done i { background: #16A34A; }
+    </style>
+
+    <div id="f08-bg" class="clip" data-start="0" data-duration="7.3" data-track-index="0"></div>
+
+    <div id="f08-stage" class="clip" data-start="0" data-duration="7.3" data-track-index="1">
+      <div id="f08-persp">
+        <div id="f08-cam">
+          <div id="f08-block"></div>
+
+          <div id="f08-hl"><span id="f08-w1" class="f08-w">Nothing</span> <span id="f08-w2" class="f08-w">slips.</span></div>
+
+          <div id="f08-win">
+            <div id="f08-head">
+              <div id="f08-logo"><svg width="32" height="32" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>
+              <div>
+                <div class="f08-tline">
+                  <div id="f08-title">Follow-ups</div>
+                  <div id="f08-nij"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2.5" /><path d="M9 6v12" stroke-dasharray="2 2.4" /><path id="f08-strike" pathLength="1" d="M4 3.5l16 17" stroke-width="2.6" /></svg>Not in Jira</div>
+                </div>
+                <div id="f08-sub">Work you assigned that isn't in Jira</div>
+              </div>
+              <div id="f08-kpis">
+                <div class="f08-kpi"><b id="f08-k1">0</b>Tracked</div>
+                <div class="f08-kpi"><b id="f08-k2" style="color:#B45309">0</b>Overdue</div>
+                <div class="f08-kpi"><b id="f08-k3" style="color:#15803D">0</b>Completed</div>
+              </div>
+            </div>
+
+            <div id="f08-cols"><span style="left:84px">Follow-up</span><span style="left:640px">Owner</span><span style="left:920px">Due</span><span style="left:1130px">Status</span></div>
+
+            <div id="f08-r1" class="f08-row" style="top:176px;">
+              <div class="f08-cb"></div>
+              <div class="f08-task"><div class="f08-tt">Share pricing feedback with design</div><div class="f08-meta">From pricing review · Mon</div></div>
+              <div class="f08-own"><div class="f08-av" style="background:#D6F5E3;color:#166534;">PS</div><div class="f08-on">Priya Shah</div></div>
+              <div id="f08-d1" class="f08-due"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>Thu</div>
+              <div class="f08-stat"><div class="f08-pill f08-open"><i></i>Open</div></div>
+            </div>
+
+            <div id="f08-r2" class="f08-row" style="top:276px;">
+              <div class="f08-cb"></div>
+              <div class="f08-task"><div class="f08-tt">Confirm vendor demo slot</div><div class="f08-meta">From standup · Tue</div></div>
+              <div class="f08-own"><div class="f08-av" style="background:#DCE8FF;color:#1D4ED8;">MR</div><div class="f08-on">Marcus Reid</div></div>
+              <div id="f08-d2" class="f08-due"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>Yesterday</div>
+              <div class="f08-stat"><div class="f08-pill f08-open"><i></i>Open</div><div class="f08-pill f08-late"><i></i>Overdue</div></div>
+            </div>
+
+            <div id="f08-r3" class="f08-row" style="top:376px;">
+              <div class="f08-cb"><div class="f08-cbf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path id="f08-chk3" pathLength="1" d="M5 12l5 5 9-10" /></svg></div></div>
+              <div class="f08-task"><div id="f08-t3" class="f08-tt">Send release notes draft<span id="f08-s3" class="f08-st"></span></div><div class="f08-meta">From Sprint 24 planning</div></div>
+              <div class="f08-own"><div class="f08-av" style="background:#FFF1C2;color:#92400E;">AC</div><div class="f08-on">Ava Chen</div></div>
+              <div id="f08-d3" class="f08-due"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>Today</div>
+              <div class="f08-stat"><div class="f08-pill f08-open"><i></i>Open</div><div class="f08-pill f08-done"><i></i>Completed</div></div>
+            </div>
+
+            <div id="f08-r4" class="f08-row" style="top:476px;">
+              <div class="f08-cb"></div>
+              <div class="f08-task"><div class="f08-tt">Book usability sessions</div><div class="f08-meta">From design sync · Wed</div></div>
+              <div class="f08-own"><div class="f08-av" style="background:#FFDCD2;color:#9A3412;">LP</div><div class="f08-on">Leo Park</div></div>
+              <div id="f08-d4" class="f08-due"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>Mon</div>
+              <div class="f08-stat"><div class="f08-pill f08-open"><i></i>Open</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+        const rows = ["#f08-r1", "#f08-r2", "#f08-r3", "#f08-r4"];
+
+        // Camera: slow drift in on the list, then eases out to frame headline + list
+        tl.fromTo("#f08-cam", { scale: 1.08, y: -30 }, { scale: 1.11, y: -44, duration: 4.7, ease: "power1.inOut" }, 0);
+        tl.fromTo("#f08-cam", { scale: 1.11, y: -44 }, { scale: 1, y: 0, duration: 2.1, ease: "power2.inOut", immediateRender: false }, 4.7);
+
+        // Window tilts flat on the coral block
+        tl.fromTo("#f08-block", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: E }, 0);
+        tl.fromTo("#f08-win", { rotationX: 12, y: 60, opacity: 0 }, { rotationX: 0, y: 0, opacity: 1, duration: 1.1, ease: E }, 0.05);
+        tl.fromTo("#f08-logo", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E }, 0.3);
+        tl.fromTo("#f08-title", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 0.35);
+        tl.fromTo("#f08-sub", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 0.9);
+        tl.fromTo(".f08-kpi", { scale: 0.9, y: 16, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.6, ease: E, stagger: 0.08 }, 1.0);
+        tl.fromTo("#f08-cols", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, 1.15);
+
+        // "never makes it into Jira?" — chip pops, ticket glyph gets crossed out on "Jira?"
+        tl.fromTo("#f08-nij", { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: E }, 1.3);
+        tl.fromTo("#f08-strike", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.35, ease: "power3.inOut" }, 1.7);
+        tl.fromTo("#f08-nij", { scale: 1 }, { scale: 1.07, duration: 0.11, ease: "power2.out", immediateRender: false }, 1.79);
+        tl.to("#f08-nij", { scale: 1, duration: 0.4, ease: "power3.out" }, 1.91);
+
+        // "Every follow-up" — four rows drop in
+        rows.forEach((r, i) => {
+          tl.fromTo(r, { y: -28, scale: 0.97, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: E }, 2.65 + i * 0.16);
+        });
+        const k1 = document.querySelector("#f08-k1");
+        const c1 = { n: 1 };
+        tl.fromTo(c1, { n: 1 }, { n: 4.99, duration: 0.64, ease: "none",
+          onUpdate: () => { k1.textContent = Math.min(4, Math.floor(c1.n)); } }, 2.65);
+
+        // "with an owner" — avatar + name per row
+        rows.forEach((r, i) => {
+          tl.fromTo(r + " .f08-av", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: E }, 3.84 + i * 0.08);
+          tl.fromTo(r + " .f08-on", { x: -12, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: E }, 3.9 + i * 0.08);
+        });
+
+        // "and a due date" — due chips
+        ["#f08-d1", "#f08-d2", "#f08-d3", "#f08-d4"].forEach((d, i) => {
+          tl.fromTo(d, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: E }, 4.48 + i * 0.08);
+        });
+
+        // Row 2 goes overdue — row tint warms, status flips amber
+        tl.fromTo("#f08-r2", { backgroundColor: "#FFFFFF", borderColor: "#E5E7EB" }, { backgroundColor: "#FFFBEB", borderColor: "#FCD34D", duration: 0.4, ease: "power2.out", immediateRender: false }, 4.9);
+        tl.fromTo("#f08-d2", { backgroundColor: "#F3F4F6", color: "#374151" }, { backgroundColor: "#FEF3C7", color: "#92400E", duration: 0.4, ease: "power2.out", immediateRender: false }, 4.9);
+        tl.fromTo("#f08-r2 .f08-open", { opacity: 1 }, { opacity: 0, duration: 0.15, ease: "none" }, 4.9);
+        tl.fromTo("#f08-r2 .f08-late", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E }, 4.95);
+        const k2 = document.querySelector("#f08-k2");
+        const c2 = { n: 0 };
+        tl.fromTo(c2, { n: 0 }, { n: 1, duration: 0.2, ease: "none", immediateRender: false, onUpdate: () => { k2.textContent = Math.round(c2.n); } }, 4.95);
+        tl.fromTo("#f08-k2", { scale: 0.6 }, { scale: 1, duration: 0.5, ease: E }, 4.98);
+
+        // Row 3 gets checked off — strikethrough, status flips green
+        tl.fromTo("#f08-r3 .f08-cbf", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: E }, 5.05);
+        tl.fromTo("#f08-chk3", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.3, ease: "power3.inOut" }, 5.1);
+        tl.fromTo("#f08-s3", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.inOut" }, 5.15);
+        tl.fromTo("#f08-t3", { color: "#111111" }, { color: "#9CA3AF", duration: 0.4, ease: "power2.out" }, 5.15);
+        tl.fromTo("#f08-r3", { backgroundColor: "#FFFFFF", borderColor: "#E5E7EB" }, { backgroundColor: "#F6FEF9", borderColor: "#BBF7D0", duration: 0.4, ease: "power2.out", immediateRender: false }, 5.1);
+        tl.fromTo("#f08-r3 .f08-open", { opacity: 1 }, { opacity: 0, duration: 0.15, ease: "none" }, 5.15);
+        tl.fromTo("#f08-r3 .f08-done", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E }, 5.2);
+        const k3 = document.querySelector("#f08-k3");
+        const c3 = { n: 0 };
+        tl.fromTo(c3, { n: 0 }, { n: 1, duration: 0.2, ease: "none", immediateRender: false, onUpdate: () => { k3.textContent = Math.round(c3.n); } }, 5.2);
+        tl.fromTo("#f08-k3", { scale: 0.6 }, { scale: 1, duration: 0.5, ease: E }, 5.23);
+
+        // "Nothing slips." — display headline above the window
+        tl.fromTo("#f08-w1", { y: 40, scale: 0.92, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.8, ease: E }, 5.21);
+        tl.fromTo("#f08-w2", { y: 40, scale: 0.92, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.8, ease: E }, 5.5);
+
+        window.__timelines["08-follow-ups"] = tl;
+      })();
+    </script>
+  </div>
+</template>

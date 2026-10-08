@@ -1,0 +1,192 @@
+<template>
+  <div id="root" data-composition-id="05-sprint-health" data-width="1920" data-height="1080" data-duration="6.8">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f05-bg { position: absolute; inset: 0; background: #F7F7F5; }
+      #f05-block { position: absolute; left: 60px; top: 40px; right: 60px; bottom: 40px; border-radius: 56px; background: linear-gradient(160deg, #DCE8FF 0%, #E9F0FF 100%); }
+      #f05-persp { position: absolute; inset: 0; perspective: 2200px; }
+      #f05-cam { position: absolute; inset: 0; transform-origin: 61% 58%; }
+      #f05-win { position: absolute; left: 250px; top: 78px; width: 1420px; height: 800px; background: #FFFFFF; border-radius: 30px; border: 1px solid #E5E7EB; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 50px 100px -24px rgba(29,78,216,.28); transform-origin: 50% 0%; }
+
+      #f05-head { position: absolute; left: 40px; right: 40px; top: 26px; height: 48px; display: flex; align-items: center; gap: 14px; }
+      .f05-logo { width: 40px; height: 40px; border-radius: 11px; background: #111111; display: flex; align-items: center; justify-content: center; }
+      .f05-h1 { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+      .f05-ws { margin-left: auto; font-size: 20px; color: #6B7280; font-weight: 500; }
+
+      .f05-card { position: absolute; border-radius: 22px; border: 1px solid #E5E7EB; background: #FCFCFB; box-sizing: border-box; }
+      .f05-lbl { font-size: 22px; font-weight: 650; letter-spacing: -0.01em; color: #111111; }
+      .f05-mut { font-size: 20px; font-weight: 500; color: #6B7280; }
+
+      /* Sprint progress */
+      #f05-prog { left: 40px; right: 40px; top: 96px; height: 196px; }
+      #f05-pt { position: absolute; left: 32px; top: 24px; }
+      #f05-pd { position: absolute; left: 600px; top: 26px; width: 292px; text-align: right; }
+      #f05-bar { position: absolute; left: 32px; top: 70px; width: 860px; height: 40px; border-radius: 999px; background: #F3F4F6; overflow: hidden; }
+      .f05-seg { position: absolute; top: 0; height: 40px; transform-origin: 0% 50%; }
+      #f05-legend { position: absolute; left: 32px; top: 132px; display: flex; gap: 34px; }
+      .f05-lg { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 550; color: #374151; }
+      .f05-lg i { width: 14px; height: 14px; border-radius: 4px; display: block; }
+      .f05-lg b { font-weight: 750; color: #111111; }
+      #f05-div { position: absolute; left: 924px; top: 24px; width: 1px; height: 148px; background: #E5E7EB; }
+      #f05-tt { position: absolute; left: 956px; top: 24px; }
+      .f05-col { position: absolute; top: 58px; width: 100px; height: 126px; }
+      .f05-v { position: absolute; left: 0; right: 0; text-align: center; font-size: 20px; font-weight: 700; }
+      .f05-b { position: absolute; left: 24px; width: 52px; bottom: 30px; border-radius: 8px 8px 3px 3px; transform-origin: 50% 100%; }
+      .f05-k { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 20px; font-weight: 550; color: #6B7280; }
+
+      /* Moving / stuck tiles */
+      .f05-tile { left: 40px; width: 400px; height: 222px; padding: 24px 28px; }
+      .f05-eye { font-size: 18px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+      .f05-tl { font-size: 24px; font-weight: 550; color: #374151; margin-top: 10px; }
+      .f05-num { position: absolute; left: 28px; top: 104px; display: flex; align-items: center; gap: 16px; }
+      .f05-big { font-size: 76px; font-weight: 750; letter-spacing: -0.045em; line-height: 1; }
+      .f05-up { width: 44px; height: 44px; border-radius: 999px; background: #DCFCE7; display: flex; align-items: center; justify-content: center; }
+      .f05-foot { position: absolute; left: 28px; top: 186px; font-size: 20px; font-weight: 600; }
+      #f05-avs { position: absolute; right: 28px; top: 116px; display: flex; gap: 8px; }
+      .f05-av { width: 48px; height: 48px; border-radius: 999px; color: #FFFFFF; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 3px solid #FFFFFF; box-sizing: border-box; }
+
+      /* Created vs resolved chart */
+      #f05-chart { left: 460px; width: 920px; top: 312px; height: 464px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(17,17,17,.04), 0 18px 40px -20px rgba(17,17,17,.18); }
+      #f05-ch { position: absolute; left: 32px; top: 24px; font-size: 28px; font-weight: 700; letter-spacing: -0.025em; }
+      #f05-cs { position: absolute; left: 32px; top: 62px; }
+      #f05-cl { position: absolute; right: 32px; top: 30px; display: flex; gap: 22px; }
+      #f05-svg { position: absolute; left: 32px; top: 100px; width: 856px; height: 300px; overflow: visible; }
+      .f05-grid { stroke: #F1F2F4; stroke-width: 2; }
+      .f05-line { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      #f05-ax { position: absolute; left: 32px; right: 32px; top: 416px; display: flex; justify-content: space-between; }
+      #f05-call { position: absolute; left: 470px; top: 150px; height: 48px; padding: 0 20px; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px; white-space: nowrap; box-shadow: 0 10px 24px -12px rgba(220,38,38,.45); }
+      #f05-call i { width: 10px; height: 10px; border-radius: 999px; background: #DC2626; display: block; }
+    </style>
+
+    <div id="f05-bg" class="clip" data-start="0" data-duration="6.8" data-track-index="0"></div>
+
+    <div id="f05-stage" class="clip" data-start="0" data-duration="6.8" data-track-index="1">
+      <div id="f05-persp">
+        <div id="f05-cam">
+          <div id="f05-block"></div>
+          <div id="f05-win">
+            <div id="f05-head">
+              <div class="f05-logo"><svg width="24" height="24" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>
+              <div class="f05-h1">Sprint 24 · Jira dashboard</div>
+              <div class="f05-ws">Northwind Labs · NWD</div>
+            </div>
+
+            <div id="f05-prog" class="f05-card">
+              <div id="f05-pt" class="f05-lbl">Sprint progress</div>
+              <div id="f05-pd" class="f05-mut">Day 8 of 10</div>
+              <div id="f05-bar">
+                <div id="f05-s1" class="f05-seg" style="left:0;width:396px;background:#16A34A;"></div>
+                <div id="f05-s2" class="f05-seg" style="left:396px;width:266px;background:#2563EB;"></div>
+                <div id="f05-s3" class="f05-seg" style="left:662px;width:198px;background:#CBD5E1;"></div>
+              </div>
+              <div id="f05-legend">
+                <div id="f05-l1" class="f05-lg"><i style="background:#16A34A"></i>Done <b>46%</b></div>
+                <div id="f05-l2" class="f05-lg"><i style="background:#2563EB"></i>In progress <b>31%</b></div>
+                <div id="f05-l3" class="f05-lg"><i style="background:#CBD5E1"></i>To do <b>23%</b></div>
+              </div>
+              <div id="f05-div"></div>
+              <div id="f05-tt" class="f05-lbl">Issues by type</div>
+              <div class="f05-col" style="left:956px;"><div id="f05-v1" class="f05-v" style="bottom:100px;">18</div><div id="f05-b1" class="f05-b" style="height:64px;background:#2563EB;"></div><div class="f05-k">Story</div></div>
+              <div class="f05-col" style="left:1068px;"><div id="f05-v2" class="f05-v" style="bottom:76px;">11</div><div id="f05-b2" class="f05-b" style="height:40px;background:#DC2626;"></div><div class="f05-k">Bug</div></div>
+              <div class="f05-col" style="left:1180px;"><div id="f05-v3" class="f05-v" style="bottom:68px;">9</div><div id="f05-b3" class="f05-b" style="height:32px;background:#9CA3AF;"></div><div class="f05-k">Task</div></div>
+            </div>
+
+            <div id="f05-move" class="f05-card f05-tile" style="top:312px;">
+              <div class="f05-eye" style="color:#16A34A;">Moving</div>
+              <div class="f05-tl">Done this week</div>
+              <div class="f05-num"><div id="f05-up" class="f05-up"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg></div><div id="f05-n1" class="f05-big">0</div></div>
+              <div id="f05-mf" class="f05-foot" style="color:#15803D;">+6 vs last week</div>
+            </div>
+
+            <div id="f05-stuck" class="f05-card f05-tile" style="top:554px;">
+              <div class="f05-eye" style="color:#DC2626;">Stuck</div>
+              <div class="f05-tl">Blocked</div>
+              <div class="f05-num"><div id="f05-n2" class="f05-big" style="color:#DC2626;">3</div></div>
+              <div id="f05-avs">
+                <div id="f05-a1" class="f05-av" style="background:#2563EB;">MR</div>
+                <div id="f05-a2" class="f05-av" style="background:#16A34A;">PS</div>
+                <div id="f05-a3" class="f05-av" style="background:#D97706;">SO</div>
+              </div>
+              <div id="f05-sf" class="f05-foot" style="color:#6B7280;">Oldest: 4 days</div>
+            </div>
+
+            <div id="f05-chart" class="f05-card">
+              <div id="f05-ch">Created vs resolved</div>
+              <div id="f05-cs" class="f05-mut">Sprint 24 · daily</div>
+              <div id="f05-cl">
+                <div class="f05-lg"><i style="background:#DC2626"></i>Created</div>
+                <div class="f05-lg"><i style="background:#16A34A"></i>Resolved</div>
+              </div>
+              <svg id="f05-svg" viewBox="0 0 856 300">
+                <line class="f05-grid" x1="0" y1="20" x2="856" y2="20" />
+                <line class="f05-grid" x1="0" y1="100" x2="856" y2="100" />
+                <line class="f05-grid" x1="0" y1="180" x2="856" y2="180" />
+                <line class="f05-grid" x1="0" y1="260" x2="856" y2="260" />
+                <polyline id="f05-res" class="f05-line" stroke="#16A34A" pathLength="1" points="8,200 128,175 248,160 368,150 488,138 608,130 728,128 848,126" />
+                <polyline id="f05-cre" class="f05-line" stroke="#DC2626" pathLength="1" points="8,250 128,240 248,232 368,220 488,205 608,180 728,140 848,92" />
+                <circle id="f05-x" cx="759" cy="127.5" r="11" fill="#DC2626" stroke="#FFFFFF" stroke-width="4" />
+              </svg>
+              <div id="f05-ax">
+                <div class="f05-mut">Day 1</div><div class="f05-mut">Day 4</div><div class="f05-mut">Day 8</div>
+              </div>
+              <div id="f05-call"><i></i>Bugs created ↑ 18%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+
+        // Dashboard window tilts to flat on the blue block
+        tl.fromTo("#f05-block", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: E }, 0);
+        tl.fromTo("#f05-win", { rotationX: 12, y: 60, opacity: 0 }, { rotationX: 0, y: 0, opacity: 1, duration: 1.1, ease: E }, 0.05);
+        tl.fromTo("#f05-prog", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 0.2);
+
+        // "Sprint health" — status bar fills left to right, three segments
+        [["#f05-s1", "#f05-l1", 0.4, 0.45], ["#f05-s2", "#f05-l2", 0.85, 0.35], ["#f05-s3", "#f05-l3", 1.2, 0.3]].forEach(([s, l, t, d]) => {
+          tl.fromTo(s, { scaleX: 0 }, { scaleX: 1, duration: d, ease: t === 0.4 ? "power2.in" : "none" }, t);
+          tl.fromTo(l, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, t + 0.05);
+        });
+
+        // "at a glance" — issues-by-type bars rise
+        [["#f05-b1", "#f05-v1"], ["#f05-b2", "#f05-v2"], ["#f05-b3", "#f05-v3"]].forEach(([b, v], i) => {
+          tl.fromTo(b, { scaleY: 0 }, { scaleY: 1, duration: 0.6, ease: E }, 1.5 + i * 0.12);
+          tl.fromTo(v, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: E }, 1.75 + i * 0.12);
+        });
+
+        // "What's moving" — Done this week counts up
+        tl.fromTo("#f05-move", { scale: 0.9, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 2.43);
+        const n1 = document.querySelector("#f05-n1");
+        const c1 = { v: 0 };
+        tl.fromTo(c1, { v: 0 }, { v: 21, duration: 0.5, ease: "power2.out",
+          onUpdate: () => { n1.textContent = Math.round(c1.v); } }, 2.48);
+        tl.fromTo("#f05-up", { scale: 0, y: 10 }, { scale: 1, y: 0, duration: 0.5, ease: E }, 2.6);
+        tl.fromTo("#f05-mf", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 2.8);
+
+        // "what's stuck" — Blocked 3 + avatars
+        tl.fromTo("#f05-stuck", { scale: 0.9, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 3.29);
+        tl.fromTo(["#f05-a1", "#f05-a2", "#f05-a3"], { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E, stagger: 0.08 }, 3.5);
+        tl.fromTo("#f05-sf", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.65);
+
+        // "trending the wrong way" — chart, lines draw, created crosses resolved
+        tl.fromTo("#f05-chart", { scale: 0.94, y: 30, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.8, ease: E }, 3.9);
+        tl.fromTo("#f05-res", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.75, ease: "power3.inOut" }, 4.3);
+        tl.fromTo("#f05-cre", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.65, ease: "power3.inOut" }, 4.4);
+        tl.fromTo("#f05-x", { scale: 0, opacity: 0, svgOrigin: "759 127.5" }, { scale: 1, opacity: 1, duration: 0.5, ease: E, svgOrigin: "759 127.5" }, 5.04);
+        tl.fromTo("#f05-call", { scale: 0.8, y: 14, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 5.1);
+
+        // Camera push onto the chart
+        tl.fromTo("#f05-cam", { scale: 1, y: 0 }, { scale: 1.18, y: -24, duration: 2.0, ease: "power2.inOut" }, 4.3);
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines["05-sprint-health"] = tl;
+      })();
+    </script>
+  </div>
+</template>

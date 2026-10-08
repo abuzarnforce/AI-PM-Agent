@@ -1,0 +1,178 @@
+<template>
+  <div id="root" data-composition-id="11-you-decide" data-width="1920" data-height="1080" data-duration="7.2">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f11-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 50% 40%, #FFFFFF 0%, #F7F7F5 70%); }
+      #f11-block { position: absolute; left: 60px; top: 40px; right: 60px; bottom: 40px; border-radius: 56px; background: linear-gradient(160deg, #FFF1C2 0%, #FFF7DD 100%); }
+      #f11-persp { position: absolute; inset: 0; perspective: 2200px; }
+      #f11-cam { position: absolute; inset: 0; transform-origin: 62% 66%; }
+      #f11-win { position: absolute; left: 330px; top: 70px; width: 1260px; height: 790px; background: #FFFFFF; border-radius: 30px; border: 1px solid #E5E7EB; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 50px 100px -24px rgba(146,64,14,.26); transform-origin: 50% 40%; }
+
+      #f11-head { position: absolute; left: 40px; right: 40px; top: 26px; height: 48px; display: flex; align-items: center; gap: 14px; }
+      .f11-logo { width: 40px; height: 40px; border-radius: 11px; background: #111111; display: flex; align-items: center; justify-content: center; flex: none; }
+      .f11-h1 { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+      .f11-ws { margin-left: auto; font-size: 20px; color: #6B7280; font-weight: 500; }
+
+      #f11-banner { position: absolute; left: 40px; right: 40px; top: 96px; height: 64px; border-radius: 16px; background: #FEF3C7; border: 1px solid #FDE68A; color: #92400E; display: flex; align-items: center; gap: 14px; padding: 0 22px; font-size: 22px; font-weight: 550; white-space: nowrap; }
+      #f11-banner b { font-weight: 750; }
+      #f11-bico { width: 36px; height: 36px; border-radius: 999px; background: #D97706; display: flex; align-items: center; justify-content: center; flex: none; }
+      #f11-ulw { position: relative; font-weight: 700; }
+      #f11-ul { position: absolute; left: 0; right: 0; bottom: -5px; height: 3px; border-radius: 2px; background: #D97706; display: block; transform-origin: 0% 50%; }
+
+      #f11-card { position: absolute; left: 40px; right: 40px; top: 180px; bottom: 30px; border-radius: 22px; border: 1px solid #E5E7EB; background: #FCFCFB; }
+      #f11-top { position: absolute; left: 32px; right: 32px; top: 26px; height: 40px; display: flex; align-items: center; gap: 12px; }
+      .f11-pill { height: 40px; padding: 0 16px; border-radius: 999px; font-size: 20px; font-weight: 650; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+      .f11-pill i { width: 10px; height: 10px; border-radius: 999px; display: block; }
+      #f11-stat { position: relative; width: 190px; height: 40px; }
+      #f11-triage, #f11-appr { position: absolute; left: 0; top: 0; }
+      #f11-by { margin-left: auto; height: 44px; padding: 0 16px 0 6px; border-radius: 999px; border: 1px solid #E5E7EB; background: #FFFFFF; font-size: 20px; font-weight: 600; color: #374151; display: flex; align-items: center; gap: 10px; }
+      #f11-bylogo { width: 32px; height: 32px; border-radius: 999px; background: #111111; display: flex; align-items: center; justify-content: center; }
+
+      #f11-title { position: absolute; left: 32px; top: 86px; font-size: 42px; font-weight: 700; letter-spacing: -0.03em; }
+      #f11-story { position: absolute; left: 32px; right: 120px; top: 150px; font-size: 26px; line-height: 1.42; font-weight: 500; color: #4B5563; }
+      #f11-story b { font-weight: 650; color: #111111; }
+
+      #f11-ac { position: absolute; left: 32px; right: 32px; top: 248px; height: 190px; border-radius: 18px; border: 1px solid #E5E7EB; background: #FFFFFF; }
+      .f11-lab { position: absolute; left: 24px; top: 18px; font-size: 20px; font-weight: 650; letter-spacing: 0.12em; text-transform: uppercase; color: #6B7280; }
+      .f11-g { position: absolute; left: 24px; right: 24px; height: 40px; display: flex; align-items: center; gap: 16px; font-size: 24px; font-weight: 500; color: #1F2937; }
+      .f11-kw { width: 86px; height: 34px; border-radius: 10px; background: #EFF5FF; color: #1D4ED8; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+
+      #f11-foot { position: absolute; left: 32px; right: 32px; top: 470px; height: 64px; display: flex; align-items: center; gap: 14px; }
+      #f11-src { height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #E5E7EB; background: #FFFFFF; font-size: 20px; font-weight: 600; color: #374151; display: flex; align-items: center; gap: 8px; }
+      #f11-src i { width: 10px; height: 10px; border-radius: 3px; background: #D97706; display: block; }
+      .f11-btn { position: relative; height: 56px; padding: 0 28px; border-radius: 16px; font-size: 22px; font-weight: 650; display: flex; align-items: center; gap: 10px; }
+      #f11-edit { margin-left: auto; border: 1px solid #E5E7EB; background: #FFFFFF; color: #374151; }
+      #f11-approve { background: #2563EB; color: #FFFFFF; font-weight: 700; box-shadow: 0 10px 22px -10px rgba(37,99,235,.7); }
+      #f11-aring { position: absolute; left: -8px; right: -8px; top: -8px; bottom: -8px; border-radius: 22px; border: 3px solid #2563EB; box-shadow: 0 0 0 8px rgba(37,99,235,.14); }
+
+      #f11-pop { position: absolute; right: 32px; top: 306px; width: 440px; height: 150px; border-radius: 20px; border: 1px solid #E5E7EB; background: #FFFFFF; box-shadow: 0 2px 4px rgba(17,17,17,.06), 0 30px 60px -16px rgba(17,17,17,.30); }
+      #f11-pt { position: absolute; left: 24px; top: 20px; font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+      #f11-ps { position: absolute; left: 24px; top: 56px; font-size: 20px; font-weight: 500; color: #6B7280; }
+      #f11-pb { position: absolute; right: 18px; bottom: 16px; display: flex; gap: 10px; }
+      .f11-sb { height: 44px; padding: 0 18px; border-radius: 12px; font-size: 20px; font-weight: 650; display: flex; align-items: center; }
+      #f11-cancel { border: 1px solid #E5E7EB; color: #374151; }
+      #f11-confirm { background: #2563EB; color: #FFFFFF; }
+
+      #f11-stamp { position: absolute; left: 660px; top: 90px; height: 108px; padding: 0 30px 0 22px; border-radius: 20px; border: 6px solid #16A34A; background: rgba(220,252,231,.88); color: #15803D; display: flex; align-items: center; gap: 16px; font-size: 52px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; box-shadow: 0 18px 40px -18px rgba(22,163,74,.55); }
+      #f11-stamp .f11-sc { width: 56px; height: 56px; border-radius: 999px; background: #16A34A; display: flex; align-items: center; justify-content: center; }
+
+      #f11-word { position: absolute; left: 0; right: 0; top: 420px; text-align: center; font-size: 150px; font-weight: 750; letter-spacing: -0.045em; line-height: 1.1; color: #111111; }
+    </style>
+
+    <div id="f11-bg" class="clip" data-start="0" data-duration="7.2" data-track-index="0"></div>
+
+    <div id="f11-stage" class="clip" data-start="0" data-duration="7.2" data-track-index="1">
+      <div id="f11-block"></div>
+      <div id="f11-persp">
+        <div id="f11-cam">
+          <div id="f11-win">
+            <div id="f11-head">
+              <div class="f11-logo"><svg width="24" height="24" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>
+              <div class="f11-h1">Drafts</div>
+              <div class="f11-ws">Northwind Labs · NWD</div>
+            </div>
+
+            <div id="f11-banner">
+              <div id="f11-bico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></div>
+              <span><b>Human approval required</b> — nothing is written to Jira <span id="f11-ulw">until you approve<i id="f11-ul"></i></span></span>
+            </div>
+
+            <div id="f11-card">
+              <div id="f11-top">
+                <div class="f11-pill" style="background:#DCE8FF;color:#1D4ED8;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M7 10h10M7 14h6" /></svg>User story</div>
+                <div id="f11-stat">
+                  <div id="f11-triage" class="f11-pill" style="background:#E7E9F0;color:#374151;"><i style="background:#6B7280"></i>needs triage</div>
+                  <div id="f11-appr" class="f11-pill" style="background:#DCFCE7;color:#166534;"><i style="background:#16A34A"></i>approved</div>
+                </div>
+                <div id="f11-by"><div id="f11-bylogo"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>Drafted by PM Agent</div>
+              </div>
+
+              <div id="f11-title">Bulk-approve leave requests</div>
+              <div id="f11-story"><b>As a</b> team manager, <b>I want</b> to approve several leave requests at once, <b>so that</b> my team isn't kept waiting.</div>
+
+              <div id="f11-ac">
+                <div class="f11-lab">Acceptance criteria</div>
+                <div class="f11-g" style="top:58px;"><div class="f11-kw">Given</div>5 pending requests</div>
+                <div class="f11-g" style="top:100px;"><div class="f11-kw">When</div>I select all and approve</div>
+                <div class="f11-g" style="top:142px;"><div class="f11-kw">Then</div>all 5 are approved and each employee is notified</div>
+              </div>
+
+              <div id="f11-foot">
+                <div id="f11-src"><i></i>Source: customer call</div>
+                <div id="f11-edit" class="f11-btn">Edit</div>
+                <div id="f11-approve" class="f11-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10" /></svg>Approve<div id="f11-aring"></div></div>
+              </div>
+
+              <div id="f11-pop">
+                <div id="f11-pt">Create NWD-190 in Jira?</div>
+                <div id="f11-ps">Project NWD · Story</div>
+                <div id="f11-pb"><div id="f11-cancel" class="f11-sb">Cancel</div><div id="f11-confirm" class="f11-sb">Confirm</div></div>
+              </div>
+
+              <div data-layout-allow-overlap id="f11-stamp"><div class="f11-sc"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10" /></svg></div>Approved</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-layout-allow-overlap id="f11-word">You decide.</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+        const pop = (sel, t, from) => tl.fromTo(sel, Object.assign({ y: 18, opacity: 0 }, from), { x: 0, y: 0, scale: 1, opacity: 1, duration: 0.7, ease: E }, t);
+
+        // Butter block + Drafts window tilt to flat
+        tl.fromTo("#f11-block", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: E }, 0);
+        tl.fromTo("#f11-win", { rotationX: 12, y: 60, opacity: 0 }, { rotationX: 0, y: 0, opacity: 1, duration: 1.1, ease: E }, 0.05);
+
+        // "nothing touches Jira" — the draft story assembles
+        pop("#f11-card", 0.45, { y: 24 });
+        pop("#f11-top", 0.55, { y: 14 });
+        pop("#f11-title", 0.62);
+        pop("#f11-story", 0.8);
+        pop("#f11-ac", 1.0);
+        gsap.utils.toArray(".f11-g").forEach((g, i) => pop(g, 1.1 + i * 0.1, { x: -18, y: 0 }));
+        pop("#f11-src", 1.35, { scale: 0.85, y: 0 });
+
+        // "until you say so." — approval banner + underline
+        pop("#f11-banner", 1.6, { y: -20 });
+        tl.fromTo("#f11-bico", { scale: 0 }, { scale: 1, duration: 0.5, ease: E }, 1.75);
+        tl.fromTo("#f11-ul", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 2.05);
+
+        // "PM Agent drafts."
+        pop("#f11-by", 3.24, { scale: 0.85, x: 20, y: 0 });
+        tl.fromTo("#f11-bylogo", { scale: 0.4 }, { scale: 1, duration: 0.6, ease: E }, 3.4);
+        pop("#f11-edit", 3.97, { y: 14 });
+        pop("#f11-approve", 4.05, { y: 14 });
+
+        // "You decide." — focus, press, confirm, stamp
+        tl.fromTo("#f11-aring", { scale: 1.08, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: E }, 4.5);
+        tl.fromTo("#f11-approve", { scale: 1 }, { scale: 0.94, duration: 0.08, ease: "power2.out", immediateRender: false }, 4.78);
+        tl.fromTo("#f11-approve", { scale: 0.94 }, { scale: 1, duration: 0.35, ease: "power3.out", immediateRender: false }, 4.86);
+        tl.fromTo("#f11-pop", { y: 12, scale: 0.94, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.25, ease: E }, 4.86);
+        tl.fromTo("#f11-confirm", { scale: 1 }, { scale: 0.92, duration: 0.07, ease: "power2.out" }, 5.05);
+        tl.fromTo("#f11-confirm", { scale: 0.92 }, { scale: 1, duration: 0.2, ease: "power3.out", immediateRender: false }, 5.12);
+        tl.fromTo("#f11-pop", { scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0, duration: 0.18, ease: "power2.in", immediateRender: false }, 5.16);
+        tl.fromTo("#f11-aring", { opacity: 1 }, { opacity: 0, duration: 0.2, immediateRender: false }, 5.16);
+        tl.fromTo("#f11-stamp", { scale: 1.6, rotation: -16, opacity: 0 }, { scale: 1, rotation: -7, opacity: 1, duration: 0.4, ease: "power4.out" }, 5.2);
+        tl.fromTo("#f11-triage", { opacity: 1 }, { opacity: 0, duration: 0.2 }, 5.25);
+        tl.fromTo("#f11-appr", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E }, 5.25);
+
+        // Slow push onto the decision
+        tl.fromTo("#f11-cam", { scale: 1 }, { scale: 1.1, duration: 3.0, ease: "power2.inOut" }, 2.4);
+
+        // Card falls back, butter gives way to white, the line lands — then hold
+        tl.fromTo("#f11-win", { filter: "blur(0px)", scale: 1, opacity: 1 }, { filter: "blur(8px)", scale: 0.92, opacity: 0.25, duration: 0.9, ease: "power2.inOut", immediateRender: false }, 5.5);
+        tl.fromTo("#f11-block", { opacity: 1 }, { opacity: 0, duration: 0.9, ease: "power2.inOut", immediateRender: false }, 5.5);
+        tl.fromTo("#f11-word", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 1.0, ease: E }, 5.6);
+
+        window.__timelines["11-you-decide"] = tl;
+      })();
+    </script>
+  </div>
+</template>

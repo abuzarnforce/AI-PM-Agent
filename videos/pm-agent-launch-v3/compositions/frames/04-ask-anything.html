@@ -1,0 +1,135 @@
+<template>
+  <div data-hf-id="hf-w76e" id="root" data-composition-id="04-ask-anything" data-width="1920" data-height="1080" data-duration="8.5">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f04-bg { position: absolute; inset: 0; background: #F7F7F5; }
+      #f04-block { position: absolute; left: 60px; top: 40px; right: 60px; bottom: 40px; border-radius: 56px; background: linear-gradient(160deg, #DCE8FF 0%, #E9F0FF 100%); }
+      #f04-persp { position: absolute; inset: 0; perspective: 2200px; }
+      #f04-cam { position: absolute; inset: 0; transform-origin: 50% 84%; }
+      #f04-win { position: absolute; left: 250px; top: 78px; width: 1420px; height: 800px; background: #FFFFFF; border-radius: 30px; border: 1px solid #E5E7EB; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 50px 100px -24px rgba(29,78,216,.28); transform-origin: 50% 0%; }
+
+      #f04-head { position: absolute; left: 40px; right: 40px; top: 26px; height: 48px; display: flex; align-items: center; gap: 14px; }
+      .f04-logo { width: 40px; height: 40px; border-radius: 11px; background: #111111; display: flex; align-items: center; justify-content: center; }
+      .f04-h1 { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+      .f04-ws { margin-left: auto; font-size: 20px; color: #6B7280; font-weight: 500; }
+
+      #f04-comp { position: absolute; left: 40px; right: 40px; top: 96px; height: 80px; border-radius: 22px; border: 2px solid #2563EB; background: #FFFFFF; box-shadow: 0 0 0 6px rgba(37,99,235,.10); display: flex; align-items: center; padding: 0 14px 0 28px; }
+      #f04-q { font-size: 32px; font-weight: 550; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; }
+      #f04-caret { width: 3px; height: 36px; background: #2563EB; margin-left: 3px; }
+      #f04-send { margin-left: auto; width: 56px; height: 56px; border-radius: 16px; background: #2563EB; display: flex; align-items: center; justify-content: center; }
+
+      #f04-steps { position: absolute; left: 40px; top: 196px; display: flex; gap: 12px; }
+      .f04-step { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 18px; border-radius: 999px; background: #F3F4F6; font-size: 20px; font-weight: 550; color: #374151; }
+      .f04-chk { width: 24px; height: 24px; border-radius: 999px; background: #16A34A; display: flex; align-items: center; justify-content: center; }
+
+      #f04-ans { position: absolute; left: 40px; right: 40px; top: 262px; bottom: 30px; border-radius: 22px; border: 1px solid #E5E7EB; background: #FCFCFB; padding: 26px 32px; }
+      #f04-title { display: flex; align-items: center; gap: 18px; }
+      .f04-risk { height: 40px; padding: 0 16px; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+      .f04-risk i { width: 10px; height: 10px; border-radius: 999px; background: #D97706; display: block; }
+      .f04-tt { font-size: 38px; font-weight: 700; letter-spacing: -0.03em; }
+
+      .f04-row { position: absolute; left: 32px; right: 32px; height: 56px; display: flex; align-items: center; gap: 18px; font-size: 25px; font-weight: 500; color: #1F2937; }
+      .f04-n { width: 34px; height: 34px; border-radius: 999px; background: #111111; color: #FFFFFF; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+      .f04-key { height: 36px; padding: 0 12px; border-radius: 10px; background: #DCE8FF; color: #1D4ED8; font-size: 21px; font-weight: 700; display: flex; align-items: center; letter-spacing: 0.01em; flex: none; }
+      .f04-row b { font-weight: 650; color: #111111; }
+
+      #f04-act { position: absolute; left: 32px; right: 32px; top: 300px; height: 62px; border-radius: 16px; background: #EFF5FF; border: 1px solid #C7DAFE; display: flex; align-items: center; gap: 14px; padding: 0 20px; font-size: 24px; font-weight: 550; color: #1E3A8A; }
+      #f04-act span { font-weight: 750; color: #1D4ED8; text-transform: uppercase; font-size: 18px; letter-spacing: 0.1em; }
+
+      #f04-foot { position: absolute; left: 32px; right: 32px; top: 384px; display: flex; align-items: center; gap: 12px; }
+      .f04-src { height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #E5E7EB; background: #FFFFFF; font-size: 20px; font-weight: 600; color: #374151; display: flex; align-items: center; gap: 8px; }
+      .f04-src i { width: 10px; height: 10px; border-radius: 3px; display: block; }
+      #f04-jql { position: absolute; left: 32px; right: 32px; top: 440px; height: 56px; border-radius: 14px; background: #111111; color: #E5E7EB; display: flex; align-items: center; gap: 16px; padding: 0 20px; font-size: 22px; font-weight: 500; letter-spacing: 0.005em; white-space: nowrap; }
+      #f04-jql span.l { color: #93C5FD; font-weight: 700; font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase; }
+      #f04-jql em { font-style: normal; color: #FDE68A; }
+      #f04-hl { position: absolute; left: 26px; right: 26px; top: 434px; height: 68px; border-radius: 18px; border: 3px solid #2563EB; box-shadow: 0 0 0 8px rgba(37,99,235,.15); }
+    </style>
+
+    <div data-hf-id="hf-4h3q" id="f04-bg" class="clip" data-start="0" data-duration="8.5" data-track-index="0"></div>
+
+    <div data-hf-id="hf-gd0g" id="f04-stage" class="clip" data-start="0" data-duration="8.5" data-track-index="1">
+      <div data-hf-id="hf-d262" id="f04-persp">
+        <div data-hf-id="hf-5fyv" id="f04-cam">
+          <div data-hf-id="hf-y1td" id="f04-block"></div>
+          <div data-hf-id="hf-6sjs" id="f04-win">
+            <div data-hf-id="hf-igg0" id="f04-head">
+              <div data-hf-id="hf-y3b6" class="f04-logo"><svg data-hf-id="hf-wjz8" width="24" height="24" viewBox="0 0 16 16" fill="none"><path data-hf-id="hf-mq8v" d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle data-hf-id="hf-ny28" cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>
+              <div data-hf-id="hf-gbt5" class="f04-h1">AI Agent</div>
+              <div data-hf-id="hf-5ik2" class="f04-ws">Northwind Labs · NWD</div>
+            </div>
+
+            <div data-hf-id="hf-nax3" id="f04-comp">
+              <div data-hf-id="hf-j31a" id="f04-q">Is Sprint 24 on track?</div><div data-hf-id="hf-armb" id="f04-caret"></div>
+              <div data-hf-id="hf-58hg" id="f04-send"><svg data-hf-id="hf-84v8" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-436h" d="M12 19V5M5 12l7-7 7 7" /></svg></div>
+            </div>
+
+            <div data-hf-id="hf-4d7j" id="f04-steps">
+              <div data-hf-id="hf-rziy" id="f04-s1" class="f04-step"><div data-hf-id="hf-02rt" class="f04-chk"><svg data-hf-id="hf-1gvq" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-ci36" d="M5 12l5 5 9-10" /></svg></div>Read 42 Jira issues</div>
+              <div data-hf-id="hf-hbl8" id="f04-s2" class="f04-step"><div data-hf-id="hf-5lod" class="f04-chk"><svg data-hf-id="hf-fpcq" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-54uu" d="M5 12l5 5 9-10" /></svg></div>Checked the QA sheet</div>
+              <div data-hf-id="hf-3vqt" id="f04-s3" class="f04-step"><div data-hf-id="hf-6slg" class="f04-chk"><svg data-hf-id="hf-g3nr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-5j5v" d="M5 12l5 5 9-10" /></svg></div>Reasoned it through</div>
+            </div>
+
+            <div data-hf-id="hf-st2y" id="f04-ans">
+              <div data-hf-id="hf-vf14" id="f04-title"><div data-hf-id="hf-104q" class="f04-risk"><i data-hf-id="hf-wt6k"></i>At risk</div><div data-hf-id="hf-z8u0" class="f04-tt">Sprint 24 needs attention</div></div>
+              <div data-hf-id="hf-m16c" id="f04-r1" class="f04-row" style="top:96px;"><div data-hf-id="hf-3682" class="f04-n">1</div><div data-hf-id="hf-81g1" class="f04-key">NWD-142</div><div data-hf-id="hf-0c5i"><b data-hf-id="hf-zsme">Checkout timeout</b> blocked for 4 days</div></div>
+              <div data-hf-id="hf-uvcl" id="f04-r2" class="f04-row" style="top:162px;"><div data-hf-id="hf-3kj3" class="f04-n">2</div><div data-hf-id="hf-ag8g" class="f04-key">NWD-156</div><div data-hf-id="hf-4qhz"><b data-hf-id="hf-p88w">Leave approvals</b> has no acceptance criteria</div></div>
+              <div data-hf-id="hf-5li1" id="f04-r3" class="f04-row" style="top:228px;"><div data-hf-id="hf-3yu4" class="f04-n">3</div><div data-hf-id="hf-cb44" class="f04-key">NWD-181</div><div data-hf-id="hf-ps9s"><b data-hf-id="hf-h9az">CSV export</b> 3 failing QA cases</div></div>
+              <div data-hf-id="hf-31ol" id="f04-act"><span data-hf-id="hf-3912">Next step</span>Unblock NWD-142 before Thursday's release review</div>
+              <div data-hf-id="hf-xhgq" id="f04-foot">
+                <div data-hf-id="hf-bqde" id="f04-c1" class="f04-src"><i data-hf-id="hf-j1cz" style="background:#2563EB"></i>Jira · 3 issues</div>
+                <div data-hf-id="hf-y4c3" id="f04-c2" class="f04-src"><i data-hf-id="hf-roew" style="background:#16A34A"></i>QA sheet · rows 12–14</div>
+              </div>
+              <div data-hf-id="hf-4mrv" id="f04-jql"><span data-hf-id="hf-mx09" class="l">How I searched</span><span data-hf-id="hf-i413">project = NWD AND sprint = <em data-hf-id="hf-1287">"Sprint 24"</em> AND status != Done</span></div>
+              <div data-hf-id="hf-ujwu" id="f04-hl"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+
+        // Window tilts to flat on the colour block
+        tl.fromTo("#f04-block", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: E }, 0);
+        tl.fromTo("#f04-win", { rotationX: 12, y: 60, opacity: 0 }, { rotationX: 0, y: 0, opacity: 1, duration: 1.1, ease: E }, 0.05);
+
+        // "Ask anything." — the question types in
+        const q = "Is Sprint 24 on track?";
+        const qEl = document.querySelector("#f04-q");
+        const typer = { n: 0 };
+        tl.fromTo(typer, { n: 0 }, { n: q.length, duration: 0.75, ease: "none",
+          onUpdate: () => { qEl.textContent = q.slice(0, Math.round(typer.n)); } }, 0.25);
+        tl.fromTo("#f04-caret", { opacity: 1 }, { opacity: 0, duration: 0.1 }, 1.1);
+        tl.fromTo("#f04-send", { scale: 1 }, { scale: 0.86, duration: 0.09, ease: "power2.out" }, 1.1);
+        tl.to("#f04-send", { scale: 1, duration: 0.35, ease: "power3.out" }, 1.2);
+
+        // "reads your Jira, reasons it through" — steps tick
+        [["#f04-s1", 2.2], ["#f04-s2", 2.7], ["#f04-s3", 3.2]].forEach(([s, t]) => {
+          tl.fromTo(s, { scale: 0.9, y: 14, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.6, ease: E }, t);
+          tl.fromTo(s + " .f04-chk", { scale: 0 }, { scale: 1, duration: 0.4, ease: E }, t + 0.35);
+        });
+
+        // The answer assembles card by card
+        tl.fromTo("#f04-ans", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: E }, 3.7);
+        tl.fromTo("#f04-title", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 3.85);
+        ["#f04-r1", "#f04-r2", "#f04-r3"].forEach((r, i) => {
+          tl.fromTo(r, { x: -24, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: E }, 4.0 + i * 0.14);
+        });
+        tl.fromTo("#f04-act", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 4.4);
+        tl.fromTo(["#f04-c1", "#f04-c2"], { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E, stagger: 0.1 }, 4.6);
+
+        // "exactly how it found the answer" — JQL line + camera push
+        tl.fromTo("#f04-jql", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 4.95);
+        tl.fromTo("#f04-cam", { scale: 1, y: 0 }, { scale: 1.32, y: -60, duration: 2.6, ease: "power2.inOut" }, 5.1);
+        tl.fromTo("#f04-hl", { scale: 1.04, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E }, 5.7);
+
+        window.__timelines["04-ask-anything"] = tl;
+      })();
+    </script>
+  </div>
+</template>

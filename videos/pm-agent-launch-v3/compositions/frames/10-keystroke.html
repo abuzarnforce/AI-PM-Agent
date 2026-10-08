@@ -1,0 +1,154 @@
+<template>
+  <div id="root" data-composition-id="10-keystroke" data-width="1920" data-height="1080" data-duration="4.3">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f10-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 50% 40%, #FFFFFF 0%, #F7F7F5 70%); }
+      #f10-cam { position: absolute; inset: 0; transform-origin: 50% 378px; }
+
+      /* 3D keycaps */
+      .f10-kc { position: absolute; top: 330px; height: 280px; }
+      .f10-skirt { position: absolute; left: 0; right: 0; top: 20px; height: 260px; border-radius: 46px; background: linear-gradient(180deg, #E4E6EB 0%, #CBCFD8 100%); box-shadow: 0 2px 4px rgba(17,17,17,.06), 0 50px 80px -24px rgba(17,17,17,.35); }
+      .f10-cap { position: absolute; left: 0; right: 0; top: 0; height: 260px; border-radius: 46px; background: linear-gradient(180deg, #FFFFFF 0%, #F3F4F6 100%); border: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: center; }
+      .f10-dish { position: absolute; left: 20px; right: 20px; top: 18px; bottom: 28px; border-radius: 32px; background: linear-gradient(180deg, #F6F7F9 0%, #FFFFFF 100%); box-shadow: inset 0 -2px 6px rgba(17,17,17,.04); }
+      .f10-lbl { position: relative; font-weight: 650; letter-spacing: -0.03em; color: #111111; margin-top: -10px; }
+      #f10-plus { position: absolute; left: 1000px; width: 80px; top: 412px; text-align: center; font-size: 72px; font-weight: 500; color: #6B7280; }
+
+      /* Command palette */
+      #f10-pal { position: absolute; left: 410px; top: 180px; width: 1100px; height: 620px; background: #FFFFFF; border-radius: 30px; border: 1px solid #E5E7EB; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 40px 80px -20px rgba(17,17,17,.25); overflow: hidden; }
+      #f10-search { position: absolute; left: 0; right: 0; top: 0; height: 104px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; gap: 18px; padding: 0 32px; }
+      #f10-q { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; }
+      #f10-caret { width: 3px; height: 40px; background: #2563EB; margin-left: -15px; }
+      #f10-ph { position: absolute; left: 84px; top: 0; height: 104px; display: flex; align-items: center; font-size: 36px; font-weight: 500; letter-spacing: -0.02em; color: #9CA3AF; }
+      .f10-kbd { height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #E5E7EB; border-bottom-width: 3px; background: #FFFFFF; font-size: 20px; font-weight: 650; color: #6B7280; display: flex; align-items: center; flex: none; }
+      #f10-esc { margin-left: auto; }
+
+      .f10-lab { position: absolute; left: 40px; font-size: 20px; font-weight: 650; letter-spacing: 0.12em; text-transform: uppercase; color: #6B7280; }
+      #f10-hl { position: absolute; left: 16px; right: 16px; top: 160px; height: 76px; border-radius: 18px; background: #EFF5FF; border: 1px solid #C7DAFE; }
+      #f10-ring { position: absolute; left: 10px; right: 10px; top: 154px; height: 88px; border-radius: 22px; border: 3px solid #2563EB; box-shadow: 0 0 0 8px rgba(37,99,235,.15); }
+      .f10-row { position: absolute; left: 16px; right: 16px; height: 76px; display: flex; align-items: center; gap: 18px; padding: 0 22px; font-size: 27px; font-weight: 550; letter-spacing: -0.015em; color: #1F2937; }
+      .f10-ico { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; flex: none; }
+      .f10-tk { height: 38px; padding: 0 12px; border-radius: 10px; background: #DCE8FF; color: #1D4ED8; font-size: 22px; font-weight: 700; display: flex; align-items: center; letter-spacing: 0.01em; flex: none; }
+      .f10-row b { font-weight: 650; color: #111111; }
+      .f10-meta { margin-left: auto; font-size: 20px; font-weight: 500; color: #6B7280; }
+      #f10-enter { height: 42px; padding: 0 16px; border-radius: 12px; background: #2563EB; color: #FFFFFF; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex: none; box-shadow: 0 6px 14px -6px rgba(37,99,235,.6); }
+
+      #f10-foot { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; border-top: 1px solid #E5E7EB; background: #FAFAF9; display: flex; align-items: center; gap: 26px; padding: 0 32px; font-size: 20px; font-weight: 500; color: #6B7280; }
+      .f10-fi { display: flex; align-items: center; gap: 10px; }
+      .f10-fi .f10-kbd { height: 32px; padding: 0 10px; }
+      #f10-brand { margin-left: auto; display: flex; align-items: center; gap: 10px; font-weight: 650; color: #374151; }
+      .f10-logo { width: 32px; height: 32px; border-radius: 9px; background: #111111; display: flex; align-items: center; justify-content: center; }
+    </style>
+
+    <div id="f10-bg" class="clip" data-start="0" data-duration="4.3" data-track-index="0"></div>
+
+    <div id="f10-stage" class="clip" data-start="0" data-duration="4.3" data-track-index="1">
+      <div id="f10-cam">
+        <!-- Ctrl + K -->
+        <div id="f10-k1" class="f10-kc" style="left:580px;width:420px;">
+          <div class="f10-skirt"></div>
+          <div id="f10-c1" class="f10-cap"><div class="f10-dish"></div><div class="f10-lbl" style="font-size:88px;">Ctrl</div></div>
+        </div>
+        <div id="f10-plus">+</div>
+        <div id="f10-k2" class="f10-kc" style="left:1080px;width:260px;">
+          <div class="f10-skirt"></div>
+          <div id="f10-c2" class="f10-cap"><div class="f10-dish"></div><div class="f10-lbl" style="font-size:120px;">K</div></div>
+        </div>
+
+        <!-- Command palette -->
+        <div id="f10-pal">
+          <div id="f10-search">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <div id="f10-q"></div><div id="f10-caret"></div>
+            <div id="f10-esc" class="f10-kbd">esc</div>
+          </div>
+          <div id="f10-ph">Search issues, boards, pages…</div>
+
+          <div id="f10-l1" class="f10-lab" style="top:124px;">Best match</div>
+          <div id="f10-hl"></div>
+          <div id="f10-r1" class="f10-row" style="top:160px;">
+            <div class="f10-ico" style="background:#DCE8FF;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M7 10h10M7 14h6" /></svg></div>
+            <div class="f10-tk">NWD-156</div><b>Leave approvals</b>
+            <div class="f10-meta">Jira issue</div>
+            <div id="f10-enter">↵ Open</div>
+          </div>
+
+          <div id="f10-l2" class="f10-lab" style="top:252px;">Jump to</div>
+          <div id="f10-r2" class="f10-row" style="top:288px;">
+            <div class="f10-ico" style="background:#D9F2FF;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16M15 4v16" /></svg></div>
+            Sprint 24 board<div class="f10-meta">Board</div>
+          </div>
+          <div id="f10-r3" class="f10-row" style="top:372px;">
+            <div class="f10-ico" style="background:#D6F5E3;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M8 12l3 3 5-6" /></svg></div>
+            Release 2.4 QA dashboard<div class="f10-meta">QA</div>
+          </div>
+          <div id="f10-r4" class="f10-row" style="top:456px;">
+            <div class="f10-ico" style="background:#FFF1C2;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3" /><circle cx="17" cy="10" r="2.4" /><path d="M3 19c0-3 3-5 6-5s6 2 6 5M15 15.5c3 0 6 1.4 6 3.5" /></svg></div>
+            Daily standup<div class="f10-meta">Standup</div>
+          </div>
+
+          <div id="f10-foot">
+            <div class="f10-fi"><div class="f10-kbd">↑↓</div>Navigate</div>
+            <div class="f10-fi"><div class="f10-kbd">↵</div>Open</div>
+            <div class="f10-fi"><div class="f10-kbd">esc</div>Close</div>
+            <div id="f10-brand"><div class="f10-logo"><svg width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>PM Agent</div>
+          </div>
+          <div id="f10-ring"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+
+        // Ctrl + K pop in
+        tl.fromTo("#f10-k1", { scale: 0.9, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 0.2);
+        tl.fromTo("#f10-plus", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E }, 0.26);
+        tl.fromTo("#f10-k2", { scale: 0.9, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 0.32);
+
+        // "everything" — Ctrl held, K strikes; skirt shadow shrinks as caps sink
+        tl.fromTo("#f10-c1", { y: 0 }, { y: 16, duration: 0.08, ease: "power2.out" }, 0.64);
+        tl.fromTo("#f10-c2", { y: 0 }, { y: 16, duration: 0.08, ease: "power2.out" }, 0.77);
+        tl.fromTo(["#f10-c1", "#f10-c2"], { y: 16 }, { y: 0, duration: 0.25, ease: "power3.out", immediateRender: false }, 0.92);
+
+        // Keys scale away as the palette drops in
+        tl.fromTo(["#f10-k1", "#f10-k2", "#f10-plus"], { scale: 1, y: 0, opacity: 1 }, { scale: 0.82, y: 30, opacity: 0, duration: 0.35, ease: "power3.in", immediateRender: false }, 1.05);
+        tl.fromTo("#f10-pal", { y: -40, scale: 0.98, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.8, ease: E }, 1.1);
+
+        // Search types "NWD-156"
+        const q = "NWD-156";
+        const qEl = document.querySelector("#f10-q");
+        const typer = { n: 0 };
+        tl.fromTo("#f10-ph", { opacity: 1 }, { opacity: 0, duration: 0.05 }, 1.3);
+        tl.fromTo(typer, { n: 0 }, { n: q.length, duration: 0.6, ease: "none",
+          onUpdate: () => { qEl.textContent = q.slice(0, Math.round(typer.n)); } }, 1.3);
+
+        // Results land
+        tl.fromTo("#f10-l1", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, 1.85);
+        tl.fromTo("#f10-r1", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, 1.9);
+        tl.fromTo("#f10-l2", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, 2.0);
+        ["#f10-r2", "#f10-r3", "#f10-r4"].forEach((r, i) => {
+          tl.fromTo(r, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, 2.06 + i * 0.08);
+        });
+
+        // "keystroke" — best match highlights
+        tl.fromTo("#f10-hl", { scale: 0.97, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E }, 2.05);
+        tl.fromTo("#f10-enter", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E }, 2.12);
+
+        // "away." — Open pulses once, focus ring lands
+        tl.fromTo("#f10-enter", { scale: 1 }, { scale: 1.14, duration: 0.1, ease: "power2.out", immediateRender: false }, 2.65);
+        tl.fromTo("#f10-enter", { scale: 1.14 }, { scale: 1, duration: 0.4, ease: "power3.out", immediateRender: false }, 2.75);
+        tl.fromTo("#f10-ring", { scale: 1.04, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E }, 2.7);
+
+        // Quick push onto the highlighted row
+        tl.fromTo("#f10-cam", { scale: 1 }, { scale: 1.06, duration: 1.9, ease: "power2.inOut" }, 1.9);
+
+        window.__timelines["10-keystroke"] = tl;
+      })();
+    </script>
+  </div>
+</template>

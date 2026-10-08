@@ -1,0 +1,184 @@
+<template>
+  <div id="root" data-composition-id="01-everywhere" data-width="1920" data-height="1080" data-duration="8">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f01-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 50% 40%, #FFFFFF 0%, #F7F7F5 70%); }
+      #f01-cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 50% 42%; }
+
+      #f01-head { position: absolute; left: 0; top: 450px; width: 1920px; height: 180px; text-align: center; font-size: 150px; line-height: 180px; font-weight: 750; letter-spacing: -0.045em; white-space: nowrap; transform-origin: 50% 50%; }
+      .f01-ch { display: inline-block; }
+      #f01-dot { color: #2563EB; }
+
+      .f01-drift { position: absolute; }
+      .f01-card { position: relative; border-radius: 26px; padding: 28px; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 30px 60px -20px rgba(17,17,17,.25); }
+      .f01-row { display: flex; align-items: center; gap: 14px; }
+      .f01-ico { width: 52px; height: 52px; border-radius: 15px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex: none; }
+      .f01-t { font-size: 38px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-top: 18px; }
+      .f01-pill { height: 40px; padding: 0 16px; border-radius: 999px; font-size: 20px; font-weight: 650; display: flex; align-items: center; gap: 8px; flex: none; }
+      .f01-pill i { width: 10px; height: 10px; border-radius: 999px; display: block; }
+      .f01-av { width: 48px; height: 48px; border-radius: 999px; color: #FFFFFF; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-left: auto; flex: none; }
+      .f01-key { height: 38px; padding: 0 14px; border-radius: 10px; background: #FFFFFF; color: #1D4ED8; font-size: 21px; font-weight: 700; display: flex; align-items: center; }
+      .f01-lbl { font-size: 24px; font-weight: 650; color: #374151; letter-spacing: -0.01em; }
+
+      #f01-c1 { width: 520px; background: #DCE8FF; }
+      #f01-c2 { width: 540px; background: #E7E9F0; }
+      #f01-c3 { width: 560px; background: #D6F5E3; }
+      #f01-c4 { width: 440px; background: #FFF1C2; border-radius: 12px; padding: 34px 32px 30px; }
+
+      .f01-diff { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+      .f01-tbl { margin-top: 18px; background: #FFFFFF; border-radius: 16px; border: 1px solid rgba(17,17,17,.06); overflow: hidden; }
+      .f01-tr { height: 42px; display: flex; align-items: center; gap: 16px; padding: 0 16px; font-size: 21px; font-weight: 500; color: #374151; border-top: 1px solid #EEF0F2; }
+      .f01-tr:first-child { border-top: none; }
+      .f01-tr b { font-weight: 700; color: #111111; width: 78px; }
+      .f01-tr .f01-pill { margin-left: auto; height: 32px; padding: 0 14px; }
+      .f01-pass { background: #DCFCE7; color: #166534; }
+      .f01-fail { background: #FEE2E2; color: #991B1B; }
+
+      #f01-tape { position: absolute; left: 160px; top: -14px; width: 120px; height: 30px; border-radius: 4px; background: rgba(255,255,255,.65); }
+      .f01-q { font-size: 64px; font-weight: 800; line-height: 40px; height: 40px; color: #D97706; }
+      .f01-quote { font-size: 32px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.25; margin-top: 4px; }
+      .f01-from { margin-top: 20px; font-size: 20px; font-weight: 600; color: #92400E; display: flex; align-items: center; gap: 8px; }
+
+      .f01-svg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+      .f01-ln { stroke: #2563EB; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 10 12; }
+      .f01-x { position: absolute; width: 46px; height: 46px; border-radius: 999px; background: #DC2626; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 6px rgba(220,38,38,.14), 0 10px 20px -8px rgba(220,38,38,.6); }
+    </style>
+
+    <div id="f01-bg" class="clip" data-start="0" data-duration="8" data-track-index="0"></div>
+
+    <div id="f01-stage" class="clip" data-start="0" data-duration="8" data-track-index="1">
+      <div id="f01-cam">
+        <div id="f01-head"><span class="f01-ch">E</span><span class="f01-ch">v</span><span class="f01-ch">e</span><span class="f01-ch">r</span><span class="f01-ch">y</span><span class="f01-ch">w</span><span class="f01-ch">h</span><span class="f01-ch">e</span><span class="f01-ch">r</span><span class="f01-ch">e</span><span id="f01-dot" class="f01-ch">.</span></div>
+
+        <!-- Ticket -->
+        <div id="f01-d1" class="f01-drift" style="left:170px;top:200px;">
+          <div id="f01-c1" class="f01-card">
+            <div class="f01-row">
+              <div class="f01-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M7 10h10M7 14h6" /></svg></div>
+              <div class="f01-key">NWD-142</div>
+            </div>
+            <div class="f01-t">Checkout timeout</div>
+            <div class="f01-row" style="margin-top:22px;">
+              <div class="f01-pill" style="background:#FFFFFF;color:#1D4ED8;"><i style="background:#2563EB"></i>In progress</div>
+              <div class="f01-av" style="background:#F97316;">MR</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pull request -->
+        <div id="f01-d2" class="f01-drift" style="left:1210px;top:210px;">
+          <div id="f01-c2" class="f01-card">
+            <div class="f01-row">
+              <div class="f01-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.2" /><circle cx="6" cy="19" r="2.2" /><circle cx="18" cy="9" r="2.2" /><path d="M6 7.2v9.6M18 11.2c0 4-6 3-11 6.2" /></svg></div>
+              <div class="f01-lbl">PR #318</div>
+              <div class="f01-pill" style="margin-left:auto;background:#DCFCE7;color:#166534;"><i style="background:#16A34A"></i>Open</div>
+            </div>
+            <div class="f01-t">Fix export encoding</div>
+            <div class="f01-row" style="margin-top:22px;gap:18px;height:48px;">
+              <div class="f01-diff" style="color:#15803D;">+42</div>
+              <div class="f01-diff" style="color:#DC2626;">−7</div>
+              <div style="font-size:20px;font-weight:550;color:#4B5563;">2 files changed</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test sheet -->
+        <div id="f01-d3" class="f01-drift" style="left:250px;top:560px;">
+          <div id="f01-c3" class="f01-card">
+            <div class="f01-row">
+              <div class="f01-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M3 9h18M3 15h18M9 3v18" /></svg></div>
+              <div class="f01-lbl" style="color:#111111;font-size:26px;">Release 2.4 · QA</div>
+            </div>
+            <div class="f01-tbl">
+              <div class="f01-tr"><b>TC-12</b>Apply leave<div class="f01-pill f01-pass">Pass</div></div>
+              <div class="f01-tr"><b>TC-13</b>Approve leave<div class="f01-pill f01-pass">Pass</div></div>
+              <div class="f01-tr" style="background:#FEF2F2;"><b>TC-14</b>CSV export<div class="f01-pill f01-fail">Fail</div></div>
+              <div class="f01-tr"><b>TC-15</b>Checkout<div class="f01-pill f01-pass">Pass</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer note -->
+        <div id="f01-d4" class="f01-drift" style="left:1190px;top:590px;">
+          <div id="f01-c4" class="f01-card">
+            <div id="f01-tape"></div>
+            <div class="f01-q">“</div>
+            <div class="f01-quote">Can managers approve leave in bulk?</div>
+            <div class="f01-from"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z" /></svg>Customer call</div>
+          </div>
+        </div>
+
+        <!-- "none of it talks to each other" -->
+        <svg class="f01-svg" viewBox="0 0 1920 1080">
+          <line id="f01-l1a" class="f01-ln" x1="0" y1="0" x2="0" y2="0" opacity="0" /><line id="f01-l1b" class="f01-ln" x1="0" y1="0" x2="0" y2="0" opacity="0" />
+          <line id="f01-l2a" class="f01-ln" x1="0" y1="0" x2="0" y2="0" opacity="0" /><line id="f01-l2b" class="f01-ln" x1="0" y1="0" x2="0" y2="0" opacity="0" />
+          <line id="f01-l3a" class="f01-ln" x1="0" y1="0" x2="0" y2="0" opacity="0" /><line id="f01-l3b" class="f01-ln" x1="0" y1="0" x2="0" y2="0" opacity="0" />
+          <line id="f01-l4a" class="f01-ln" x1="0" y1="0" x2="0" y2="0" opacity="0" /><line id="f01-l4b" class="f01-ln" x1="0" y1="0" x2="0" y2="0" opacity="0" />
+        </svg>
+        <div id="f01-x1" class="f01-x" style="left:927px;top:317px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></div>
+        <div id="f01-x2" class="f01-x" style="left:447px;top:481px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></div>
+        <div id="f01-x3" class="f01-x" style="left:1417px;top:499px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></div>
+        <div id="f01-x4" class="f01-x" style="left:977px;top:692px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+
+        // One slow Apple push across the whole shot
+        tl.fromTo("#f01-cam", { scale: 1 }, { scale: 1.04, duration: 8, ease: "power2.inOut" }, 0);
+
+        // "Your product lives everywhere." — display word pops in, the period lands on "everywhere."
+        tl.fromTo("#f01-head .f01-ch:not(#f01-dot)", { y: 60, scale: 0.9, opacity: 0 },
+          { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: E, stagger: 0.07 }, 0.3);
+        tl.fromTo("#f01-dot", { y: 30, scale: 0.4, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.6, ease: E }, 1.45);
+
+        // ...then it becomes the eyebrow headline at the top
+        tl.fromTo("#f01-head", { y: 0, scale: 1 }, { y: -430, scale: 0.45, duration: 0.9, ease: "power3.inOut" }, 2.1);
+
+        // Four scattered sources, each on its word, then a gentle independent drift
+        const cards = [
+          ["#f01-c1", "#f01-d1", 2.30, -4, 1.0, [-8, 6]],
+          ["#f01-c2", "#f01-d2", 3.07, 3, 0.97, [7, -6]],
+          ["#f01-c3", "#f01-d3", 4.05, 2.5, 0.96, [-6, -5]],
+          ["#f01-c4", "#f01-d4", 4.86, -3, 1.02, [6, 5]]
+        ];
+        cards.forEach(([c, d, t, r, s, dr]) => {
+          tl.fromTo(c, { scale: s * 0.85, y: 30, rotation: r - 5, opacity: 0 },
+            { scale: s, y: 0, rotation: r, opacity: 1, duration: 0.75, ease: E }, t);
+          tl.fromTo(d, { x: 0, y: 0 }, { x: dr[0], y: dr[1], duration: 8 - (t + 0.4), ease: "none" }, t + 0.4);
+        });
+
+        // "And none of it talks to each other." — connectors draw, then snap at the middle
+        const links = [
+          ["1", [712, 345], [1188, 335], 6.19, 6.57],
+          ["2", [440, 462], [500, 545], 6.25, 6.66],
+          ["3", [1460, 474], [1420, 570], 6.45, 7.04],
+          ["4", [832, 720], [1168, 710], 6.52, 7.12]
+        ];
+        links.forEach(([n, A, B, tDraw, tSnap]) => {
+          const M = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2];
+          const len = Math.hypot(A[0] - M[0], A[1] - M[1]);
+          [["a", A], ["b", B]].forEach(([h, P]) => {
+            const el = "#f01-l" + n + h;
+            const ux = (P[0] - M[0]) / len, uy = (P[1] - M[1]) / len;
+            tl.fromTo(el, { attr: { x1: P[0], y1: P[1], x2: P[0], y2: P[1] }, opacity: 0 },
+              { attr: { x1: P[0], y1: P[1], x2: M[0], y2: M[1] }, opacity: 1, duration: 0.32, ease: "power3.inOut" }, tDraw);
+            // snap: halves pull apart, turn red, fade
+            tl.to(el, { x: ux * 22, y: uy * 22, duration: 0.4, ease: "power3.out" }, tSnap);
+            tl.to(el, { stroke: "#DC2626", duration: 0.1, ease: "none" }, tSnap);
+            tl.to(el, { opacity: 0, duration: 0.45, ease: "power2.in" }, tSnap + 0.2);
+          });
+          tl.fromTo("#f01-x" + n, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E }, tSnap + 0.04);
+        });
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines["01-everywhere"] = tl;
+      })();
+    </script>
+  </div>
+</template>

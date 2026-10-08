@@ -1,0 +1,65 @@
+{
+  "provider": "heygen",
+  "speed": "1.0",
+  "lines": [
+    {
+      "id": "01",
+      "text": "Your product lives everywhere. Tickets. Pull requests. Test sheets. Customer notes. And none of it talks to each other."
+    },
+    {
+      "id": "02",
+      "text": "Meet PM Agent. One intelligent layer that turns all of it into insight, decisions, and action."
+    },
+    {
+      "id": "03",
+      "text": "Open it, and you already know what matters today. Every signal, with its source."
+    },
+    {
+      "id": "04",
+      "text": "Ask anything. PM Agent reads your Jira, reasons it through, and shows you exactly how it found the answer."
+    },
+    {
+      "id": "05",
+      "text": "Sprint health, at a glance. What's moving, what's stuck, and what's trending the wrong way."
+    },
+    {
+      "id": "06",
+      "text": "Your QA sheet becomes a live release check. Ninety-six percent passing. Three blockers, named."
+    },
+    {
+      "id": "07",
+      "text": "Run standup in one place. Who's in, what moved, what's blocked, and an AI summary of what needs you."
+    },
+    {
+      "id": "08",
+      "text": "And the work that never makes it into Jira? Every follow-up, with an owner and a due date. Nothing slips."
+    },
+    {
+      "id": "09",
+      "text": "Connect Jira, GitHub, and Gemini in minutes."
+    },
+    {
+      "id": "10",
+      "text": "Then everything is one keystroke away."
+    },
+    {
+      "id": "11",
+      "text": "And nothing touches Jira until you say so. PM Agent drafts. You decide."
+    },
+    {
+      "id": "12",
+      "text": "Stories. PRDs. Feedback turned into work. All in your team's templates."
+    },
+    {
+      "id": "13",
+      "text": "PM Agent. Connect everything. Understand anything. Move product forward."
+    }
+  ],
+  "bgm": {
+    "mode": "retrieve",
+    "query": "bright modern tech launch, piano + light electronic pulse, builds to a drop, confident and optimistic",
+    "blob": "PM Agent connects Jira, GitHub and QA into one intelligent workspace — AI does the heavy lifting, the PM stays in control.",
+    "arc": "Scattered → Connected → Insight → Decision → Action → Lockup"
+  },
+  "voice": "69a83c97b51a4bb5a3d0fb0ce1699431"
+}

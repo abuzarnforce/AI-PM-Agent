@@ -9,4 +9,12 @@ tsconfig.tsbuildinfo
 .vercel
 .env*
 brag-output/
-videos/
+# Video projects stay local (v1 contains real data); only the demo-data v3 film is tracked.
+videos/*
+!videos/pm-agent-launch-v3/
+videos/pm-agent-launch-v3/snapshots/
+videos/pm-agent-launch-v3/voice-samples/
+videos/pm-agent-launch-v3/.thumbnails/
+videos/pm-agent-launch-v3/.waveform-cache/
+videos/pm-agent-launch-v3/.hyperframes/preview/
+videos/pm-agent-launch-v3/audio.log

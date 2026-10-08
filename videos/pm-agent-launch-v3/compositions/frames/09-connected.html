@@ -1,0 +1,142 @@
+<template>
+  <div id="root" data-composition-id="09-connected" data-width="1920" data-height="1080" data-duration="4.2">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f09-bg { position: absolute; inset: 0; background: #F7F7F5; }
+      #f09-persp { position: absolute; inset: 0; perspective: 2200px; }
+      #f09-cam { position: absolute; inset: 0; transform-origin: 50% 46%; }
+      #f09-block { position: absolute; left: 60px; top: 40px; right: 60px; bottom: 40px; border-radius: 56px; background: linear-gradient(160deg, #D9F2FF 0%, #EAF7FF 100%); }
+      #f09-win { position: absolute; left: 168px; top: 140px; width: 1584px; height: 596px; background: #FFFFFF; border-radius: 30px; border: 1px solid #E5E7EB; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 50px 100px -24px rgba(3,105,161,.28); transform-origin: 50% 0%; }
+
+      #f09-head { position: absolute; left: 40px; right: 40px; top: 26px; height: 48px; display: flex; align-items: center; gap: 14px; }
+      .f09-logo { width: 40px; height: 40px; border-radius: 11px; background: #111111; display: flex; align-items: center; justify-content: center; }
+      .f09-h1 { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+      .f09-ws { margin-left: auto; font-size: 20px; color: #6B7280; font-weight: 500; }
+
+      #f09-sec { position: absolute; left: 40px; right: 40px; top: 104px; height: 52px; display: flex; align-items: center; }
+      .f09-st { font-size: 38px; font-weight: 700; letter-spacing: -0.03em; }
+      #f09-prog { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+      #f09-pt { font-size: 22px; font-weight: 650; color: #6B7280; white-space: nowrap; }
+      .f09-bar { width: 220px; height: 10px; border-radius: 999px; background: #E5E7EB; overflow: hidden; }
+      #f09-fill { width: 0%; height: 100%; border-radius: 999px; background: #16A34A; }
+
+      .f09-card { position: absolute; top: 184px; width: 480px; height: 372px; box-sizing: border-box; padding: 32px; border-radius: 22px; border: 1px solid #E5E7EB; background: #FFFFFF; box-shadow: 0 1px 2px rgba(17,17,17,.04), 0 14px 30px -20px rgba(17,17,17,.22); }
+      .f09-tile { width: 96px; height: 96px; border-radius: 26px; display: flex; align-items: center; justify-content: center; }
+      .f09-name { margin-top: 26px; font-size: 40px; font-weight: 700; letter-spacing: -0.03em; }
+      .f09-desc { margin-top: 6px; font-size: 24px; font-weight: 500; color: #6B7280; }
+      .f09-btn { position: absolute; left: 32px; right: 32px; bottom: 32px; height: 68px; }
+      .f09-b0, .f09-b1 { position: absolute; inset: 0; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 24px; font-weight: 650; }
+      .f09-b0 { background: #F3F4F6; border: 1px solid #E5E7EB; color: #111111; }
+      .f09-b1 { background: #16A34A; color: #FFFFFF; opacity: 0; }
+      .f09-ck { width: 30px; height: 30px; border-radius: 999px; background: rgba(255,255,255,.22); display: flex; align-items: center; justify-content: center; }
+
+      #f09-chipwrap { position: absolute; left: 0; right: 0; top: 774px; display: flex; justify-content: center; }
+      #f09-chip { height: 64px; padding: 0 28px 0 14px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E5E7EB; box-shadow: 0 1px 2px rgba(17,17,17,.05), 0 18px 40px -16px rgba(17,17,17,.22); display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 650; letter-spacing: -0.015em; }
+      .f09-clk { width: 40px; height: 40px; border-radius: 999px; background: #DCE8FF; display: flex; align-items: center; justify-content: center; }
+    </style>
+
+    <div id="f09-bg" class="clip" data-start="0" data-duration="4.2" data-track-index="0"></div>
+
+    <div id="f09-stage" class="clip" data-start="0" data-duration="4.2" data-track-index="1">
+      <div id="f09-persp">
+        <div id="f09-cam">
+          <div id="f09-block"></div>
+
+          <div id="f09-win">
+            <div id="f09-head">
+              <div class="f09-logo"><svg width="24" height="24" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>
+              <div class="f09-h1">Connections</div>
+              <div class="f09-ws">Northwind Labs</div>
+            </div>
+
+            <div id="f09-sec">
+              <div class="f09-st">Data sources</div>
+              <div id="f09-prog"><div id="f09-pt">0 of 3 connected</div><div class="f09-bar"><div id="f09-fill"></div></div></div>
+            </div>
+
+            <div id="f09-c1" class="f09-card" style="left:40px;">
+              <div class="f09-tile" style="background:#2563EB;"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M7 10h10M7 14h6" /></svg></div>
+              <div class="f09-name">Jira</div>
+              <div class="f09-desc">Issues, sprints, epics</div>
+              <div id="f09-btn1" class="f09-btn">
+                <div class="f09-b0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>Connect</div>
+                <div class="f09-b1">Connected<div class="f09-ck"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10" /></svg></div></div>
+              </div>
+            </div>
+
+            <div id="f09-c2" class="f09-card" style="left:552px;">
+              <div class="f09-tile" style="background:#111111;"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.2" /><circle cx="6" cy="19" r="2.2" /><circle cx="18" cy="9" r="2.2" /><path d="M6 7.2v9.6M18 11.2c0 4-6 3-11 6.2" /></svg></div>
+              <div class="f09-name">GitHub</div>
+              <div class="f09-desc">Repos, commits, PRs</div>
+              <div id="f09-btn2" class="f09-btn">
+                <div class="f09-b0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>Connect</div>
+                <div class="f09-b1">Connected<div class="f09-ck"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10" /></svg></div></div>
+              </div>
+            </div>
+
+            <div id="f09-c3" class="f09-card" style="left:1064px;">
+              <div class="f09-tile" style="background:#D9F2FF;"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12.5" r="3" /><circle cx="12" cy="4" r="2" /><circle cx="19.5" cy="17" r="2" /><circle cx="4.5" cy="17" r="2" /><path d="M12 6v3.5M17.8 16l-3.2-1.9M6.2 16l3.2-1.9" /></svg></div>
+              <div class="f09-name">Gemini</div>
+              <div class="f09-desc">Reasoning model</div>
+              <div id="f09-btn3" class="f09-btn">
+                <div class="f09-b0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>Connect</div>
+                <div class="f09-b1">Connected<div class="f09-ck"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10" /></svg></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="f09-chipwrap">
+            <div id="f09-chip"><div class="f09-clk"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></div>Set up in 2 minutes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+
+        // One slow Apple push across the shot
+        tl.fromTo("#f09-cam", { scale: 1 }, { scale: 1.05, duration: 4.2, ease: "power2.inOut" }, 0);
+
+        // Window tilts flat on the sky block
+        tl.fromTo("#f09-block", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: E }, 0);
+        tl.fromTo("#f09-win", { rotationX: 12, y: 60, opacity: 0 }, { rotationX: 0, y: 0, opacity: 1, duration: 1.0, ease: E }, 0);
+        tl.fromTo("#f09-sec", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 0.15);
+
+        // Three connector cards pop in, staggered
+        ["#f09-c1", "#f09-c2", "#f09-c3"].forEach((c, i) => {
+          tl.fromTo(c, { scale: 0.9, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 0.2 + i * 0.1);
+        });
+
+        // Each button is pressed and flips to "Connected" on its word
+        const pt = document.querySelector("#f09-pt");
+        const fill = document.querySelector("#f09-fill");
+        const prog = { n: 0 };
+        const show = () => {
+          pt.textContent = Math.round(prog.n) + " of 3 connected";
+          fill.style.width = (prog.n / 3 * 100) + "%";
+        };
+        [["#f09-c1", "#f09-btn1", 0.64], ["#f09-c2", "#f09-btn2", 1.36], ["#f09-c3", "#f09-btn3", 2.09]].forEach(([card, btn, t], i) => {
+          tl.fromTo(btn, { scale: 1 }, { scale: 0.92, duration: 0.08, ease: "power2.out" }, t - 0.08);
+          tl.fromTo(btn, { scale: 0.92 }, { scale: 1, duration: 0.4, ease: "power3.out", immediateRender: false }, t);
+          tl.fromTo(btn + " .f09-b1", { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none" }, t);
+          tl.fromTo(btn + " .f09-b0", { opacity: 1 }, { opacity: 0, duration: 0.15, ease: "none" }, t);
+          tl.fromTo(btn + " .f09-ck", { scale: 0 }, { scale: 1, duration: 0.45, ease: E }, t + 0.06);
+          tl.fromTo(card, { borderColor: "#E5E7EB" }, { borderColor: "#86EFAC", duration: 0.3, ease: "power2.out", immediateRender: false }, t);
+          tl.fromTo(prog, { n: i }, { n: i + 1, duration: 0.3, ease: "power2.out", onUpdate: show, immediateRender: i === 0 }, t);
+        });
+        tl.fromTo("#f09-pt", { color: "#6B7280" }, { color: "#15803D", duration: 0.3, ease: "power2.out" }, 2.25);
+
+        // "in minutes" — set-up chip pops below
+        tl.fromTo("#f09-chip", { scale: 0.85, y: 16, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 2.7);
+
+        window.__timelines["09-connected"] = tl;
+      })();
+    </script>
+  </div>
+</template>

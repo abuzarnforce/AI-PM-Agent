@@ -1,0 +1,182 @@
+<template>
+  <div id="root" data-composition-id="07-standup" data-width="1920" data-height="1080" data-duration="7.4">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f07-bg { position: absolute; inset: 0; background: #F7F7F5; }
+      #f07-block { position: absolute; left: 60px; top: 40px; right: 60px; bottom: 40px; border-radius: 56px; background: linear-gradient(160deg, #FFF1C2 0%, #FFF7DD 100%); }
+      #f07-persp { position: absolute; inset: 0; perspective: 2200px; }
+      #f07-cam { position: absolute; inset: 0; transform-origin: 1410px 760px; }
+      #f07-win { position: absolute; left: 250px; top: 78px; width: 1420px; height: 800px; background: #FFFFFF; border-radius: 30px; border: 1px solid #E5E7EB; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 50px 100px -24px rgba(180,83,9,.24); transform-origin: 50% 0%; }
+
+      #f07-head { position: absolute; left: 40px; right: 40px; top: 26px; height: 48px; display: flex; align-items: center; gap: 14px; }
+      .f07-logo { width: 40px; height: 40px; border-radius: 11px; background: #111111; display: flex; align-items: center; justify-content: center; }
+      .f07-h1 { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+      .f07-sub { font-size: 20px; font-weight: 500; color: #6B7280; }
+      .f07-ws { margin-left: auto; font-size: 20px; color: #6B7280; font-weight: 500; }
+
+      #f07-kpis { position: absolute; left: 40px; right: 40px; top: 96px; height: 92px; display: flex; gap: 14px; }
+      .f07-kpi { flex: 1; border-radius: 18px; border: 1px solid #E5E7EB; background: #FCFCFB; padding: 12px 20px; display: flex; flex-direction: column; justify-content: center; }
+      .f07-kl { font-size: 20px; font-weight: 600; color: #6B7280; display: flex; align-items: center; gap: 8px; }
+      .f07-kl i { width: 10px; height: 10px; border-radius: 999px; display: block; }
+      .f07-kn { font-size: 36px; font-weight: 750; letter-spacing: -0.03em; line-height: 1.1; margin-top: 2px; }
+
+      .f07-card { position: absolute; width: 420px; height: 268px; border-radius: 18px; border: 1px solid #E5E7EB; background: #FFFFFF; box-shadow: 0 1px 2px rgba(17,17,17,.04), 0 12px 28px -18px rgba(17,17,17,.22); }
+      .f07-av { position: absolute; left: 22px; top: 22px; width: 56px; height: 56px; border-radius: 999px; color: #FFFFFF; font-size: 21px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+      .f07-nm { position: absolute; left: 92px; top: 22px; font-size: 26px; font-weight: 650; letter-spacing: -0.02em; }
+      .f07-rl { position: absolute; left: 92px; top: 56px; font-size: 20px; font-weight: 500; color: #6B7280; }
+      .f07-pr { position: absolute; right: 20px; top: 30px; height: 36px; padding: 0 14px; border-radius: 999px; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+      .f07-pr i { width: 10px; height: 10px; border-radius: 999px; display: block; }
+      .f07-in { background: #DCFCE7; color: #166534; }
+      .f07-in i { background: #16A34A; }
+      .f07-out { background: #FEF3C7; color: #92400E; }
+      .f07-out i { background: #D97706; }
+      .f07-ln { position: absolute; left: 22px; right: 20px; height: 36px; display: flex; align-items: center; gap: 12px; font-size: 23px; font-weight: 500; color: #1F2937; white-space: nowrap; }
+      .f07-ln span { width: 108px; flex: none; font-size: 20px; font-weight: 650; color: #6B7280; }
+      .f07-ln.f07-muted { color: #9CA3AF; font-style: italic; }
+      .f07-blk { position: absolute; left: 22px; top: 200px; height: 44px; padding: 0 16px; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 21px; font-weight: 650; display: flex; align-items: center; gap: 10px; }
+      .f07-blk b { font-weight: 800; }
+      .f07-blk i { width: 10px; height: 10px; border-radius: 999px; background: #DC2626; display: block; }
+
+      #f07-sum { position: absolute; left: 916px; right: 40px; top: 208px; height: 562px; border-radius: 22px; border: 2px solid #2563EB; background: #FFFFFF; box-shadow: 0 0 0 6px rgba(37,99,235,.10), 0 24px 50px -24px rgba(29,78,216,.35); }
+      #f07-sh { position: absolute; left: 24px; right: 24px; top: 20px; height: 44px; display: flex; align-items: center; gap: 12px; }
+      .f07-mini { width: 36px; height: 36px; border-radius: 10px; background: #111111; display: flex; align-items: center; justify-content: center; }
+      .f07-st { font-size: 28px; font-weight: 700; letter-spacing: -0.025em; }
+      .f07-ai { margin-left: auto; height: 32px; padding: 0 12px; border-radius: 999px; background: #EFF5FF; color: #1D4ED8; font-size: 20px; font-weight: 700; display: flex; align-items: center; }
+      .f07-sec { position: absolute; left: 20px; right: 20px; height: 100px; border-radius: 16px; padding: 14px 18px; }
+      .f07-sl { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+      .f07-sl i { width: 10px; height: 10px; border-radius: 999px; display: block; }
+      .f07-si { margin-top: 10px; font-size: 24px; font-weight: 550; color: #111111; letter-spacing: -0.01em; white-space: nowrap; }
+      #f07-s4 { background: #EFF5FF; border: 1px solid #C7DAFE; }
+      #f07-hl { position: absolute; left: 14px; right: 14px; top: 434px; height: 112px; border-radius: 20px; border: 3px solid #2563EB; box-shadow: 0 0 0 8px rgba(37,99,235,.15); }
+    </style>
+
+    <div id="f07-bg" class="clip" data-start="0" data-duration="7.4" data-track-index="0"></div>
+
+    <div id="f07-stage" class="clip" data-start="0" data-duration="7.4" data-track-index="1">
+      <div id="f07-persp">
+        <div id="f07-cam">
+          <div id="f07-block"></div>
+          <div id="f07-win">
+            <div id="f07-head">
+              <div class="f07-logo"><svg width="24" height="24" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>
+              <div class="f07-h1">Daily Standup</div>
+              <div class="f07-sub">Thursday · Sprint 24</div>
+              <div class="f07-ws">Northwind Labs · NWD</div>
+            </div>
+
+            <div id="f07-kpis">
+              <div class="f07-kpi"><div class="f07-kl">Team</div><div class="f07-kn">8</div></div>
+              <div class="f07-kpi"><div class="f07-kl"><i style="background:#16A34A"></i>Present</div><div class="f07-kn" style="color:#15803D">7</div></div>
+              <div class="f07-kpi"><div class="f07-kl"><i style="background:#D97706"></i>Absent</div><div class="f07-kn" style="color:#B45309">1</div></div>
+              <div class="f07-kpi"><div class="f07-kl"><i style="background:#DC2626"></i>Blocked</div><div class="f07-kn" style="color:#DC2626">3</div></div>
+              <div class="f07-kpi"><div class="f07-kl"><i style="background:#2563EB"></i>Follow-ups</div><div class="f07-kn">5</div></div>
+            </div>
+
+            <div id="f07-c1" class="f07-card" style="left:40px;top:208px;">
+              <div class="f07-av" style="background:#2563EB;">AC</div>
+              <div class="f07-nm">Ava Chen</div><div class="f07-rl">PM</div>
+              <div class="f07-pr f07-in"><i></i>Present</div>
+              <div class="f07-ln" style="top:104px;"><span>Yesterday</span>Groomed the backlog</div>
+              <div class="f07-ln" style="top:146px;"><span>Today</span>Release 2.4 review</div>
+            </div>
+            <div id="f07-c2" class="f07-card" style="left:478px;top:208px;">
+              <div class="f07-av" style="background:#0F766E;">MR</div>
+              <div class="f07-nm">Marcus Reid</div><div class="f07-rl">Engineer</div>
+              <div class="f07-pr f07-in"><i></i>Present</div>
+              <div class="f07-ln" style="top:104px;"><span>Yesterday</span>Shipped PR #318</div>
+              <div class="f07-ln" style="top:146px;"><span>Today</span>CSV export fix</div>
+              <div class="f07-blk"><i></i><b>Blocked</b> · waiting on API keys</div>
+            </div>
+            <div id="f07-c3" class="f07-card" style="left:40px;top:494px;">
+              <div class="f07-av" style="background:#DB2777;">PS</div>
+              <div class="f07-nm">Priya Shah</div><div class="f07-rl">QA</div>
+              <div class="f07-pr f07-in"><i></i>Present</div>
+              <div class="f07-ln" style="top:104px;"><span>Yesterday</span>Ran 312 QA cases</div>
+              <div class="f07-ln" style="top:146px;"><span>Today</span>Retest NWD-142</div>
+            </div>
+            <div id="f07-c4" class="f07-card" style="left:478px;top:494px;">
+              <div class="f07-av" style="background:#D97706;">LP</div>
+              <div class="f07-nm">Leo Park</div><div class="f07-rl">Designer</div>
+              <div class="f07-pr f07-out"><i></i>Absent</div>
+              <div class="f07-ln f07-muted" style="top:104px;">Out today · back Monday</div>
+            </div>
+
+            <div id="f07-sum">
+              <div id="f07-sh">
+                <div class="f07-mini"><svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>
+                <div class="f07-st">AI Daily Summary</div>
+                <div class="f07-ai">AI</div>
+              </div>
+              <div id="f07-s1" class="f07-sec" style="top:82px;">
+                <div class="f07-sl" style="color:#991B1B;"><i style="background:#DC2626"></i>Attention needed</div>
+                <div class="f07-si">NWD-142 blocked 4 days</div>
+              </div>
+              <div id="f07-s2" class="f07-sec" style="top:198px;">
+                <div class="f07-sl" style="color:#92400E;"><i style="background:#D97706"></i>Delivery risk</div>
+                <div class="f07-si">CSV export may slip</div>
+              </div>
+              <div id="f07-s3" class="f07-sec" style="top:314px;">
+                <div class="f07-sl" style="color:#4B5563;"><i style="background:#9CA3AF"></i>Carry-over</div>
+                <div class="f07-si">Release notes draft</div>
+              </div>
+              <div id="f07-s4" class="f07-sec" style="top:440px;">
+                <div class="f07-sl" style="color:#1D4ED8;"><i style="background:#2563EB"></i>PM actions</div>
+                <div class="f07-si">Get API keys to Marcus today</div>
+              </div>
+              <div id="f07-hl"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+
+        // Window tilts to flat on the butter block
+        tl.fromTo("#f07-block", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: E }, 0);
+        tl.fromTo("#f07-win", { rotationX: 12, y: 60, opacity: 0 }, { rotationX: 0, y: 0, opacity: 1, duration: 1.1, ease: E }, 0.05);
+
+        // KPI strip pops
+        tl.fromTo("#f07-kpis .f07-kpi", { scale: 0.9, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E, stagger: 0.16 }, 0.4);
+
+        // "in one place" — the team assembles
+        ["#f07-c1", "#f07-c2", "#f07-c3", "#f07-c4"].forEach((c, i) => {
+          tl.fromTo(c, { scale: 0.94, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 0.94 + i * 0.08);
+        });
+
+        // "Who's in" — presence chips flip on
+        ["#f07-c1", "#f07-c2", "#f07-c3", "#f07-c4"].forEach((c, i) => {
+          tl.fromTo(c + " .f07-pr", { rotationX: -90, opacity: 0, transformPerspective: 400 }, { rotationX: 0, opacity: 1, duration: 0.5, ease: E }, 1.83 + i * 0.12);
+        });
+
+        // "what moved" — yesterday / today lines
+        ["#f07-c1", "#f07-c2", "#f07-c3"].forEach((c, i) => {
+          tl.fromTo(c + " .f07-ln", { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: E, stagger: 0.07 }, 2.56 + i * 0.12);
+        });
+        tl.fromTo("#f07-c4 .f07-ln", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: E }, 2.95);
+
+        // "what's blocked" — Marcus flags red
+        tl.fromTo("#f07-c2 .f07-blk", { scale: 0.8, y: 10, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.6, ease: E }, 3.41);
+        tl.fromTo("#f07-c2", { borderColor: "#E5E7EB", backgroundColor: "#FFFFFF" }, { borderColor: "#FCA5A5", backgroundColor: "#FFF8F8", duration: 0.4, ease: "power2.out", immediateRender: false }, 3.5);
+
+        // "an AI summary" — slides in from the right
+        tl.fromTo("#f07-sum", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease: E }, 4.5);
+        tl.fromTo("#f07-sh", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, 4.62);
+        ["#f07-s1", "#f07-s2", "#f07-s3", "#f07-s4"].forEach((s, i) => {
+          tl.fromTo(s, { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, 4.75 + i * 0.15);
+        });
+
+        // "what needs you" — push onto PM actions + focus ring
+        tl.fromTo("#f07-cam", { scale: 1, x: 0, y: 0 }, { scale: 1.22, x: -120, y: -80, duration: 1.5, ease: "power2.inOut" }, 5.4);
+        tl.fromTo("#f07-hl", { scale: 1.04, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E }, 5.9);
+
+        window.__timelines["07-standup"] = tl;
+      })();
+    </script>
+  </div>
+</template>

@@ -1,0 +1,186 @@
+<template>
+  <div id="root" data-composition-id="06-release-check" data-width="1920" data-height="1080" data-duration="7.4">
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: block; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Inter", sans-serif; color: #111111; }
+      #f06-bg { position: absolute; inset: 0; background: #F7F7F5; }
+      #f06-block { position: absolute; left: 60px; top: 40px; right: 60px; bottom: 40px; border-radius: 56px; background: linear-gradient(160deg, #D6F5E3 0%, #E8FAF0 100%); }
+      #f06-persp { position: absolute; inset: 0; perspective: 2200px; }
+      #f06-cam { position: absolute; inset: 0; transform-origin: 1235px 553px; }
+      #f06-win { position: absolute; left: 250px; top: 78px; width: 1420px; height: 800px; background: #FFFFFF; border-radius: 30px; border: 1px solid #E5E7EB; box-shadow: 0 2px 4px rgba(17,17,17,.04), 0 50px 100px -24px rgba(21,128,61,.26); transform-origin: 50% 0%; }
+
+      #f06-head { position: absolute; left: 40px; right: 40px; top: 26px; height: 48px; display: flex; align-items: center; gap: 14px; }
+      .f06-logo { width: 40px; height: 40px; border-radius: 11px; background: #111111; display: flex; align-items: center; justify-content: center; }
+      .f06-h1 { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+      .f06-ws { margin-left: auto; font-size: 20px; color: #6B7280; font-weight: 500; }
+      #f06-live { height: 36px; padding: 0 14px; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+      #f06-live i { width: 10px; height: 10px; border-radius: 999px; background: #16A34A; display: block; box-shadow: 0 0 0 4px rgba(22,163,74,.18); }
+      #f06-file { position: absolute; left: 300px; top: 30px; height: 40px; padding: 0 14px 0 6px; border-radius: 999px; border: 1px solid #E5E7EB; background: #FFFFFF; font-size: 20px; font-weight: 600; color: #374151; display: flex; align-items: center; gap: 10px; }
+      .f06-sheet { width: 30px; height: 30px; border-radius: 9px; background: #D6F5E3; display: flex; align-items: center; justify-content: center; flex: none; }
+
+      #f06-title { position: absolute; left: 40px; top: 102px; display: flex; align-items: center; gap: 16px; }
+      .f06-tt { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; }
+      .f06-tt span { color: #6B7280; font-weight: 600; }
+      #f06-prog { position: absolute; right: 40px; top: 100px; width: 470px; }
+      .f06-pl { display: flex; align-items: baseline; font-size: 20px; font-weight: 600; color: #6B7280; }
+      #f06-pct { margin-left: auto; font-size: 26px; font-weight: 750; color: #111111; letter-spacing: -0.02em; }
+      .f06-track { margin-top: 8px; height: 14px; border-radius: 999px; background: #EEF0F3; overflow: hidden; }
+      #f06-fill { width: 100%; height: 100%; border-radius: 999px; background: #16A34A; transform-origin: 0% 50%; }
+
+      .f06-panel { position: absolute; top: 190px; height: 570px; border-radius: 22px; border: 1px solid #E5E7EB; background: #FCFCFB; }
+      #f06-ringp { left: 40px; width: 520px; }
+      #f06-ringsvg { position: absolute; left: 80px; top: 36px; width: 360px; height: 360px; }
+      #f06-num { position: absolute; left: 80px; top: 150px; width: 360px; text-align: center; font-size: 104px; font-weight: 750; letter-spacing: -0.05em; line-height: 1; }
+      #f06-pass { position: absolute; left: 80px; top: 262px; width: 360px; text-align: center; font-size: 26px; font-weight: 600; color: #166534; }
+      #f06-stats { position: absolute; left: 0; right: 0; top: 440px; display: flex; justify-content: center; gap: 12px; }
+      .f06-stat { height: 44px; padding: 0 16px; border-radius: 999px; font-size: 20px; font-weight: 650; display: flex; align-items: center; gap: 8px; }
+      .f06-stat b { font-weight: 800; }
+      .f06-cap { position: absolute; left: 0; right: 0; top: 508px; text-align: center; font-size: 20px; color: #6B7280; font-weight: 500; }
+
+      #f06-blk { left: 590px; right: 40px; }
+      #f06-bh { position: absolute; left: 30px; top: 28px; display: flex; align-items: center; gap: 14px; }
+      .f06-bt { font-size: 32px; font-weight: 700; letter-spacing: -0.025em; }
+      #f06-cnt { width: 40px; height: 40px; border-radius: 999px; background: #DC2626; color: #FFFFFF; font-size: 22px; font-weight: 750; display: flex; align-items: center; justify-content: center; }
+      .f06-bs { position: absolute; left: 30px; top: 76px; font-size: 20px; color: #6B7280; font-weight: 500; }
+
+      .f06-row { position: absolute; left: 24px; right: 24px; height: 108px; border-radius: 18px; border: 1px solid #F3D0D0; background: #FFFFFF; box-shadow: 0 1px 2px rgba(17,17,17,.04), 0 10px 24px -14px rgba(220,38,38,.25); display: flex; align-items: center; gap: 18px; padding: 0 22px; }
+      .f06-bp { height: 38px; padding: 0 14px; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex: none; }
+      .f06-bp i { width: 10px; height: 10px; border-radius: 999px; background: #DC2626; display: block; }
+      .f06-rt { font-size: 26px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.15; }
+      .f06-key { display: inline-flex; margin-top: 6px; height: 32px; padding: 0 10px; border-radius: 9px; background: #DCE8FF; color: #1D4ED8; font-size: 20px; font-weight: 700; align-items: center; }
+      .f06-own { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 600; color: #1F2937; flex: none; }
+      .f06-av { width: 46px; height: 46px; border-radius: 999px; color: #FFFFFF; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px #FFFFFF, 0 4px 10px -4px rgba(17,17,17,.3); }
+
+      #f06-chip { position: absolute; left: 660px; top: 470px; width: 600px; height: 120px; display: flex; align-items: center; gap: 22px; padding: 0 28px; border-radius: 28px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(17,17,17,.05), 0 24px 50px -18px rgba(21,128,61,.35); transform-origin: 0% 0%; }
+      .f06-cico { width: 72px; height: 72px; border-radius: 18px; background: #D6F5E3; display: flex; align-items: center; justify-content: center; flex: none; }
+      .f06-ct { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; }
+      .f06-cs { font-size: 22px; font-weight: 500; color: #4B5563; margin-top: 4px; }
+    </style>
+
+    <div id="f06-bg" class="clip" data-start="0" data-duration="7.4" data-track-index="0"></div>
+
+    <div id="f06-stage" class="clip" data-start="0" data-duration="7.4" data-track-index="1">
+      <div id="f06-persp">
+        <div id="f06-cam">
+          <div id="f06-block"></div>
+          <div id="f06-win">
+            <div id="f06-head">
+              <div class="f06-logo"><svg width="24" height="24" viewBox="0 0 16 16" fill="none"><path d="M2 3.5 C7 3.5 8 8 12 8 M2 8 H12 M2 12.5 C7 12.5 8 8 12 8" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" /><circle cx="13" cy="8" r="1.8" fill="#FFFFFF" /></svg></div>
+              <div class="f06-h1">QA Dashboard</div>
+              <div class="f06-ws">Northwind Labs · NWD</div>
+              <div id="f06-live"><i></i>Live</div>
+            </div>
+            <div id="f06-file"><div class="f06-sheet"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M3 9h18M3 15h18M10 3v18" /></svg></div>release-2.4-qa.xlsx</div>
+
+            <div id="f06-title"><div class="f06-tt">Release 2.4 <span>·</span> Ready for release?</div></div>
+            <div id="f06-prog">
+              <div class="f06-pl">Executed · 305 of 312<div id="f06-pct">0.0%</div></div>
+              <div class="f06-track"><div id="f06-fill"></div></div>
+            </div>
+
+            <div id="f06-ringp" class="f06-panel">
+              <svg id="f06-ringsvg" viewBox="0 0 360 360">
+                <circle cx="180" cy="180" r="150" fill="none" stroke="#EAF7EF" stroke-width="30" />
+                <g transform="rotate(-90 180 180)"><circle id="f06-arc" cx="180" cy="180" r="150" fill="none" stroke="#16A34A" stroke-width="30" stroke-linecap="round" pathLength="100" stroke-dasharray="100 200" stroke-dashoffset="100" /></g>
+              </svg>
+              <div id="f06-num">0%</div>
+              <div id="f06-pass">passing</div>
+              <div id="f06-stats">
+                <div class="f06-stat" style="background:#DCFCE7;color:#166534;"><b>293</b>Passed</div>
+                <div class="f06-stat" style="background:#FEE2E2;color:#991B1B;"><b>9</b>Failed</div>
+                <div class="f06-stat" style="background:#FEF3C7;color:#92400E;"><b>3</b>Blocked</div>
+              </div>
+              <div class="f06-cap">of 305 executed cases</div>
+            </div>
+
+            <div id="f06-blk" class="f06-panel">
+              <div id="f06-bh"><div class="f06-bt">Release blockers</div><div id="f06-cnt">3</div></div>
+              <div class="f06-bs">From the QA sheet · linked to Jira</div>
+              <div id="f06-r1" class="f06-row" style="top:124px;">
+                <div class="f06-bp"><i></i>Blocked</div>
+                <div><div class="f06-rt">Bulk leave approval</div><div class="f06-key">NWD-156</div></div>
+                <div id="f06-o1" class="f06-own"><div class="f06-av" style="background:#DB2777;">PS</div>Priya Shah</div>
+              </div>
+              <div id="f06-r2" class="f06-row" style="top:250px;">
+                <div class="f06-bp"><i></i>Blocked</div>
+                <div><div class="f06-rt">CSV export encoding</div><div class="f06-key">NWD-181</div></div>
+                <div id="f06-o2" class="f06-own"><div class="f06-av" style="background:#0F766E;">MR</div>Marcus Reid</div>
+              </div>
+              <div id="f06-r3" class="f06-row" style="top:376px;">
+                <div class="f06-bp"><i></i>Blocked</div>
+                <div><div class="f06-rt">Checkout timeout</div><div class="f06-key">NWD-142</div></div>
+                <div id="f06-o3" class="f06-own"><div class="f06-av" style="background:#7C3AED;">SO</div>Sam Ortiz</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="f06-chip">
+            <div class="f06-cico"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M3 9h18M3 15h18M10 3v18" /></svg></div>
+            <div><div class="f06-ct">release-2.4-qa.xlsx</div><div class="f06-cs">312 cases</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        const tl = gsap.timeline({ paused: true });
+        const E = "expo.out";
+
+        tl.fromTo("#f06-block", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: E }, 0);
+
+        // "QA sheet" — the spreadsheet chip pops centre stage
+        tl.fromTo("#f06-chip", { scale: 0.9, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 0.3);
+
+        // "becomes" — chip flies into the window header as the dashboard tilts flat
+        tl.fromTo("#f06-win", { rotationX: 12, y: 60, opacity: 0 }, { rotationX: 0, y: 0, opacity: 1, duration: 1.0, ease: E }, 1.11);
+        tl.fromTo("#f06-chip", { x: 0, y: 0, scale: 1 }, { x: -110, y: -362, scale: 0.42, duration: 0.5, ease: "power3.inOut", immediateRender: false }, 1.11);
+        tl.to("#f06-chip", { opacity: 0, duration: 0.15 }, 1.5);
+        tl.fromTo("#f06-file", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: E }, 1.45);
+
+        // "live release check"
+        tl.fromTo("#f06-live", { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: E }, 1.54);
+        tl.fromTo("#f06-title", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 1.8);
+        tl.fromTo("#f06-prog", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: E }, 1.9);
+        tl.fromTo("#f06-fill", { scaleX: 0 }, { scaleX: 0.977, duration: 1.0, ease: "power2.out" }, 2.0);
+        const pctEl = document.querySelector("#f06-pct");
+        const ex = { v: 0 };
+        tl.fromTo(ex, { v: 0 }, { v: 97.7, duration: 1.0, ease: "power2.out",
+          onUpdate: () => { pctEl.textContent = ex.v.toFixed(1) + "%"; } }, 2.0);
+
+        // Panels settle in
+        tl.fromTo("#f06-ringp", { scale: 0.96, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 2.25);
+        tl.fromTo("#f06-blk", { scale: 0.96, y: 24, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: E }, 2.37);
+
+        // "Ninety-six percent passing" — the ring fills, number snaps up
+        const numEl = document.querySelector("#f06-num");
+        const ring = { v: 0 };
+        tl.fromTo("#f06-arc", { strokeDashoffset: 100 }, { strokeDashoffset: 4, duration: 1.0, ease: "power2.out" }, 2.9);
+        tl.fromTo(ring, { v: 0 }, { v: 96, duration: 1.0, ease: "power2.out", immediateRender: false,
+          onUpdate: () => { numEl.textContent = Math.round(ring.v) + "%"; } }, 2.9);
+        tl.fromTo("#f06-pass", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: E }, 3.8);
+        tl.fromTo("#f06-stats .f06-stat", { scale: 0.85, y: 12, opacity: 0 }, { scale: 1, y: 0, opacity: 1, duration: 0.6, ease: E, stagger: 0.08 }, 3.95);
+        tl.fromTo("#f06-ringp .f06-cap", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: E }, 4.2);
+
+        // "Three blockers" — rows slide in, each with its red pill
+        ["#f06-r1", "#f06-r2", "#f06-r3"].forEach((r, i) => {
+          const t = 4.61 + i * 0.15;
+          tl.fromTo(r, { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: E }, t);
+          tl.fromTo(r + " .f06-bp", { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E }, t + 0.12);
+        });
+        tl.fromTo("#f06-cnt", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: E }, 4.91);
+
+        // Camera pushes onto the blocker list
+        tl.fromTo("#f06-cam", { scale: 1, x: 0, y: 0 }, { scale: 1.14, x: -40, y: -20, duration: 1.7, ease: "power2.inOut" }, 5.2);
+
+        // "named." — owners pop onto each row
+        ["#f06-o1", "#f06-o2", "#f06-o3"].forEach((o, i) => {
+          tl.fromTo(o, { scale: 0.7, x: 16, opacity: 0 }, { scale: 1, x: 0, opacity: 1, duration: 0.6, ease: E }, 5.67 + i * 0.1);
+        });
+
+        window.__timelines["06-release-check"] = tl;
+      })();
+    </script>
+  </div>
+</template>
