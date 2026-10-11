@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectorStatus, saveConnectorConfig, clearConnector } from "@/lib/connectorStore";
+import { credentialAccessError } from "@/lib/currentUser";
+
+async function denied() {
+  const e = await credentialAccessError();
+  return e && NextResponse.json({ error: e.error }, { status: e.status });
+}
 
 export async function GET() {
+  const deny = await denied();
+  if (deny) return deny;
   return NextResponse.json(await connectorStatus());
 }
 
 export async function POST(req: NextRequest) {
+  const deny = await denied();
+  if (deny) return deny;
   const body = (await req.json()) as {
     jira?: { baseUrl?: string; email?: string; apiToken?: string };
     gemini?: { apiKey?: string; model?: string };
@@ -39,6 +49,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const deny = await denied();
+  if (deny) return deny;
   const { kind } = (await req.json()) as { kind: "jira" | "gemini" | "github" };
   if (kind !== "jira" && kind !== "gemini" && kind !== "github") {
     return NextResponse.json({ error: "kind must be 'jira', 'gemini', or 'github'" }, { status: 400 });

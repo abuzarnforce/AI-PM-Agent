@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plug, Sparkles, ShieldCheck, Unplug, Lock, GitBranch, FileSpreadsheet, MessageSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useNav } from "@/lib/nav";
-import { Badge, Button, Field, PageHeader, Section, inputCls } from "./ui";
+import { Badge, Button, Field, PageHeader, Section, codeInputCls, inputCls } from "./ui";
 import IntelligenceLayer from "./IntelligenceLayer";
 
 interface Status {
@@ -17,76 +17,99 @@ interface Status {
 
 type TestResult = { ok: boolean; detail: string } | null;
 
-/** Jira/Gemini/GitHub credentials live here, so re-confirm the signed-in user's password
- * every time this tab is opened — not just once per session. The component fully unmounts
- * when the PM navigates to another tab (see page.tsx's tab switch), so this gate state
- * naturally resets on every visit. */
+/** Connections hold Jira/AI/GitHub credentials, so they're admin-only and need a fresh
+ * emailed code (valid 15 minutes, enforced server-side by /api/connector). */
 export default function ConnectorPanel() {
-  const [unlocked, setUnlocked] = useState(false);
-  const [password, setPassword] = useState("");
-  const [unlockError, setUnlockError] = useState<string | null>(null);
-  const [unlocking, setUnlocking] = useState(false);
+  const [state, setState] = useState<"checking" | "locked" | "sent" | "forbidden" | "open">("checking");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  async function unlock(e: React.FormEvent) {
-    e.preventDefault();
-    if (!password) return;
-    setUnlocking(true);
-    setUnlockError(null);
+  useEffect(() => {
+    fetch("/api/connector").then((r) => setState(r.ok ? "open" : r.status === 403 ? "forbidden" : "locked"));
+  }, []);
+
+  async function post(url: string, body: object) {
+    setBusy(true);
+    setError(null);
     try {
-      const res = await fetch("/api/auth/verify-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setUnlocked(true);
+      return true;
     } catch (err: any) {
-      setUnlockError(err.message ?? "Something went wrong");
+      setError(err.message ?? "Something went wrong");
+      return false;
     } finally {
-      setUnlocking(false);
+      setBusy(false);
     }
   }
 
-  if (!unlocked) {
-    return (
-      <div className="flex min-h-[80dvh] items-center justify-center p-4">
-        <motion.form
-          onSubmit={unlock}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-sm rounded-xl border border-border bg-panel p-6"
-        >
-          <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted">
-            <Lock size={16} />
-          </div>
-          <h1 className="text-lg font-semibold tracking-tight">Confirm it's you</h1>
-          <p className="mb-5 mt-1 text-sm text-muted">
-            Connections hold your Jira, Gemini and GitHub credentials, so PM Agent asks for your password each time.
-          </p>
-          <input
-            autoFocus
-            type="password"
-            aria-label="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className={`${inputCls} mb-3`}
-          />
-          {unlockError && (
-            <div role="alert" className="mb-3 text-xs text-red-400">
-              {unlockError}
-            </div>
-          )}
-          <Button type="submit" variant="primary" loading={unlocking} disabled={!password} className="w-full">
-            Unlock
-          </Button>
-        </motion.form>
-      </div>
-    );
+  const sendCode = async () => (await post("/api/auth/otp/request", { purpose: "stepup" })) && setState("sent");
+  async function verify(e: React.FormEvent) {
+    e.preventDefault();
+    if (await post("/api/auth/otp/verify", { purpose: "stepup", code })) setState("open");
   }
 
-  return <ConnectorPanelContent />;
+  if (state === "open") return <ConnectorPanelContent />;
+  if (state === "checking") return <div className="min-h-[80dvh]" />;
+
+  return (
+    <div className="flex min-h-[80dvh] items-center justify-center p-4">
+      <motion.form
+        onSubmit={verify}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-sm rounded-xl border border-border bg-panel p-6"
+      >
+        <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted">
+          <Lock size={16} />
+        </div>
+        {state === "forbidden" ? (
+          <>
+            <h1 className="text-lg font-semibold tracking-tight">Admins only</h1>
+            <p className="mt-1 text-sm text-muted">Connections hold your workspace's Jira, AI and GitHub credentials. Ask a workspace admin to change them.</p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-lg font-semibold tracking-tight">Confirm it's you</h1>
+            <p className="mb-5 mt-1 text-sm text-muted">
+              {state === "sent"
+                ? "We emailed you a 6-digit code. It expires in 10 minutes."
+                : "Connections hold your Jira, AI and GitHub credentials, so we'll email you a one-time code first."}
+            </p>
+            {state === "sent" && (
+              <input
+                autoFocus
+                aria-label="6-digit code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                placeholder="000000"
+                className={`${inputCls} ${codeInputCls} mb-3`}
+              />
+            )}
+            {error && (
+              <div role="alert" className="mb-3 text-xs text-red-400">
+                {error}
+              </div>
+            )}
+            {state === "sent" ? (
+              <Button type="submit" variant="primary" loading={busy} disabled={code.length !== 6} className="w-full">
+                Unlock
+              </Button>
+            ) : (
+              <Button type="button" variant="primary" loading={busy} onClick={sendCode} className="w-full">
+                Email me a code
+              </Button>
+            )}
+          </>
+        )}
+      </motion.form>
+    </div>
+  );
 }
 
 function ConnectorPanelContent() {

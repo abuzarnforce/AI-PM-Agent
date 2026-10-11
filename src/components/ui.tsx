@@ -378,6 +378,7 @@ export function Field({ label, hint, children, className = "" }: { label: string
 }
 
 export const inputCls = "w-full px-3 py-2 text-sm";
+export const codeInputCls = "text-center font-mono text-2xl tracking-[0.5em] tabular";
 
 /* ------------------------------------------------------------- Link row */
 

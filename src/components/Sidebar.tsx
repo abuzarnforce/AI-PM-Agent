@@ -199,7 +199,7 @@ export default function Sidebar({
           )}
         </div>
       </div>
-      {accountOpen && username && <AccountModal username={username} onClose={() => setAccountOpen(false)} />}
+      {accountOpen && <AccountModal onClose={() => setAccountOpen(false)} onRenamed={setUsername} />}
     </nav>
   );
 }
