@@ -12,7 +12,6 @@ type Step = "email" | "code" | "name";
 export type ProviderId = "google" | "microsoft";
 
 const ERRORS: Record<string, string> = {
-  no_access: "That account isn't part of this workspace. Ask your admin for an invite.",
   sso_failed: "We couldn't complete that sign-in. Please try again.",
   sso_cancelled: "Sign-in was cancelled.",
   sso_unavailable: "That sign-in option isn't set up for this workspace.",
@@ -112,7 +111,7 @@ export default function SignIn({ providers }: { providers: ProviderId[] }) {
               {step === "email" && (
                 <>
                   <h1 className="text-page-title">Sign in to PM Agent</h1>
-                  <p className="mt-2 text-sm text-muted">Use your work account. No password to remember.</p>
+                  <p className="mt-2 text-sm text-muted">New here? Signing in creates your own private workspace. No password to remember.</p>
                   {providers.length > 0 && (
                     <>
                       <div className="mt-8 space-y-2.5">
@@ -134,7 +133,7 @@ export default function SignIn({ providers }: { providers: ProviderId[] }) {
                       </div>
                     </>
                   )}
-                  <Field label="Work email" className={providers.length ? "" : "mt-8"}>
+                  <Field label="Email" className={providers.length ? "" : "mt-8"}>
                     <input
                       autoFocus
                       type="email"
@@ -165,7 +164,7 @@ export default function SignIn({ providers }: { providers: ProviderId[] }) {
                       </>
                     ) : (
                       <>
-                        If <span className="font-medium text-fg">{email}</span> has access to a workspace, we've sent it a 6-digit code. It expires in 10 minutes.
+                        We've sent a 6-digit code to <span className="font-medium text-fg">{email}</span>. It expires in 10 minutes.
                       </>
                     )}
                   </p>
@@ -221,7 +220,7 @@ export default function SignIn({ providers }: { providers: ProviderId[] }) {
 
           <div className="mt-10 flex items-start gap-2 border-t border-border pt-5 text-xs leading-relaxed text-subtle">
             <ShieldCheck size={14} className="mt-px shrink-0" />
-            <span>Access is limited to your company's email domain and people your admin invites. We'll never ask for your code by phone or chat.</span>
+            <span>Every workspace is private: you only ever see your own team's integrations and data. We'll never ask for your code by phone or chat.</span>
           </div>
         </form>
       </main>

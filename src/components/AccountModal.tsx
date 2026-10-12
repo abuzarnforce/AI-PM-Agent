@@ -86,6 +86,9 @@ export default function AccountModal({ onClose, onRenamed }: { onClose: () => vo
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
+    try {
+      localStorage.removeItem("pm-agent-activity"); // per-browser activity log; don't show it to the next account
+    } catch {}
     router.push("/");
     router.refresh();
   }
@@ -166,7 +169,7 @@ export default function AccountModal({ onClose, onRenamed }: { onClose: () => vo
           {people.length > 0 && (
             <section className="mb-6">
               <div className="mb-2 flex items-center gap-1.5 text-sm font-medium text-fg/70">
-                <Users size={14} /> People with access
+                <Users size={14} /> People in your workspace
               </div>
               <ul className="divide-y divide-border rounded-lg border border-border">
                 {people.map((p) => (

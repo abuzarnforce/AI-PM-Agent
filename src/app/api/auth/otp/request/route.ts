@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canSignIn, normalizeEmail } from "@/lib/authStore";
+import { normalizeEmail } from "@/lib/authStore";
 import { getCurrentAccount } from "@/lib/currentUser";
-import { issueCode, RateLimitError } from "@/lib/otp";
+import { issueCode, limitByIp, RateLimitError } from "@/lib/otp";
 import { codeEmail, sendEmail } from "@/lib/mailer";
 
-/** Sends a one-time code. `purpose: "stepup"` re-confirms the signed-in user (the code goes
- * to their own email; any email in the body is ignored). For sign-in, the response is the
- * same whether or not the email has access, so this can't be used to discover who's a user. */
+/** Sends a one-time code. Sign-up is open: any email can get a code (new people get their own
+ * workspace). `purpose: "stepup"` re-confirms the signed-in user (the code goes to their own
+ * email; any email in the body is ignored). */
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as { email?: string; purpose?: string };
   const purpose = body.purpose === "stepup" ? "stepup" : "signin";
@@ -17,11 +17,12 @@ export async function POST(req: NextRequest) {
     if (!email) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   } else {
     email = normalizeEmail(body.email);
-    if (!email) return NextResponse.json({ error: "Enter a valid work email." }, { status: 400 });
-    if (!(await canSignIn(email))) return NextResponse.json({ ok: true });
+    if (!email) return NextResponse.json({ error: "Enter a valid email." }, { status: 400 });
   }
 
   try {
+    // Vercel sets x-forwarded-for to the real client IP (first entry).
+    await limitByIp(req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown");
     const code = await issueCode(email);
     const { subject, text, html } = codeEmail(code, purpose);
     await sendEmail(email, subject, text, html);

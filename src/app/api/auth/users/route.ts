@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentAccount } from "@/lib/currentUser";
-import { inviteAccount, listAccounts, normalizeEmail, removeAccount, updateAccount, type Role } from "@/lib/authStore";
+import { inviteAccount, listAccounts, normalizeEmail, removeAccount, updateAccount, workspaceOf, type Role } from "@/lib/authStore";
 import { inviteEmail, sendEmail } from "@/lib/mailer";
 
 const isRole = (r: unknown): r is Role => r === "admin" || r === "member";
@@ -15,7 +15,7 @@ async function requireAdmin() {
 export async function GET() {
   const me = await getCurrentAccount();
   if (!me) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
-  const accounts = (await listAccounts()).map(({ email, name, role, status, lastLoginAt }) => ({ email, name, role, status, lastLoginAt }));
+  const accounts = (await listAccounts(workspaceOf(me))).map(({ email, name, role, status, lastLoginAt }) => ({ email, name, role, status, lastLoginAt }));
   return NextResponse.json({ accounts });
 }
 
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const email = normalizeEmail(body.email);
   if (!email) return NextResponse.json({ error: "Enter a valid email." }, { status: 400 });
   try {
-    const account = await inviteAccount(email, isRole(body.role) ? body.role : "member", me.email);
+    const account = await inviteAccount(email, isRole(body.role) ? body.role : "member", me.email, workspaceOf(me));
     const { subject, text, html } = inviteEmail(me.name || me.email, `${req.nextUrl.origin}/login?email=${encodeURIComponent(email)}`);
     // The invite stands even if the email bounces; they can still sign in from /login.
     const emailed = await sendEmail(email, subject, text, html).then(() => true, () => false);
@@ -44,7 +44,7 @@ export async function PATCH(req: NextRequest) {
   const email = normalizeEmail(body.email);
   if (!email || !isRole(body.role)) return NextResponse.json({ error: "Email and role are required." }, { status: 400 });
   try {
-    return NextResponse.json({ account: await updateAccount(email, { role: body.role }) });
+    return NextResponse.json({ account: await updateAccount(email, { role: body.role }, workspaceOf(me)) });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
@@ -57,7 +57,7 @@ export async function DELETE(req: NextRequest) {
   if (!email) return NextResponse.json({ error: "Email is required." }, { status: 400 });
   if (email === me.email) return NextResponse.json({ error: "You can't remove yourself." }, { status: 400 });
   try {
-    await removeAccount(email);
+    await removeAccount(email, workspaceOf(me));
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });

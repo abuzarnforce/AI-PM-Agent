@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canSignIn, completeSignIn, hasIdentity } from "@/lib/authStore";
+import { completeSignIn, hasIdentity, workspaceOf } from "@/lib/authStore";
 import { checkClaims, exchangeCode, getProvider, type ProviderId } from "@/lib/sso";
 import { issueCode, RateLimitError } from "@/lib/otp";
 import { codeEmail, sendEmail } from "@/lib/mailer";
@@ -38,15 +38,14 @@ export async function GET(req: NextRequest, { params }: { params: { provider: st
     return fail("sso_failed");
   }
   if (!who) return fail("sso_failed");
-  if (!(await canSignIn(who.email))) return fail("no_access");
 
   const next = safeNext(st.next);
 
   if (await hasIdentity(who.email, who.subject)) {
-    await completeSignIn(who.email, { identity: who.subject, name: who.name });
+    const { account } = await completeSignIn(who.email, { identity: who.subject, name: who.name });
     const res = NextResponse.redirect(new URL(next, req.url));
     res.cookies.set(OAUTH_COOKIE, "", { path: "/", maxAge: 0 });
-    res.cookies.set(SESSION_COOKIE, createToken(who.email, "session", SESSION_TTL_S), cookieOptions(SESSION_TTL_S));
+    res.cookies.set(SESSION_COOKIE, createToken(who.email, "session", SESSION_TTL_S, { ws: workspaceOf(account) }), cookieOptions(SESSION_TTL_S));
     return res;
   }
 

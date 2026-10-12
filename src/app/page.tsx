@@ -93,7 +93,7 @@ const MORE: { icon: LucideIcon; title: string; body: string }[] = [
 
 const SECURITY: { icon: LucideIcon; title: string; body: string }[] = [
   { icon: MailCheck, title: "Passwordless sign-in", body: "Continue with Google or Microsoft, or get a one-time code by email. The first time you use Google or Microsoft, we also email you a code to confirm the address really is yours." },
-  { icon: Users, title: "Your company only", body: "Workspaces are limited to your email domain plus people an admin invites. Sign-in never reveals who has an account." },
+  { icon: Users, title: "Private workspaces", body: "Every team gets its own workspace. Your Jira, GitHub, QA sheets, drafts and keys are never visible to anyone outside it." },
   { icon: UserCog, title: "Admin & member roles", body: "Admins invite people, manage roles and own the integrations. Removing someone signs them out on their next request." },
   { icon: KeyRound, title: "Step-up for credentials", body: "Viewing or changing Jira, AI or GitHub keys needs a fresh emailed code — even if you're already signed in." },
   { icon: Lock, title: "Locked-down sessions", body: "Signed, HTTP-only, same-site cookies. Every API call is checked server-side, and cross-site requests are refused." },
@@ -102,12 +102,16 @@ const SECURITY: { icon: LucideIcon; title: string; body: string }[] = [
 
 const FAQ = [
   {
+    q: "Can other teams using PM Agent see our data?",
+    a: "No. Every team works in its own private workspace. Your Jira, GitHub and AI connections, drafts, QA sheets, roadmap and standups are stored separately and are never visible to anyone outside your workspace.",
+  },
+  {
     q: "Will PM Agent change anything in Jira by itself?",
     a: "No. Creating or updating issues always produces a draft first. It lands in your Drafts queue and only reaches Jira when a person approves it.",
   },
   {
     q: "How do people sign in?",
-    a: "With their Google or Microsoft work account, or with a one-time code sent to their work email. There's no password. Anyone on your company's email domain can join as a member, and admins can invite anyone else.",
+    a: "With Google, Microsoft, or a one-time code sent to their email. There's no password. Anyone can sign up and gets their own private workspace; admins invite their teammates into it.",
   },
   {
     q: "What does it connect to?",

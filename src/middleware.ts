@@ -15,7 +15,8 @@ async function validSession(token: string | undefined): Promise<boolean> {
   if (!(await crypto.subtle.verify("HMAC", key, sig, new TextEncoder().encode(encoded)))) return false;
   try {
     const payload = JSON.parse(atob(encoded.replace(/-/g, "+").replace(/_/g, "/")));
-    return payload.p === "session" && typeof payload.exp === "number" && Date.now() < payload.exp;
+    // Sessions from before workspaces existed carry no `ws`; they must sign in again.
+    return payload.p === "session" && typeof payload.x?.ws === "string" && typeof payload.exp === "number" && Date.now() < payload.exp;
   } catch {
     return false;
   }

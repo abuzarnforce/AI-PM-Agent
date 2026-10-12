@@ -22,6 +22,16 @@ const hashCode = (email: string, code: string) =>
 
 export class RateLimitError extends Error {}
 
+/** Caps code emails per client IP, so open sign-up can't be used to spray codes at
+ * thousands of addresses and burn the free email quota. */
+export async function limitByIp(ip: string): Promise<void> {
+  const k = `ratelimit:ip:${ip}`;
+  const now = Date.now();
+  const hits = ((await readJson<number[]>(k)) ?? []).filter((t) => now - t < 60 * 60 * 1000);
+  if (hits.length >= 10) throw new RateLimitError("Too many codes requested from this network. Try again in an hour.");
+  await writeJson(k, [...hits, now]);
+}
+
 /** Issues a fresh 6-digit code (replacing any earlier one) and returns it for emailing. */
 export async function issueCode(email: string): Promise<string> {
   const now = Date.now();

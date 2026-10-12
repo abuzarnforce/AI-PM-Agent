@@ -1,4 +1,4 @@
-import { readJson, writeJson } from "./kvStore";
+import { currentWorkspace, MAIN_WORKSPACE, readJson, writeJson } from "./kvStore";
 
 export interface ConnectorConfig {
   jira: {
@@ -30,8 +30,8 @@ const EMPTY: ConnectorConfig = {
   slack: { botToken: "", appToken: "", defaultChannel: "" },
 };
 
-/** Env vars act only as an initial seed for first run (handy for the maintainer's own
- * deployment). Once a value is saved through the Connector UI, the stored value wins —
+/** Env vars act only as an initial seed for the MAIN workspace (the maintainer's own
+ * deployment) — never for anyone else's workspace, or every sign-up would get our Jira and AI keys. Once a value is saved through the Connector UI, the stored value wins —
  * that's what makes this a piece of software anyone can download and configure
  * themselves without touching environment variables or redeploying. */
 function envSeed(): ConnectorConfig {
@@ -59,7 +59,7 @@ function envSeed(): ConnectorConfig {
 
 export async function loadConnectorConfig(): Promise<ConnectorConfig> {
   const stored = await readJson<ConnectorConfig>(STORE_KEY);
-  const seed = envSeed();
+  const seed = (await currentWorkspace()) === MAIN_WORKSPACE ? envSeed() : EMPTY;
   if (!stored) return seed;
   return {
     jira: {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canSignIn, completeSignIn, normalizeEmail } from "@/lib/authStore";
+import { completeSignIn, normalizeEmail, workspaceOf } from "@/lib/authStore";
 import { getCurrentAccount } from "@/lib/currentUser";
 import { checkCode } from "@/lib/otp";
 import { cookieOptions, createToken, ELEVATED_COOKIE, ELEVATED_TTL_S, LINK_COOKIE, SESSION_COOKIE, SESSION_TTL_S, verifyToken } from "@/lib/session";
@@ -21,8 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   const email = normalizeEmail(body.email);
-  // Re-check access: an invite may have been revoked between sending and entering the code.
-  if (!email || !(await canSignIn(email)) || !(await checkCode(email, code))) {
+  if (!email || !(await checkCode(email, code))) {
     return NextResponse.json({ error: WRONG }, { status: 401 });
   }
 
@@ -34,6 +33,6 @@ export async function POST(req: NextRequest) {
   // Ask for a name only if neither the user nor their SSO provider has given us one.
   const res = NextResponse.json({ firstTime: !account.name });
   res.cookies.set(LINK_COOKIE, "", { path: "/", maxAge: 0 });
-  res.cookies.set(SESSION_COOKIE, createToken(email, "session", SESSION_TTL_S), cookieOptions(SESSION_TTL_S));
+  res.cookies.set(SESSION_COOKIE, createToken(email, "session", SESSION_TTL_S, { ws: workspaceOf(account) }), cookieOptions(SESSION_TTL_S));
   return res;
 }

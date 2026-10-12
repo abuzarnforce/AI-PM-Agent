@@ -1,19 +1,15 @@
 import { cookies } from "next/headers";
 import { verifyToken, SESSION_COOKIE, ELEVATED_COOKIE } from "./session";
-import { getAccount, type Account } from "./authStore";
-
-/** Signature-only check of the session cookie. Node-runtime only. */
-export function getCurrentEmail(): string | null {
-  return verifyToken(cookies().get(SESSION_COOKIE)?.value, "session")?.email ?? null;
-}
+import { getAccount, workspaceOf, type Account } from "./authStore";
 
 /** Full check: valid cookie AND the account still exists — so removing someone from the
  * workspace signs them out on their next page load. */
 export async function getCurrentAccount(): Promise<Account | null> {
-  const email = getCurrentEmail();
-  if (!email) return null;
-  const account = await getAccount(email);
-  return account?.status === "active" ? account : null;
+  const session = verifyToken(cookies().get(SESSION_COOKIE)?.value, "session");
+  if (!session) return null;
+  const account = await getAccount(session.email);
+  // The session is pinned to a workspace; if the account has since moved, the session is dead.
+  return account?.status === "active" && workspaceOf(account) === session.extra.ws ? account : null;
 }
 
 /** True when the user re-confirmed with an emailed code in the last 15 minutes. */
